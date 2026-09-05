@@ -7,45 +7,54 @@
   <div class="card">
     <div class="toolbar">
       <div class="search-box">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
         <input type="text" [(ngModel)]="searchQuery" placeholder="Search by name or roll number...">
       </div>
     </div>
 
-    <div class="table-responsive">
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>Roll No</th>
-            <th>Student Name</th>
-            <th>Gender</th>
-            <th>Class & Section</th>
-            <th>Contact</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (student of filteredStudents(); track student.id) {
+    <!-- Loader / Content Switching -->
+    @if (isLoading()) {
+      <div class="loader-container">
+        <app-loader></app-loader>
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
             <tr>
-              <td><span class="badge">{{ student.rollNo }}</span></td>
-              <td class="fw-medium">{{ student.name }}</td>
-              <td>{{ student.gender === 'M' ? 'Male' : (student.gender === 'F' ? 'Female' : 'Other') }}</td>
-              <td>{{ student.classSectionId }}</td>
-              <td>{{ student.mobileNo }}</td>
-              <td class="actions">
-                <a [routerLink]="['/students/edit', student.id]" class="icon-btn edit-btn" title="Edit" style="text-decoration: none; display: inline-block;">✎</a>
-                <a (click)="openViewModal(student)" class="icon-btn view-btn" title="View">👁</a>
-                <a (click)="deleteStudent(student.id)" class="icon-btn delete-btn" title="Delete">🗑</a>
-              </td>
+              <th>Roll No</th>
+              <th>Student Name</th>
+              <th>Gender</th>
+              <th>Class & Section</th>
+              <th>Contact</th>
+              <th>Actions</th>
             </tr>
-          } @empty {
-            <tr>
-              <td colspan="6" class="empty-state">No students found matching "{{ searchQuery() }}"</td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            @for (student of filteredStudents(); track student.id) {
+              <tr>
+                <td><span class="badge">{{ student.rollNo }}</span></td>
+                <td class="fw-medium">{{ student.name }}</td>
+                <td>{{ student.gender === 'M' ? 'Male' : (student.gender === 'F' ? 'Female' : 'Other') }}</td>
+                <td>{{ student.classSectionId }}</td>
+                <td>{{ student.mobileNo }}</td>
+                <td class="actions">
+                  <a [routerLink]="['/students/edit', student.id]" class="icon-btn edit-btn" title="Edit" style="text-decoration: none; display: inline-block;">✎</a>
+                  <a (click)="openViewModal(student)" class="icon-btn view-btn" title="View">👁</a>
+                  <a (click)="deleteStudent(student.id)" class="icon-btn delete-btn" title="Delete">🗑</a>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="6" class="empty-state">No students found matching "{{ searchQuery() }}"</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
   </div>
 </div>
 

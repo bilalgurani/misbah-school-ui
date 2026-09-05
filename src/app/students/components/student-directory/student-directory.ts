@@ -2,8 +2,8 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { StudentService } from '../../student.service';
-import { JsonPipe } from '@angular/common';
 import { ToastService } from '../../../shared/services/toast.service';
+import { LoaderComponent } from '../../../shared/component/loader.component';
 
 interface FullStudentDto {
   id: number;
@@ -26,7 +26,7 @@ interface FullStudentDto {
 }
 
 @Component({
-  imports: [FormsModule, RouterModule],
+  imports: [FormsModule, RouterModule, LoaderComponent],
   selector: 'app-student-directory',
   styleUrl: './student-directory.scss',
   templateUrl: './student-directory.html',

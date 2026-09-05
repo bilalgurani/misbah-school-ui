@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { TeacherService } from '../../teacher.service';
 import { ToastService } from '../../../shared/services/toast.service';
+import { LoaderComponent } from '../../../shared/component/loader.component';
 interface FullTeacherDto {
   id: string;
   name: string;
@@ -18,7 +19,7 @@ interface FullTeacherDto {
 }
 
 @Component({
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, LoaderComponent],
   selector: 'app-teacher-directory',
   styleUrl: './teacher-directory.scss',
   templateUrl: './teacher-directory.html',

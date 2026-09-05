@@ -1,1 +1,133 @@
-<p>dashboard works!</p>
+<div class="dashboard-container">
+  <header class="dashboard-header">
+    <div>
+      <h1 class="title">School Overview</h1>
+      <p class="subtitle">Real-time stats and metrics for Misbah School</p>
+    </div>
+    <button class="btn-refresh" (click)="fetchDashboardStats()" [disabled]="isLoading()">
+      <span [class.spin]="isLoading()">&#x21bb;</span> Refresh
+    </button>
+  </header>
+
+  <!-- Native Control Flow for Loader -->
+  @if (isLoading()) {
+    <app-loader message="Fetching latest metrics..."></app-loader>
+  }
+
+  <!-- Native Control Flow for Error Banner -->
+  @if (hasError() && !isLoading()) {
+    <div class="error-banner">
+      <p>Failed to connect to backend service. Please check database connection or refresh.</p>
+    </div>
+  }
+
+  <!-- Native Control Flow for KPI Cards -->
+  @if (!isLoading() && stats(); as s) {
+    <div class="kpi-grid">
+      <div class="kpi-card indigo">
+        <div class="kpi-title">Total Students</div>
+        <div class="kpi-value">{{ s.totalStudents }}</div>
+        <div class="kpi-subtext">Boys: {{ s.totalBoys }} | Girls: {{ s.totalGirls }}</div>
+      </div>
+
+      <div class="kpi-card blue">
+        <div class="kpi-title">Pre-Primary (Nursery - UKG)</div>
+        <div class="kpi-value">{{ s.prePrimaryStudents }}</div>
+        <div class="kpi-subtext">Active Enrollments</div>
+      </div>
+
+      <div class="kpi-card green">
+        <div class="kpi-title">Primary (Class 1+)</div>
+        <div class="kpi-value">{{ s.primaryStudents }}</div>
+        <div class="kpi-subtext">Active Enrollments</div>
+      </div>
+
+      <div class="kpi-card purple">
+        <div class="kpi-title">Total Active Teachers</div>
+        <div class="kpi-value">{{ s.totalTeachers }}</div>
+        <div class="kpi-subtext">Staff Count</div>
+      </div>
+
+      <div class="kpi-card emerald">
+        <div class="kpi-title">Today's Attendance Rate</div>
+        <div class="kpi-value">{{ s.studentAttendancePercentage | number:'1.0-1' }}%</div>
+        <div class="kpi-subtext">Overall Student Presence</div>
+      </div>
+
+      <!-- Pending Attendance Clickable Card -->
+      <div 
+        class="kpi-card amber stat-card" 
+        [class.clickable]="s.pendingClassAttendanceCount > 0"
+        (click)="s.pendingClassAttendanceCount > 0 ? openPendingModal() : null"
+      >
+        <div class="kpi-title">Pending Class Sections</div>
+        <div class="kpi-value">{{ s.pendingClassAttendanceCount }}</div>
+        <div class="kpi-subtext">
+          @if (s.pendingClassAttendanceCount > 0) {
+            <span class="view-link">View details &rarr;</span>
+          } @else {
+            All classes completed
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>
+
+<!-- Pending Classes Modal -->
+@if (isPendingModalOpen()) {
+  <div class="modal-backdrop" (click)="closePendingModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Pending Attendance Breakdown</h3>
+        <button class="close-btn" (click)="closePendingModal()" type="button">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <p class="subtitle">
+          The following classes have active students but attendance has not been marked today:
+        </p>
+
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Class</th>
+                <th>Section</th>
+                <th>Active Students</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of stats()?.pendingClasses; track item.classSectionId) {
+                <tr>
+                  <td class="fw-medium">{{ item.className }}</td>
+                  <td><span class="badge">{{ item.sectionName }}</span></td>
+                  <td>{{ item.totalStudents }} students</td>
+                  <td>
+                    <a 
+                      [routerLink]="['/student-attendance']" 
+                      [queryParams]="{ classSectionId: item.classSectionId }"
+                      class="btn-sm-primary"
+                      (click)="closePendingModal()"
+                    >
+                      Mark Now
+                    </a>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="4" class="empty-state">All classes have completed attendance today!</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closePendingModal()">Close</button>
+      </div>
+    </div>
+  </div>
+}

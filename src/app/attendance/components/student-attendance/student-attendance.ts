@@ -2,6 +2,8 @@ import { Component, computed, inject, OnInit, signal } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { AttendanceApiService } from "../../services/attendance-api.service";
 import { ClassSection, LocalStudentUI, MarkAttendanceRequest } from "../../models/attendance.models";
+import { ToastService } from "../../../shared/services/toast.service";
+import { ActivatedRoute } from "@angular/router";
 
 @Component({
   imports: [FormsModule],
@@ -12,6 +14,9 @@ import { ClassSection, LocalStudentUI, MarkAttendanceRequest } from "../../model
 export class StudentAttendance implements OnInit {
 
   private api = inject(AttendanceApiService);
+  private toast = inject(ToastService);
+  private route = inject(ActivatedRoute);
+  
   classSections = signal<ClassSection[]>([]);
   selectedSectionId = signal<number | null>(null);
   selectedDate = signal<string>(new Date().toISOString().split('T')[0]);
@@ -44,11 +49,23 @@ export class StudentAttendance implements OnInit {
       next: (sections) => {
         this.classSections.set(sections);
         if (sections.length > 0) {
-          this.selectedSectionId.set(sections[0].id);
+          // 3. Read query param from the URL
+          const paramId = this.route.snapshot.queryParamMap.get('classSectionId');
+          const targetId = paramId ? Number(paramId) : null;
+
+          // Check if the passed section ID exists in the fetched sections
+          const matchedSection = sections.find(s => s.id === targetId);
+
+          if (matchedSection) {
+            this.selectedSectionId.set(matchedSection.id);
+          } else {
+            this.selectedSectionId.set(sections[0].id); // Fallback to first section
+          }
+          
           this.fetchAttendanceOrStudents();
         }
       },
-      error: (err) => console.error('Failed to load sections', err)
+      error: (err) => this.toast.show('Failed to load sections', err)
     });
   }
 
@@ -100,7 +117,7 @@ export class StudentAttendance implements OnInit {
         this.isLoading.set(false);
       },
       error: (err) => {
-        console.error('Failed to load students', err);
+        this.toast.show('Failed to load students', err);
         this.isLoading.set(false);
       }
     });
@@ -135,12 +152,11 @@ export class StudentAttendance implements OnInit {
     this.api.saveAttendance(payload).subscribe({
       next: () => {
         this.isSubmitting.set(false);
-        alert('Attendance submitted successfully!');
+        this.toast.show('Attendance submitted successfully!');
       },
       error: (err) => {
         this.isSubmitting.set(false);
-        console.error('Failed to save attendance', err);
-        alert('Error saving attendance.');
+        this.toast.show('Failed to save attendance', err);
       }
     });
   }

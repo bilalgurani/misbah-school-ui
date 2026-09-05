@@ -7,43 +7,52 @@
   <div class="card">
     <div class="toolbar">
       <div class="search-box">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
         <input type="text" [(ngModel)]="searchQuery" placeholder="Search by name, ID, or subject...">
       </div>
     </div>
 
-    <div class="table-responsive">
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>Teacher Name</th>
-            <th>Subject</th>
-            <th>Qualification</th>
-            <th>Contact</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (teacher of filteredTeachers(); track teacher.id) {
+    <!-- Loader / Content Switching -->
+    @if (isLoading()) {
+      <div class="loader-container">
+        <app-loader></app-loader>
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
             <tr>
-              <td class="fw-medium">{{ teacher.name }}</td>
-              <td>{{ teacher.subject }}</td>
-              <td>{{ teacher.qualification }}</td>
-              <td>{{ teacher.phoneNo }}</td>
-              <td class="actions">
-                <a [routerLink]="['/teachers/edit', teacher.id]" class="icon-btn edit-btn" title="Edit">✎</a>
-                <a (click)="openViewModal(teacher)" class="icon-btn view-btn" title="View">👁</a>
-                <a (click)="deleteTeacher(teacher.id)" class="icon-btn delete-btn" title="Delete">🗑</a>
-              </td>
+              <th>Teacher Name</th>
+              <th>Subject</th>
+              <th>Qualification</th>
+              <th>Contact</th>
+              <th>Actions</th>
             </tr>
-          } @empty {
-            <tr>
-              <td colspan="6" class="empty-state">No teachers found matching "{{ searchQuery() }}"</td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            @for (teacher of filteredTeachers(); track teacher.id) {
+              <tr>
+                <td class="fw-medium">{{ teacher.name }}</td>
+                <td>{{ teacher.subject }}</td>
+                <td>{{ teacher.qualification }}</td>
+                <td>{{ teacher.phoneNo }}</td>
+                <td class="actions">
+                  <a [routerLink]="['/teachers/edit', teacher.id]" class="icon-btn edit-btn" title="Edit">✎</a>
+                  <a (click)="openViewModal(teacher)" class="icon-btn view-btn" title="View">👁</a>
+                  <a (click)="deleteTeacher(teacher.id)" class="icon-btn delete-btn" title="Delete">🗑</a>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5" class="empty-state">No teachers found matching "{{ searchQuery() }}"</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
   </div>
 </div>
 

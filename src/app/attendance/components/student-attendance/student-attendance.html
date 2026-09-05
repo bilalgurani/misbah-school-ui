@@ -101,7 +101,7 @@
         </tr>
       </thead>
       <tbody>
-        @for (student of students(); track student.id) {
+        @for (student of filteredStudents(); track student.id) {
           <tr [class.is-absent]="student.status === 'ABSENT'">
             <td class="col-roll">#{{ student.rollNo }}</td>
             <td class="col-name">

@@ -12,6 +12,7 @@ import { ToastService } from '../../../shared/services/toast.service';
 })
 export class TeacherAttendance {
   private api = inject(AttendanceApiService);
+
   private toast = inject(ToastService);
 
   selectedDate = signal<string>(new Date().toISOString().split('T')[0]);
@@ -87,9 +88,8 @@ export class TeacherAttendance {
         this.isLoading.set(false);
       },
       error: (err) => {
-        console.error('Failed to load teachers', err);
         this.isLoading.set(false);
-        this.toast.show('Failed to load teacher roster.', 'error');
+        this.toast.show('Failed to load teacher roster.', err);
       }
     });
   }
