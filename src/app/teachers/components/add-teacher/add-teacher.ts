@@ -5,6 +5,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TeacherService } from '../../teacher.service';
+import { ToastService } from '../../../shared/services/toast.service';
 
 @Component({
   imports: [CommonModule, ReactiveFormsModule, RouterModule],
@@ -17,6 +18,7 @@ export class AddTeacher implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private teacherService = inject(TeacherService);
+    private toast = inject(ToastService);
 
   teacherForm!: FormGroup;
   isSubmitting = signal<boolean>(false);
@@ -50,7 +52,7 @@ export class AddTeacher implements OnInit {
   private loadTeacherData(id: string): void {
     this.teacherService.getTeacherById(id).subscribe({
       next: (teacher) => this.teacherForm.patchValue(teacher),
-      error: (err) => console.error('Error fetching teacher data:', err)
+      error: (err) => this.toast.show('Error fetching teacher data:', err)
     });
   }
 
@@ -68,7 +70,7 @@ export class AddTeacher implements OnInit {
       this.teacherService.updateTeacher(id, formData).subscribe({
         next: () => this.handleSuccess(),
         error: (err) => {
-          console.error('Update failed:', err);
+          this.toast.show('Update failed:', err);
           this.isSubmitting.set(false);
         }
       });
@@ -76,7 +78,7 @@ export class AddTeacher implements OnInit {
       this.teacherService.createTeacher(formData).subscribe({
         next: () => this.handleSuccess(),
         error: (err) => {
-          console.error('Creation failed:', err);
+          this.toast.show('Creation failed:', err);
           this.isSubmitting.set(false);
         }
       });

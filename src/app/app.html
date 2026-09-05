@@ -1,2 +1,13 @@
-<app-shell></app-shell>
+<!-- Render application layout only when authenticated -->
+@if (auth.isAuthenticated()) {
+  <app-shell>
+    <router-outlet></router-outlet>
+  </app-shell>
+} @else {
+  <!-- Display standalone full-page views (Login, Password Reset) -->
+  <main class="auth-container">
+    <router-outlet></router-outlet>
+  </main>
+}
+
 <app-toast></app-toast>

@@ -1,0 +1,62 @@
+.financial-container {
+  padding: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: 1.5rem;
+  .title { font-size: 1.5rem; font-weight: 700; color: #1e293b; margin: 0; }
+  .subtitle { color: #64748b; font-size: 0.875rem; margin-top: 0.25rem; }
+}
+
+.financial-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.kpi-card {
+  background: #ffffff;
+  padding: 1.25rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+  border-left: 4px solid #cbd5e1;
+  
+  &.green { border-left-color: #10b981; }
+  &.red { border-left-color: #ef4444; }
+  &.indigo { border-left-color: #4f46e5; }
+
+  .kpi-title { font-size: 0.8125rem; color: #64748b; font-weight: 600; text-transform: uppercase; }
+  .kpi-value { font-size: 1.5rem; font-weight: 700; color: #1e293b; margin-top: 0.5rem; }
+}
+
+.table-card {
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+  padding: 1.25rem;
+  
+  .table-header h3 { margin: 0 0 1rem 0; font-size: 1.125rem; color: #1e293b; }
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  th, td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid #f1f5f9; font-size: 0.875rem; }
+  th { background: #f8fafc; color: #475569; font-weight: 600; }
+}
+
+.type-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  &.income { background: #d1fae5; color: #065f46; }
+  &.expenditure { background: #fee2e2; color: #991b1b; }
+}
+
+.fw-medium { font-weight: 500; }
+.text-success { color: #10b981; font-weight: 600; }
+.text-danger { color: #ef4444; font-weight: 600; }

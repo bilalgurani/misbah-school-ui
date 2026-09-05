@@ -1,0 +1,59 @@
+<div class="financial-container">
+  <header class="page-header">
+    <div>
+      <h1 class="title">Financial & Fee Management</h1>
+      <p class="subtitle">Track fee collections, school income, and expenditure ledger entries</p>
+    </div>
+  </header>
+
+  <!-- Summary KPI Cards -->
+  <div class="financial-kpi-grid">
+    <div class="kpi-card green">
+      <div class="kpi-title">Total Income</div>
+      <div class="kpi-value">₹{{ totalIncome() | number:'1.2-2' }}</div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-title">Total Expenditure</div>
+      <div class="kpi-value">₹{{ totalExpenditure() | number:'1.2-2' }}</div>
+    </div>
+    <div class="kpi-card indigo">
+      <div class="kpi-title">Net Balance</div>
+      <div class="kpi-value">₹{{ netBalance() | number:'1.2-2' }}</div>
+    </div>
+  </div>
+
+  <!-- Ledger Table Card -->
+  <div class="table-card">
+    <div class="table-header">
+      <h3>Recent Financial Transactions</h3>
+    </div>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Description</th>
+          <th>Category</th>
+          <th>Type</th>
+          <th>Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of ledgerItems(); track item.id) {
+          <tr>
+            <td>{{ item.transactionDate }}</td>
+            <td class="fw-medium">{{ item.description }}</td>
+            <td><span class="badge">{{ item.category }}</span></td>
+            <td>
+              <span class="type-badge" [class.income]="item.type === 'INCOME'" [class.expenditure]="item.type === 'EXPENDITURE'">
+                {{ item.type }}
+              </span>
+            </td>
+            <td [class.text-success]="item.type === 'INCOME'" [class.text-danger]="item.type === 'EXPENDITURE'">
+              {{ item.type === 'INCOME' ? '+' : '-' }}₹{{ item.amount | number:'1.2-2' }}
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

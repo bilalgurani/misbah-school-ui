@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { StudentService } from '../../student.service';
+import { ToastComponent } from '../../../shared/component/toast.component';
+import { ToastService } from '../../../shared/services/toast.service';
 
 @Component({
   imports: [CommonModule, ReactiveFormsModule, RouterModule],
@@ -15,6 +17,7 @@ export class AddStudent {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private studentService = inject(StudentService);
+  private toast = inject(ToastService);
 
   studentForm!: FormGroup;
   isSubmitting = signal<boolean>(false);
@@ -55,7 +58,7 @@ export class AddStudent {
   private loadStudentData(id: string): void {
     this.studentService.getStudentById(id).subscribe({
       next: (student) => this.studentForm.patchValue(student),
-      error: (err) => console.error('Error fetching student data:', err)
+      error: (err) => this.toast.show('Error fetching student data:', err)
     });
   }
 
@@ -73,7 +76,7 @@ export class AddStudent {
       this.studentService.updateStudent(id, formData).subscribe({
         next: () => this.handleSuccess(),
         error: (err) => {
-          console.error('Update failed:', err);
+          this.toast.show('Update failed:', err);
           this.isSubmitting.set(false);
         }
       });
@@ -81,7 +84,7 @@ export class AddStudent {
       this.studentService.createStudent(formData).subscribe({
         next: () => this.handleSuccess(),
         error: (err) => {
-          console.error('Creation failed:', err);
+          this.toast.show('Creation failed:', err);
           this.isSubmitting.set(false);
         }
       });

@@ -1,1 +1,37 @@
-<p>dashboard-charts works!</p>
+<div class="trends-card">
+  <div class="trends-header">
+    <h3>Monthly Attendance Trends</h3>
+    <p class="subtitle">Comparing student presence vs. faculty punctuality over the last 6 months</p>
+  </div>
+
+  <div class="legend">
+    <span class="legend-item"><span class="dot student"></span> Students (%)</span>
+    <span class="legend-item"><span class="dot teacher"></span> Teachers (%)</span>
+  </div>
+
+  <div class="chart-container">
+    @for (trend of trends(); track trend.period) {
+      <div class="chart-column">
+        <div class="bars-wrapper">
+          <!-- Student Bar -->
+          <div 
+            class="bar student-bar" 
+            [style.height.%]="trend.studentAttendancePercentage"
+            [title]="'Students: ' + trend.studentAttendancePercentage + '%'"
+          >
+            <span class="bar-tooltip">{{ trend.studentAttendancePercentage | number:'1.0-1' }}%</span>
+          </div>
+          <!-- Teacher Bar -->
+          <div 
+            class="bar teacher-bar" 
+            [style.height.%]="trend.teacherAttendancePercentage"
+            [title]="'Teachers: ' + trend.teacherAttendancePercentage + '%'"
+          >
+            <span class="bar-tooltip">{{ trend.teacherAttendancePercentage | number:'1.0-1' }}%</span>
+          </div>
+        </div>
+        <span class="period-label">{{ trend.period }}</span>
+      </div>
+    }
+  </div>
+</div>
