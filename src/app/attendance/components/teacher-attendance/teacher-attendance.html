@@ -1,0 +1,126 @@
+<div class="attendance-container">
+  <!-- Controls & Filters Header -->
+  <header class="header">
+    <div class="filters">
+      <!-- Attendance Date Control Only -->
+      <div class="control-wrapper">
+        <label class="control-label" for="dateSelect">Attendance Date</label>
+        <div class="input-container">
+          <svg class="control-icon" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
+          </svg>
+          <input id="dateSelect" type="date" class="control custom-date" 
+            [ngModel]="selectedDate()"
+            (ngModelChange)="selectedDate.set($event); onFilterChange()"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Stat Badges -->
+    <div class="summary">
+      <div class="stat">
+        <span class="label">Total Teachers</span>
+        <strong>{{ teachers().length }}</strong>
+      </div>
+      <div class="stat present">
+        <span class="label">Present</span>
+        <strong>{{ presentCount() }}</strong>
+      </div>
+      <div class="stat absent">
+        <span class="label">Absent</span>
+        <strong>{{ absentCount() }}</strong>
+      </div>
+    </div>
+  </header>
+
+  <!-- Bulk Action Bar -->
+  <div class="table-toolbar">
+    <span class="toolbar-title">Teacher Roster</span>
+    <div class="search-box">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+      </svg>
+      <input 
+        type="text" 
+        class="search-input" 
+        placeholder="Search by name or Employee ID..." 
+        [value]="searchQuery()"
+        (input)="searchQuery.set($any($event.target).value)"
+      />
+      @if (searchQuery()) {
+        <button class="clear-btn" (click)="searchQuery.set('')" type="button" aria-label="Clear search">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+          </svg>
+        </button>
+      }
+    </div>
+    <div class="bulk-actions">
+      <button class="btn btn-outline-success" (click)="markAll('PRESENT')">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+        Mark All Present
+      </button>
+      <button class="btn btn-outline-danger" (click)="markAll('ABSENT')">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        Mark All Absent
+      </button>
+    </div>
+  </div>
+
+  <!-- Roster Data Table -->
+  <div class="table-card">
+    <table class="roster-table">
+      <thead>
+        <tr>
+          <th class="col-roll">Emp ID</th>
+          <th class="col-name">Teacher Name</th>
+          <th class="col-status">Status</th>
+          <th class="col-actions">Toggle Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- NOTE: Looping over filteredTeachers() so the search bar works! -->
+        @for (teacher of filteredTeachers(); track teacher.id) {
+          <tr [class.is-absent]="teacher.status === 'ABSENT'">
+            <td class="col-roll">{{ teacher.teacherId }}</td>
+            <td class="col-name">
+              <div class="student-profile">
+                <div class="avatar">{{ teacher.name.charAt(0) }}</div>
+                <span class="name-text">{{ teacher.name }}</span>
+              </div>
+            </td>
+            <td class="col-status">
+              <span class="badge" [class.badge-present]="teacher.status === 'PRESENT'" [class.badge-absent]="teacher.status === 'ABSENT'">
+                {{ teacher.status }}
+              </span>
+            </td>
+            <td class="col-actions">
+              <div class="btn-group">
+                <button 
+                  class="btn-status btn-present" 
+                  [class.active]="teacher.status === 'PRESENT'"
+                  (click)="setStatus(teacher.id, 'PRESENT')">
+                  Present
+                </button>
+                <button 
+                  class="btn-status btn-absent" 
+                  [class.active]="teacher.status === 'ABSENT'"
+                  (click)="setStatus(teacher.id, 'ABSENT')">
+                  Absent
+                </button>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Bottom Submit Footer -->
+  <footer class="form-footer">
+    <button class="btn btn-primary submit-btn" [disabled]="isSubmitting() || isLoading()" (click)="submitAttendance()">
+      {{ isSubmitting() ? 'Submitting...' : 'Save & Submit Attendance' }}
+    </button>
+  </footer>
+</div>

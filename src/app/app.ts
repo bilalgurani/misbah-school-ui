@@ -1,8 +1,9 @@
 import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Shell } from './shell/shell';
+import { ToastComponent } from './shared/component/toast.component';
 
 @Component({
-  imports: [RouterOutlet],
+  imports: [Shell, ToastComponent],
   selector: 'app-root',
   styleUrl: './app.scss',
   templateUrl: './app.html',

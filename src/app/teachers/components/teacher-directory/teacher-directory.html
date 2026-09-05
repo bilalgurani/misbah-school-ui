@@ -1,0 +1,102 @@
+<div class="directory-container">
+  <div class="page-header">
+    <h2>Teacher Directory</h2>
+    <a routerLink="/teachers/add" class="btn-primary">+ Add Teacher</a>
+  </div>
+
+  <div class="card">
+    <div class="toolbar">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <input type="text" [(ngModel)]="searchQuery" placeholder="Search by name, ID, or subject...">
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Teacher Name</th>
+            <th>Subject</th>
+            <th>Qualification</th>
+            <th>Contact</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (teacher of filteredTeachers(); track teacher.id) {
+            <tr>
+              <td class="fw-medium">{{ teacher.name }}</td>
+              <td>{{ teacher.subject }}</td>
+              <td>{{ teacher.qualification }}</td>
+              <td>{{ teacher.phoneNo }}</td>
+              <td class="actions">
+                <a [routerLink]="['/teachers/edit', teacher.id]" class="icon-btn edit-btn" title="Edit">✎</a>
+                <a (click)="openViewModal(teacher)" class="icon-btn view-btn" title="View">👁</a>
+                <a (click)="deleteTeacher(teacher.id)" class="icon-btn delete-btn" title="Delete">🗑</a>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="empty-state">No teachers found matching "{{ searchQuery() }}"</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+@if (isModalOpen() && selectedTeacher(); as t) {
+  <div class="modal-backdrop" (click)="closeViewModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-avatar-title">
+          <div class="large-avatar">{{ t.name.charAt(0) }}</div>
+          <div>
+            <h3>{{ t.name }}</h3>
+            <span class="badge" [class.badge-active]="t.employmentStatus === 'ACTIVE'">{{ t.employmentStatus }}</span>
+          </div>
+        </div>
+        <button class="close-btn" (click)="closeViewModal()" type="button">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="label">Subject Specialization</span>
+            <span class="value">{{ t.subject || 'Not Assigned' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Qualification</span>
+            <span class="value">{{ t.qualification || 'Not Specified' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Phone Number</span>
+            <span class="value">{{ t.phoneNo || 'Not Provided' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Email Address</span>
+            <span class="value">{{ t.email || 'Not Provided' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Date of Birth</span>
+            <span class="value">{{ t.dob || 'Not Provided' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Date of Joining</span>
+            <span class="value">{{ t.dateOfJoining }}</span>
+          </div>
+          <div class="info-item full-width">
+            <span class="label">Residential Address</span>
+            <span class="value">{{ t.address || 'Not Provided' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <a [routerLink]="['/teachers/edit', t.id]" class="btn-primary" (click)="closeViewModal()">Edit Profile</a>
+      </div>
+    </div>
+  </div>
+}

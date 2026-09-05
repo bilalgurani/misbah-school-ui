@@ -1,0 +1,99 @@
+import { Component, computed, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
+import { StudentService } from '../../student.service';
+import { JsonPipe } from '@angular/common';
+import { ToastService } from '../../../shared/services/toast.service';
+
+interface FullStudentDto {
+  id: number;
+  name: string;
+  rollNo: number | null;
+  satsNo: string | null;
+  gender: string | null;
+  fatherName: string | null;
+  motherName: string | null;
+  dob: string | null;
+  aadharNo: string | null;
+  address: string | null;
+  mobileNo: string | null;
+  dateOfAdmission: string | null;
+  bloodGroup: string | null;
+  emergencyContactName: string | null;
+  emergencyContactNo: string | null;
+  enrollmentStatus: 'ACTIVE' | 'INACTIVE' | 'ALUMNI' | string;
+  classSectionId: number | null;
+}
+
+@Component({
+  imports: [FormsModule, RouterModule],
+  selector: 'app-student-directory',
+  styleUrl: './student-directory.scss',
+  templateUrl: './student-directory.html',
+})
+export class StudentDirectory {
+  private studentService = inject(StudentService);
+  private toast = inject(ToastService);
+
+  students = signal<any[]>([]);
+  isLoading = signal<boolean>(false);
+  searchQuery = signal<string>('');
+
+  selectedStudent = signal<FullStudentDto | null>(null);
+  isModalOpen = signal<boolean>(false);
+
+  filteredStudents = computed(() => {
+    const query = this.searchQuery().toLowerCase().trim();
+    if (!query) return this.students();
+    return this.students().filter(s =>
+      s.name.toLowerCase().includes(query) ||
+      (s.rollNo && s.rollNo.toString().toLowerCase().includes(query))
+    );
+  });
+
+  ngOnInit(): void {
+    this.loadStudents();
+  }
+
+  loadStudents(): void {
+    this.isLoading.set(true);
+    this.studentService.getStudents().subscribe({
+      next: (data) => {
+        this.students.set(data);
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        this.toast.show('Failed to load students', err);
+        this.isLoading.set(false);
+      }
+    });
+  }
+
+  openViewModal(student: FullStudentDto) {
+    this.studentService.getFullStudentById(student.id).subscribe({
+      next: (fullStudent) => {
+        this.selectedStudent.set(fullStudent);
+        this.isModalOpen.set(true);
+      },
+      error: (err) => {
+        this.toast.show('Failed to load full student details', err);
+      }
+    });
+  }
+
+  closeViewModal() {
+    this.isModalOpen.set(false);
+    this.selectedStudent.set(null);
+  }
+
+  deleteStudent(id: string): void {
+    if (confirm('Are you sure you want to delete this student?')) {
+      this.studentService.deleteStudent(id).subscribe({
+        next: () => {
+          this.students.update(list => list.filter(s => s.id !== id));
+        },
+        error: (err) => this.toast.show('Failed to delete student', err)
+      });
+    }
+  }
+}

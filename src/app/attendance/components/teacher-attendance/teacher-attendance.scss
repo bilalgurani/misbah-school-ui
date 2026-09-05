@@ -1,0 +1,447 @@
+$brand-color: #1976d2;
+$border-color: #e2e8f0;
+$text-primary: #0f172a;
+$text-secondary: #64748b;
+
+$success-color: #16a34a;
+$success-bg: #f0fdf4;
+$danger-color: #dc2626;
+$danger-bg: #fef2f2;
+
+.attendance-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Header & Controls */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid $border-color;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.filters {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  .control-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 190px;
+
+    .control-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: $text-secondary;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .input-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+
+      .control-icon {
+        position: absolute;
+        left: 12px;
+        width: 18px;
+        height: 18px;
+        fill: $text-secondary;
+        pointer-events: none;
+        transition: fill 0.2s ease;
+      }
+
+      .chevron-icon {
+        position: absolute;
+        right: 12px;
+        width: 20px;
+        height: 20px;
+        fill: $text-secondary;
+        pointer-events: none;
+      }
+
+      .control {
+        width: 100%;
+        height: 42px;
+        padding: 0 12px 0 38px;
+        border: 1px solid $border-color;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        color: $text-primary;
+        background-color: #f8fafc;
+        outline: none;
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+
+        &:hover {
+          background-color: #ffffff;
+          border-color: #cbd5e1;
+        }
+
+        &:focus {
+          background-color: #ffffff;
+          border-color: $brand-color;
+          box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.12);
+
+          ~ .control-icon {
+            fill: $brand-color;
+          }
+        }
+      }
+
+      .custom-select {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        padding-right: 36px;
+      }
+
+      .custom-date {
+        font-family: inherit;
+
+        &::-webkit-calendar-picker-indicator {
+          cursor: pointer;
+          opacity: 0.6;
+          transition: opacity 0.2s ease;
+
+          &:hover {
+            opacity: 1;
+          }
+        }
+      }
+    }
+  }
+}
+
+/* Stats Summary */
+.summary {
+  display: flex;
+  gap: 12px;
+
+  .stat {
+    background: #f8fafc;
+    border: 1px solid $border-color;
+    padding: 10px 18px;
+    border-radius: 10px;
+    min-width: 100px;
+
+    .label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      color: $text-secondary;
+    }
+
+    strong {
+      display: block;
+      font-size: 20px;
+      color: $text-primary;
+      margin-top: 2px;
+    }
+
+    &.present {
+      background: $success-bg;
+      border-color: #bbf7d0;
+      strong { color: $success-color; }
+    }
+
+    &.absent {
+      background: $danger-bg;
+      border-color: #fecaca;
+      strong { color: $danger-color; }
+    }
+  }
+}
+
+/* Table Toolbar */
+.table-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .toolbar-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: $text-primary;
+  }
+
+  .bulk-actions {
+    display: flex;
+    gap: 8px;
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+
+      svg {
+        width: 16px;
+        height: 16px;
+      }
+
+      &.btn-outline-success {
+        background-color: #ffffff;
+        border-color: #bbf7d0;
+        color: $success-color;
+
+        &:hover {
+          background-color: $success-bg;
+        }
+      }
+
+      &.btn-outline-danger {
+        background-color: #ffffff;
+        border-color: #fecaca;
+        color: $danger-color;
+
+        &:hover {
+          background-color: $danger-bg;
+        }
+      }
+    }
+  }
+}
+
+/* Table Card Layout */
+.table-card {
+  background: #ffffff;
+  border: 1px solid $border-color;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.roster-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+
+  th {
+    background: #f8fafc;
+    padding: 12px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    color: $text-secondary;
+    border-bottom: 1px solid $border-color;
+  }
+
+  td {
+    padding: 12px 16px;
+    border-bottom: 1px solid $border-color;
+    font-size: 14px;
+    color: $text-primary;
+    vertical-align: middle;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  tr.is-absent {
+    background-color: #fffafb;
+  }
+
+  .col-roll {
+    width: 80px;
+    font-weight: 600;
+    color: $text-secondary;
+  }
+
+  .student-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background-color: #e0e7ff;
+      color: $brand-color;
+      font-weight: 700;
+      font-size: 13px;
+      display: grid;
+      place-items: center;
+    }
+
+    .name-text {
+      font-weight: 600;
+    }
+  }
+
+  /* Status Badges */
+  .badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+
+    &.badge-present {
+      background-color: $success-bg;
+      color: $success-color;
+    }
+
+    &.badge-absent {
+      background-color: $danger-bg;
+      color: $danger-color;
+    }
+  }
+
+  /* Status Toggle Buttons */
+  .btn-group {
+    display: inline-flex;
+    background-color: #f1f5f9;
+    padding: 3px;
+    border-radius: 8px;
+    gap: 2px;
+
+    .btn-status {
+      border: none;
+      background: none;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      color: $text-secondary;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+
+      &.btn-present.active {
+        background-color: $success-color;
+        color: #ffffff;
+      }
+
+      &.btn-absent.active {
+        background-color: $danger-color;
+        color: #ffffff;
+      }
+    }
+  }
+}
+
+/* Submit Footer */
+.form-footer {
+  display: flex;
+  justify-content: flex-end;
+
+  .submit-btn {
+    padding: 12px 28px;
+    background-color: $brand-color;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+
+    &:hover {
+      opacity: 0.9;
+    }
+  }
+}
+
+.table-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+
+  .toolbar-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: $text-primary;
+  }
+
+  .search-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex: 1;
+    max-width: 320px;
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      width: 18px;
+      height: 18px;
+      fill: $text-secondary;
+      pointer-events: none;
+      transition: fill 0.2s ease;
+    }
+
+    .search-input {
+      width: 100%;
+      height: 38px;
+      padding: 0 32px 0 38px;
+      border: 1px solid $border-color;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: $text-primary;
+      background-color: #ffffff;
+      outline: none;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+
+      &::placeholder {
+        color: #94a3b8;
+      }
+
+      &:focus {
+        border-color: $brand-color;
+        box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.12);
+
+        ~ .search-icon {
+          fill: $brand-color;
+        }
+      }
+    }
+
+    .clear-btn {
+      position: absolute;
+      right: 8px;
+      background: none;
+      border: none;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border-radius: 50%;
+      color: $text-secondary;
+
+      &:hover {
+        background-color: #f1f5f9;
+        color: $text-primary;
+      }
+
+      svg {
+        width: 14px;
+        height: 14px;
+      }
+    }
+  }
+}
