@@ -37,7 +37,7 @@ export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
   
-  private apiUrl = `${environment.apiUrl}`;
+  private apiUrl = `${environment.apiUrl}/auth`;
 
   // Reactive Signals synchronized with initial localStorage
   currentUser = signal<string | null>(localStorage.getItem('username'));
