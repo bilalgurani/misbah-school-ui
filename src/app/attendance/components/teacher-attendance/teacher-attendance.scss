@@ -1,11 +1,12 @@
-$brand-color: #1976d2;
-$border-color: #e2e8f0;
-$text-primary: #0f172a;
-$text-secondary: #64748b;
-$success-color: #16a34a;
-$success-bg: #f0fdf4;
-$danger-color: #dc2626;
-$danger-bg: #fef2f2;
+/* Variables mapped to CSS Custom Properties */
+$brand-color: var(--primary);
+$border-color: var(--border);
+$text-primary: var(--foreground);
+$text-secondary: var(--muted-foreground);
+$success-color: var(--chart-3);
+$success-bg: color-mix(in oklch, var(--chart-3) 15%, transparent);
+$danger-color: var(--destructive);
+$danger-bg: color-mix(in oklch, var(--destructive) 15%, transparent);
 
 .attendance-container {
   display: flex;
@@ -13,6 +14,7 @@ $danger-bg: #fef2f2;
   gap: 16px;
   width: 100%;
   box-sizing: border-box;
+  color: $text-primary;
 
   @media (min-width: 768px) {
     gap: 20px;
@@ -26,9 +28,10 @@ $danger-bg: #fef2f2;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  background: #ffffff;
+  background: var(--card);
+  color: var(--card-foreground);
   padding: 16px;
-  border-radius: 12px;
+  border-radius: var(--radius);
   border: 1px solid $border-color;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
 
@@ -84,26 +87,27 @@ $danger-bg: #fef2f2;
 
       .control {
         width: 100%;
-        height: 42px;
+        height: 44px; /* Accessible touch target height */
         padding: 0 12px 0 38px;
         border: 1px solid $border-color;
-        border-radius: 10px;
+        border-radius: var(--radius);
         font-size: 14px;
         font-weight: 600;
         color: $text-primary;
-        background-color: #f8fafc;
+        background-color: var(--background);
         outline: none;
         cursor: pointer;
         box-sizing: border-box;
-        transition: all 0.2s ease-in-out;
+        transition: border-color 0.15s cubic-bezier(0.4, 0, 0.2, 1), 
+                    box-shadow 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 
         &:focus {
-          background-color: #ffffff;
-          border-color: $brand-color;
-          box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.12);
+          background-color: var(--background);
+          border-color: var(--ring);
+          box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 20%, transparent);
 
           ~ .control-icon {
-            fill: $brand-color;
+            fill: var(--ring);
           }
         }
       }
@@ -114,6 +118,9 @@ $danger-bg: #fef2f2;
         &::-webkit-calendar-picker-indicator {
           cursor: pointer;
           opacity: 0.6;
+          filter: var(--calendar-icon-filter, none);
+          transition: opacity 0.15s ease;
+
           &:hover { opacity: 1; }
         }
       }
@@ -134,10 +141,10 @@ $danger-bg: #fef2f2;
 
   .stat {
     flex: 1;
-    background: #f8fafc;
+    background: var(--muted);
     border: 1px solid $border-color;
     padding: 10px 12px;
-    border-radius: 10px;
+    border-radius: var(--radius);
     text-align: center;
 
     @media (min-width: 768px) {
@@ -166,13 +173,13 @@ $danger-bg: #fef2f2;
 
     &.present {
       background: $success-bg;
-      border-color: #bbf7d0;
+      border-color: color-mix(in oklch, $success-color 30%, transparent);
       strong { color: $success-color; }
     }
 
     &.absent {
       background: $danger-bg;
-      border-color: #fecaca;
+      border-color: color-mix(in oklch, $danger-color 30%, transparent);
       strong { color: $danger-color; }
     }
   }
@@ -223,23 +230,25 @@ $danger-bg: #fef2f2;
 
     .search-input {
       width: 100%;
-      height: 40px;
+      height: 44px; /* Accessible touch target size */
       padding: 0 32px 0 38px;
       border: 1px solid $border-color;
-      border-radius: 8px;
+      border-radius: var(--radius);
       font-size: 13px;
       font-weight: 500;
       color: $text-primary;
-      background-color: #ffffff;
+      background-color: var(--background);
       outline: none;
       box-sizing: border-box;
+      transition: border-color 0.15s cubic-bezier(0.4, 0, 0.2, 1), 
+                  box-shadow 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 
       &:focus {
-        border-color: $brand-color;
-        box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.12);
+        border-color: var(--ring);
+        box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 20%, transparent);
 
         ~ .search-icon {
-          fill: $brand-color;
+          fill: var(--ring);
         }
       }
     }
@@ -256,9 +265,10 @@ $danger-bg: #fef2f2;
       cursor: pointer;
       border-radius: 50%;
       color: $text-secondary;
+      transition: background-color 0.15s ease, color 0.15s ease;
 
       &:hover {
-        background-color: #f1f5f9;
+        background-color: var(--accent);
         color: $text-primary;
       }
 
@@ -286,15 +296,21 @@ $danger-bg: #fef2f2;
       align-items: center;
       justify-content: center;
       gap: 6px;
-      height: 40px;
+      height: 44px; /* Accessible touch target size */
       padding: 0 12px;
-      border-radius: 8px;
+      border-radius: var(--radius);
       font-size: 12px;
       font-weight: 600;
       cursor: pointer;
       border: 1px solid transparent;
       white-space: nowrap;
-      transition: all 0.15s ease;
+      transition: background-color 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+                  box-shadow 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+                  transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+
+      &:active {
+        transform: scale(0.98);
+      }
 
       @media (min-width: 640px) {
         font-size: 13px;
@@ -309,8 +325,8 @@ $danger-bg: #fef2f2;
       }
 
       &.btn-outline-success {
-        background-color: #ffffff;
-        border-color: #bbf7d0;
+        background-color: var(--card);
+        border-color: color-mix(in oklch, $success-color 30%, transparent);
         color: $success-color;
 
         &:hover {
@@ -319,8 +335,8 @@ $danger-bg: #fef2f2;
       }
 
       &.btn-outline-danger {
-        background-color: #ffffff;
-        border-color: #fecaca;
+        background-color: var(--card);
+        border-color: color-mix(in oklch, $danger-color 30%, transparent);
         color: $danger-color;
 
         &:hover {
@@ -335,9 +351,10 @@ $danger-bg: #fef2f2;
    Card-to-Table Roster Layout (Mobile First -> Desktop Grid)
    ========================================================================== */
 .table-card {
-  background: #ffffff;
+  background: var(--card);
+  color: var(--card-foreground);
   border: 1px solid $border-color;
-  border-radius: 12px;
+  border-radius: var(--radius);
   overflow: hidden;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
 }
@@ -353,7 +370,7 @@ $danger-bg: #fef2f2;
       display: grid;
       grid-template-columns: 100px 1fr 120px 180px;
       padding: 12px 16px;
-      background: #f8fafc;
+      background: var(--muted);
       font-size: 12px;
       font-weight: 600;
       color: $text-secondary;
@@ -372,13 +389,18 @@ $danger-bg: #fef2f2;
       gap: 12px;
       padding: 16px;
       border-bottom: 1px solid $border-color;
+      transition: background-color 0.15s ease;
 
       &:last-child {
         border-bottom: none;
       }
 
+      &:hover {
+        background-color: var(--accent);
+      }
+
       &.is-absent {
-        background-color: #fffafb;
+        background-color: color-mix(in oklch, var(--destructive) 5%, var(--card));
       }
 
       /* Desktop: Table Row Layout */
@@ -420,8 +442,8 @@ $danger-bg: #fef2f2;
             width: 32px;
             height: 32px;
             border-radius: 50%;
-            background-color: #e0e7ff;
-            color: $brand-color;
+            background-color: color-mix(in oklch, var(--primary) 15%, transparent);
+            color: var(--primary);
             font-weight: 700;
             font-size: 13px;
             display: grid;
@@ -444,7 +466,7 @@ $danger-bg: #fef2f2;
         .badge {
           display: inline-block;
           padding: 4px 10px;
-          border-radius: 20px;
+          border-radius: var(--radius);
           font-size: 11px;
           font-weight: 700;
 
@@ -470,9 +492,9 @@ $danger-bg: #fef2f2;
         .btn-group {
           display: flex;
           width: 100%;
-          background-color: #f1f5f9;
+          background-color: var(--muted);
           padding: 3px;
-          border-radius: 8px;
+          border-radius: var(--radius);
           gap: 2px;
           box-sizing: border-box;
 
@@ -481,21 +503,22 @@ $danger-bg: #fef2f2;
             border: none;
             background: none;
             padding: 8px 14px;
+            min-height: 36px;
             font-size: 12px;
             font-weight: 600;
             color: $text-secondary;
-            border-radius: 6px;
+            border-radius: var(--radius);
             cursor: pointer;
-            transition: all 0.15s ease;
+            transition: background-color 0.15s ease, color 0.15s ease;
 
             &.btn-present.active {
               background-color: $success-color;
-              color: #ffffff;
+              color: var(--primary-foreground);
             }
 
             &.btn-absent.active {
               background-color: $danger-color;
-              color: #ffffff;
+              color: var(--destructive-foreground);
             }
           }
         }
@@ -514,22 +537,30 @@ $danger-bg: #fef2f2;
 
   .submit-btn {
     width: 100%;
+    min-height: 48px;
     padding: 12px 28px;
-    background-color: $brand-color;
-    color: #ffffff;
+    background-color: var(--primary);
+    color: var(--primary-foreground);
     border: none;
-    border-radius: 8px;
+    border-radius: var(--radius);
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
-    transition: opacity 0.2s ease;
+    transition: background-color 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 
     @media (min-width: 640px) {
       width: auto;
     }
 
     &:hover:not(:disabled) {
-      opacity: 0.9;
+      background-color: color-mix(in oklch, var(--primary) 88%, var(--primary-foreground));
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+    }
+
+    &:active {
+      transform: scale(0.98);
     }
 
     &:disabled {
@@ -537,4 +568,16 @@ $danger-bg: #fef2f2;
       cursor: not-allowed;
     }
   }
+}
+
+.roster-row.is-present {
+  background-color: var(--success-bg, #f0fdf4);
+  border-left: 4px solid var(--success-color, #16a34a);
+}
+
+/* Badge Exception: Direct green highlight for present status */
+.badge.badge-present {
+  background-color: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
 }

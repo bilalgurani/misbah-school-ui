@@ -1,16 +1,16 @@
-/* Color & Sizing Variables */
+/* Color & Sizing Variables mapped to CSS Custom Properties */
 $sidebar-width: 250px;
-$bg-app: #f8fafc;
-$bg-sidebar: #ffffff;
-$border-color: #e2e8f0;
+$bg-app: var(--background);
+$bg-sidebar: var(--sidebar);
+$border-color: var(--border);
 
-/* Modern Light Palette Accents */
-$brand-color: #1976d2;
-$bg-hover: #f1f5f9;
-$bg-active: #e0e7ff;
-$text-primary: #0f172a;
-$text-secondary: #64748b;
-$text-active: #1d4ed8;
+/* Palette Accents */
+$brand-color: var(--primary);
+$bg-hover: var(--accent);
+$bg-active: var(--secondary);
+$text-primary: var(--foreground);
+$text-secondary: var(--sidebar-foreground);
+$text-active: var(--foreground);
 
 /* Base Mobile Layout (< 768px) */
 .shell {
@@ -18,13 +18,15 @@ $text-active: #1d4ed8;
   min-height: 100vh;
   min-height: 100dvh;
   background-color: $bg-app;
+  color: $text-primary;
   position: relative;
 }
 
 /* Mobile Sidebar Drawer Off-Canvas State */
 .sidenav {
   background-color: $bg-sidebar;
-  border-right: 1px solid $border-color;
+  color: var(--sidebar-foreground);
+  border-right: 1px solid var(--sidebar-border);
   position: fixed;
   top: 0;
   left: 0;
@@ -48,12 +50,12 @@ $text-active: #1d4ed8;
 .sidebar-backdrop {
   position: fixed;
   inset: 0;
-  background-color: rgba(15, 23, 42, 0.5);
+  background-color: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(2px);
   z-index: 999;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
 
   &.active {
     opacity: 1;
@@ -78,18 +80,18 @@ $text-active: #1d4ed8;
     position: relative;
 
     .brand-logo {
-      width: 36px;
-      height: 36px;
-      border-radius: 8px;
-      background-color: $brand-color;
-      color: #ffffff;
-      display: grid;
-      place-items: center;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       flex-shrink: 0;
 
-      svg {
-        width: 22px;
-        height: 22px;
+      .brand-logo-img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        border-radius: 50%;
       }
     }
 
@@ -102,14 +104,14 @@ $text-active: #1d4ed8;
       .brand-name {
         font-size: 15px;
         font-weight: 700;
-        color: $text-primary;
+        color: var(--sidebar-foreground);
         letter-spacing: -0.01em;
       }
 
       .brand-tag {
         font-size: 11px;
         font-weight: 500;
-        color: $text-secondary;
+        color: var(--sidebar-foreground);
         margin-top: 2px;
       }
     }
@@ -117,12 +119,19 @@ $text-active: #1d4ed8;
     .close-drawer-btn {
       background: none;
       border: none;
-      color: $text-secondary;
+      color: var(--sidebar-foreground);
       cursor: pointer;
       padding: 4px;
       display: flex;
       align-items: center;
       justify-content: center;
+      border-radius: var(--radius);
+      transition: background-color 0.15s ease, color 0.15s ease;
+
+      &:hover {
+        background-color: var(--sidebar-accent-foreground);
+        color: var(--sidebar-foreground);
+      }
 
       svg {
         width: 22px;
@@ -136,6 +145,7 @@ $text-active: #1d4ed8;
   display: flex;
   flex-direction: column;
   gap: 4px;
+  background-color: transparent;
 
   .nav-link {
     display: flex;
@@ -143,38 +153,32 @@ $text-active: #1d4ed8;
     gap: 12px;
     min-height: 44px; /* Touch target optimized */
     padding: 10px 14px;
-    border-radius: 8px;
+    border-radius: var(--radius);
     text-decoration: none;
     font-size: 14px;
     font-weight: 500;
-    color: $text-secondary;
-    transition: all 0.2s ease-in-out;
+    color: var(--sidebar-foreground);
+    background-color: transparent;
+    transition: background-color 0.15s cubic-bezier(0.4, 0, 0.2, 1), 
+                color 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 
     .nav-icon {
       width: 20px;
       height: 20px;
-      fill: $text-secondary;
+      fill: currentColor;
       flex-shrink: 0;
-      transition: fill 0.2s ease-in-out;
+      transition: fill 0.15s ease;
     }
 
     &:hover {
-      background-color: $bg-hover;
-      color: $text-primary;
-
-      .nav-icon {
-        fill: $text-primary;
-      }
+      background-color: var(--sidebar-accent-foreground);
+      color: var(--sidebar-accent);
     }
 
     &.active-link {
-      background-color: $bg-active;
-      color: $text-active;
+      background-color: var(--sidebar-primary);
+      color: var(--sidebar-primary-foreground);
       font-weight: 600;
-
-      .nav-icon {
-        fill: $text-active;
-      }
     }
   }
 }
@@ -182,7 +186,7 @@ $text-active: #1d4ed8;
 .nav-section-title {
   font-size: 0.75rem;
   font-weight: 700;
-  color: #9ca3af;
+  color: var(--sidebar-foreground);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin: 1.25rem 0 0.35rem 0.75rem;
@@ -201,7 +205,8 @@ $text-active: #1d4ed8;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: #ffffff;
+  background-color: var(--card);
+  color: var(--card-foreground);
   border-bottom: 1px solid $border-color;
   position: sticky;
   top: 0;
@@ -210,21 +215,24 @@ $text-active: #1d4ed8;
   .header-left {
     display: flex;
     align-items: center;
+    flex: 1; /* Allows the center space to expand */
     gap: 12px;
 
     .hamburger-btn {
       background: none;
       border: none;
-      color: $text-primary;
+      color: var(--foreground);
       cursor: pointer;
       padding: 6px;
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 6px;
+      border-radius: var(--radius);
+      flex-shrink: 0;
+      transition: background-color 0.15s ease;
 
       &:hover {
-        background-color: $bg-hover;
+        background-color: var(--accent);
       }
 
       svg {
@@ -233,15 +241,18 @@ $text-active: #1d4ed8;
       }
     }
 
-    .page-title h3 {
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: $text-primary;
-      margin: 0;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 200px;
+    .page-title {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      .header-banner-img {
+        max-height: 80px;
+        width: auto;
+        object-fit: contain;
+        display: block;
+      }
     }
   }
 }
@@ -254,6 +265,7 @@ $text-active: #1d4ed8;
 /* User Menu Dropdown Mobile Optimization */
 .user-menu-container {
   position: relative;
+  flex-shrink: 0;
 
   .avatar-btn {
     background: none;
@@ -267,7 +279,7 @@ $text-active: #1d4ed8;
       height: 36px;
       border-radius: 50%;
       object-fit: cover;
-      border: 2px solid #e0e7ff;
+      border: 2px solid var(--border);
     }
   }
 }
@@ -278,10 +290,11 @@ $text-active: #1d4ed8;
   right: 0;
   top: calc(100% + 8px);
   width: 240px;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--popover);
+  color: var(--popover-foreground);
+  border: 1px solid var(--border);
   border-radius: 12px;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.15), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
   z-index: 1100;
 
   &.show {
@@ -296,25 +309,25 @@ $text-active: #1d4ed8;
     .user-name {
       font-size: 14px;
       font-weight: 600;
-      color: #0f172a;
+      color: var(--popover-foreground);
     }
 
     .user-role {
       font-size: 12px;
-      color: #4f46e5;
+      color: var(--primary);
       font-weight: 500;
     }
 
     .user-email {
       font-size: 11px;
-      color: #64748b;
+      color: var(--sidebar-foreground);
       margin-top: 2px;
     }
   }
 
   .dropdown-divider {
     height: 1px;
-    background-color: #e2e8f0;
+    background-color: var(--border);
   }
 
   .dropdown-list {
@@ -328,18 +341,20 @@ $text-active: #1d4ed8;
       gap: 10px;
       padding: 10px 12px;
       font-size: 13px;
-      color: #334155;
+      color: var(--sidebar-foreground);
       text-decoration: none;
-      border-radius: 6px;
+      border-radius: var(--radius);
+      transition: background-color 0.15s ease, color 0.15s ease;
 
       svg {
         width: 18px;
         height: 18px;
-        fill: #64748b;
+        fill: currentColor;
       }
 
       &:hover {
-        background-color: #f1f5f9;
+        background-color: var(--accent);
+        color: var(--accent-foreground);
       }
     }
   }
@@ -355,20 +370,21 @@ $text-active: #1d4ed8;
       padding: 10px 12px;
       font-size: 13px;
       font-weight: 500;
-      color: #ef4444;
+      color: var(--destructive);
       background: none;
       border: none;
-      border-radius: 6px;
+      border-radius: var(--radius);
       cursor: pointer;
+      transition: background-color 0.15s ease;
 
       svg {
         width: 18px;
         height: 18px;
-        fill: #ef4444;
+        fill: currentColor;
       }
 
       &:hover {
-        background-color: #fef2f2;
+        background-color: color-mix(in oklch, var(--destructive) 12%, transparent);
       }
     }
   }
@@ -398,7 +414,7 @@ $text-active: #1d4ed8;
   }
 
   .top-header {
-    height: 64px;
+    height: 84px;
     padding: 0 32px;
 
     .header-left {
@@ -406,9 +422,8 @@ $text-active: #1d4ed8;
         display: none; /* Hide hamburger menu on desktop */
       }
 
-      .page-title h3 {
-        font-size: 1.1rem;
-        max-width: none;
+      .page-title .header-banner-img {
+        max-height: 62px;
       }
     }
   }

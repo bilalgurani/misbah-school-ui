@@ -1,13 +1,13 @@
-/* Variables */
-$primary-color: #4f46e5;
-$primary-hover: #4338ca;
-$text-dark: #111827;
-$text-muted: #4b5563;
-$text-light: #6b7280;
-$border-color: #d1d5db;
-$divider-color: #e5e7eb;
-$danger-color: #ef4444;
-$bg-light: #f9fafb;
+/* Variables mapped to CSS Custom Properties */
+$primary-color: var(--primary);
+$primary-hover: var(--primary-foreground);
+$text-dark: var(--foreground);
+$text-muted: var(--muted-foreground);
+$text-light: var(--muted-foreground);
+$border-color: var(--border);
+$divider-color: var(--border);
+$danger-color: var(--destructive);
+$bg-light: var(--muted);
 
 .form-container {
   width: 100%;
@@ -15,6 +15,7 @@ $bg-light: #f9fafb;
   margin: 0 auto;
   padding: 1rem;
   box-sizing: border-box;
+  color: $text-dark;
 
   @media (min-width: 640px) {
     padding: 1.5rem;
@@ -63,13 +64,15 @@ $bg-light: #f9fafb;
 
 /* Form Card */
 .card {
-  background: white;
+  background: var(--card);
+  color: var(--card-foreground);
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   padding: 1.25rem;
+  border: 1px solid $border-color;
 
   @media (min-width: 640px) {
-    border-radius: 8px;
+    border-radius: var(--radius);
     padding: 2rem;
   }
 }
@@ -77,8 +80,8 @@ $bg-light: #f9fafb;
 /* Section Titles & Dividers */
 .section-title {
   font-size: 1rem;
-  color: #374151;
-  border-left: 4px solid $primary-color;
+  color: $text-muted;
+  border-left: 4px solid var(--primary);
   padding-left: 0.75rem;
   margin-top: 0;
   margin-bottom: 1.25rem;
@@ -142,21 +145,22 @@ $bg-light: #f9fafb;
     border-radius: 8px;
     font-size: 1rem; /* Prevents auto-zoom on iOS safari */
     font-family: inherit;
-    background-color: white;
+    color: $text-dark;
+    background-color: var(--background);
     box-sizing: border-box;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    transition: border-color 0.15s cubic-bezier(0.4, 0, 0.2, 1), 
+                box-shadow 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 
     @media (min-width: 640px) {
-      min-height: auto;
-      border-radius: 6px;
+      border-radius: var(--radius);
       font-size: 0.95rem;
       padding: 0.6rem;
     }
 
     &:focus {
       outline: none;
-      border-color: $primary-color;
-      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+      border-color: var(--ring);
+      box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 20%, transparent);
     }
   }
 
@@ -197,37 +201,44 @@ $bg-light: #f9fafb;
     text-decoration: none;
     font-size: 0.95rem;
     box-sizing: border-box;
-    transition: background-color 0.15s ease, opacity 0.15s ease;
+    transition: background-color 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &:active {
+      transform: scale(0.98);
+    }
 
     @media (min-width: 640px) {
       width: auto;
-      min-height: auto;
-      border-radius: 6px;
+      border-radius: var(--radius);
       font-weight: 500;
     }
   }
 
   .btn-secondary {
-    background: white;
+    background: var(--secondary);
     border: 1px solid $border-color;
-    color: #374151;
+    color: var(--secondary-foreground);
 
     &:hover {
-      background: $bg-light;
+      background: var(--accent);
+      color: var(--accent-foreground);
     }
   }
 
   .btn-primary { 
-    background: $primary-color;
+    background: var(--primary);
     border: none;
-    color: white;
+    color: var(--primary-foreground);
 
     &:hover:not(:disabled) {
-      background: $primary-hover;
+      background-color: color-mix(in oklch, var(--primary) 88%, var(--primary-foreground));
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
     }
 
     &:disabled {
-      opacity: 0.7;
+      opacity: 0.65;
       cursor: not-allowed;
     }
   }

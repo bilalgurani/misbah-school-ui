@@ -1,17 +1,18 @@
-/* Color Tokens */
-$primary: #4f46e5;
-$primary-hover: #4338ca;
-$text-main: #111827;
-$text-sub: #374151;
-$text-light: #6b7280;
-$border-color: #d1d5db;
-$divider-color: #e5e7eb;
-$error-color: #ef4444;
+/* Color Tokens mapped to CSS Custom Properties */
+$primary: var(--primary);
+$primary-hover: var(--primary-foreground);
+$text-main: var(--foreground);
+$text-sub: var(--muted-foreground);
+$text-light: var(--muted-foreground);
+$border-color: var(--border);
+$divider-color: var(--border);
+$error-color: var(--destructive);
 
 .form-container {
   padding: clamp(1rem, 3vw, 2rem);
   max-width: 900px;
   margin: 0 auto;
+  color: $text-main;
 }
 
 .page-header {
@@ -42,8 +43,9 @@ $error-color: #ef4444;
 }
 
 .card {
-  background: #ffffff;
-  border-radius: 12px;
+  background: var(--card);
+  color: var(--card-foreground);
+  border-radius: var(--radius);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
   padding: clamp(1.25rem, 3vw, 2rem);
   border: 1px solid $divider-color;
@@ -52,7 +54,7 @@ $error-color: #ef4444;
 .section-title {
   font-size: 1.05rem;
   color: $text-sub;
-  border-left: 4px solid $primary;
+  border-left: 4px solid var(--primary);
   padding-left: 0.75rem;
   margin-top: 0;
   margin-bottom: 1.25rem;
@@ -89,7 +91,7 @@ $error-color: #ef4444;
   label {
     font-size: 0.875rem;
     font-weight: 500;
-    color: #4b5563;
+    color: var(--muted-foreground);
   }
 
   .required {
@@ -101,18 +103,19 @@ $error-color: #ef4444;
     min-height: 44px; /* Accessible touch target height */
     padding: 0.5rem 0.875rem;
     border: 1px solid $border-color;
-    border-radius: 6px;
+    border-radius: var(--radius);
     font-size: 0.9375rem;
     font-family: inherit;
     color: $text-main;
-    background-color: #ffffff;
+    background-color: var(--background);
     box-sizing: border-box;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    transition: border-color 0.15s cubic-bezier(0.4, 0, 0.2, 1), 
+                box-shadow 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 
     &:focus {
       outline: none;
-      border-color: $primary;
-      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+      border-color: var(--ring);
+      box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 20%, transparent);
     }
   }
 
@@ -121,7 +124,7 @@ $error-color: #ef4444;
       border-color: $error-color;
 
       &:focus {
-        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+        box-shadow: 0 0 0 3px color-mix(in oklch, var(--destructive) 20%, transparent);
       }
     }
   }
@@ -154,12 +157,14 @@ $error-color: #ef4444;
     justify-content: center;
     min-height: 44px;
     padding: 0.625rem 1.5rem;
-    border-radius: 6px;
+    border-radius: var(--radius);
     font-weight: 600;
     cursor: pointer;
     text-decoration: none;
     font-size: 0.9375rem;
-    transition: background-color 0.15s ease, transform 0.1s ease;
+    transition: background-color 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 
     &:active {
       transform: scale(0.98);
@@ -167,22 +172,24 @@ $error-color: #ef4444;
   }
 
   .btn-secondary {
-    background: #ffffff;
+    background: var(--secondary);
     border: 1px solid $border-color;
-    color: $text-sub;
+    color: var(--secondary-foreground);
 
     &:hover {
-      background: #f9fafb;
+      background: var(--accent);
+      color: var(--accent-foreground);
     }
   }
 
   .btn-primary {
-    background: $primary;
+    background: var(--primary);
     border: none;
-    color: #ffffff;
+    color: var(--primary-foreground);
 
     &:hover:not(:disabled) {
-      background: $primary-hover;
+      background-color: color-mix(in oklch, var(--primary) 88%, var(--primary-foreground));
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
     }
 
     &:disabled {
@@ -194,19 +201,20 @@ $error-color: #ef4444;
 
 .form-group input[type="date"] {
   width: 100%;
-  min-height: 42px; /* Touch-friendly height without bloated vertical padding */
+  min-height: 44px; /* Unified accessibility target */
   padding: 0.5rem 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 0.9375rem; /* Compact text size */
+  border: 1px solid $border-color;
+  border-radius: var(--radius);
+  font-size: 0.9375rem;
   font-family: inherit;
-  color: #111827;
-  background-color: #ffffff;
+  color: $text-main;
+  background-color: var(--background);
   appearance: none;
   -webkit-appearance: none;
-  box-sizing: border-border-box;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 
-  /* Adjust internal WebKit calendar icon sizing & alignment */
+  /* Internal WebKit calendar icon styling with dark mode adaptation */
   &::-webkit-calendar-picker-indicator {
     cursor: pointer;
     width: 1.1rem;
@@ -214,6 +222,7 @@ $error-color: #ef4444;
     opacity: 0.6;
     padding: 0;
     margin: 0;
+    filter: var(--calendar-icon-filter, none); /* Dynamic filter token for dark mode icon visibility */
     transition: opacity 0.15s ease;
 
     &:hover {
@@ -229,7 +238,7 @@ $error-color: #ef4444;
 
   &:focus {
     outline: none;
-    border-color: #4f46e5;
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+    border-color: var(--ring);
+    box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 20%, transparent);
   }
 }

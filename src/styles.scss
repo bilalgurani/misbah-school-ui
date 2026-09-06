@@ -1,3 +1,5 @@
+@use 'styles/colors' as *;
+
 @font-face {
   font-family: 'Roboto';
   src: url('assets/fonts/Roboto/Roboto-VariableFont_wdth\,wght.ttf') format('truetype-variations');
@@ -45,6 +47,8 @@ select {
   font: inherit;
 }
 
+
+
 body {
   font-family: 'Roboto', sans-serif;
   min-height: 100vh;
@@ -53,7 +57,7 @@ body {
 
 .control {
   padding: 8px 12px;
-  border: 1px solid #c4c4c4;
+  border: 1px solid var(--border);
   border-radius: 6px;
   font-size: 14px;
   font-family: inherit;
@@ -67,15 +71,17 @@ body {
   font-size: 14px;
   font-family: inherit;
   cursor: pointer;
-  background: #3949ab;
-  color: #fff;
+  background: var(--primary);
+  color: var(--primary-foreground);
 }
+
 .btn:hover {
   opacity: 0.9;
 }
+
 .btn-primary {
-  background: #3949ab;
-  color: #fff;
+  background: var(--primary);
+  color: var(--primary-foreground);
 }
 .btn-success {
   background: #2e7d32;
@@ -255,3 +261,10 @@ body {
   from { transform: scale(0.95); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
 }
+
+.svg-icon {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      transition: fill 0.15s ease;
+    }

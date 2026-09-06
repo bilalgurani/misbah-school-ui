@@ -4,7 +4,7 @@
       <h1 class="title">School Overview</h1>
       <p class="subtitle">Real-time stats and metrics for Misbah School</p>
     </div>
-    <button class="btn-refresh" (click)="fetchDashboardStats()" [disabled]="isLoading()">
+    <button class="btn btn-refresh" (click)="fetchDashboardStats()" [disabled]="isLoading()">
       <span [class.spin]="isLoading()">&#x21bb;</span>
       <span>Refresh</span>
     </button>
