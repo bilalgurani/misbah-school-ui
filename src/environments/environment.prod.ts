@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://api.yourdomain.com/api' // Or your server's IP / domain
+  apiUrl: 'https://ms-school.up.railway.app/api' // Or your server's IP / domain
 };

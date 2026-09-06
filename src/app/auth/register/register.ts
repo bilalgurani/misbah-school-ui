@@ -3,6 +3,7 @@ import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, Validatio
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../auth.service';
 import { ToastService } from '../../shared/services/toast.service';
+import { environment } from '../../../environments/environment';
 
 export interface UnlinkedTeacher {
   id: number;
@@ -22,6 +23,8 @@ export class Register implements OnInit {
   private http = inject(HttpClient);
   private authService = inject(AuthService);
   private toast = inject(ToastService);
+
+  private apiUrl = `${environment.apiUrl}`;
 
   isSubmitting = signal(false);
   unlinkedTeachers = signal<UnlinkedTeacher[]>([]);
@@ -51,7 +54,7 @@ export class Register implements OnInit {
 
   loadUnlinkedTeachers(): void {
     // Replace API URL with your actual endpoint for unlinked teachers
-    this.http.get<UnlinkedTeacher[]>('http://localhost:8080/api/teachers/unlinked').subscribe({
+    this.http.get<UnlinkedTeacher[]>(`${this.apiUrl}/teachers/unlinked`).subscribe({
       next: (teachers) => this.unlinkedTeachers.set(teachers),
       error: () => this.toast.show('Failed to load teachers list', 'error')
     });

@@ -10,7 +10,6 @@ import { Dashboard } from './dashboard/dashboard';
 import { FinancialLedger } from './financial/financial-ledger/financial-ledger';
 import { Login } from './auth/login/login';
 import { ChangePassword } from './auth/change-password/change-password';
-import { AdminDashboard } from './admin-dashboard/admin-dashboard';
 import { AuthGuards } from './auth/auth.guard';
 import { Shell } from './shell/shell';
 import { Register } from './auth/register/register';
@@ -31,7 +30,7 @@ export const routes: Routes = [
       {path: 'register', component: Register, canActivate: [AuthGuards.roleGuard('ADMIN')]},
       { path: 'change-password', component: ChangePassword },
       { path: 'dashboard', component: Dashboard },
-      { path: 'admin', component: AdminDashboard, canActivate: [AuthGuards.roleGuard('ADMIN')] },
+      { path: 'admin', component: Dashboard, canActivate: [AuthGuards.roleGuard('ADMIN')] },
 
       { path: 'students', component: StudentDirectory },
       { path: 'student-attendance', component: StudentAttendance },
