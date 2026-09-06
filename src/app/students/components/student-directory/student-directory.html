@@ -1,16 +1,18 @@
 <div class="directory-container">
   <div class="page-header">
     <h2>Student Directory</h2>
-    <a routerLink="/students/add" class="btn-primary">+ Add Student</a>
+    @if (authService.isAdmin()) {
+      <a routerLink="/students/add" class="btn-primary">+ Add Student</a>
+    }
   </div>
 
   <div class="card">
     <div class="toolbar">
       <div class="search-box">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
           <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
         </svg>
-        <input type="text" [(ngModel)]="searchQuery" placeholder="Search by name or roll number...">
+        <input type="text" [(ngModel)]="searchQuery" placeholder="Search by name or roll number..." aria-label="Search students">
       </div>
     </div>
 
@@ -35,15 +37,19 @@
           <tbody>
             @for (student of filteredStudents(); track student.id) {
               <tr>
-                <td><span class="badge">{{ student.rollNo }}</span></td>
-                <td class="fw-medium">{{ student.name }}</td>
-                <td>{{ student.gender === 'M' ? 'Male' : (student.gender === 'F' ? 'Female' : 'Other') }}</td>
-                <td>{{ student.classSectionId }}</td>
-                <td>{{ student.mobileNo }}</td>
-                <td class="actions">
-                  <a [routerLink]="['/students/edit', student.id]" class="icon-btn edit-btn" title="Edit" style="text-decoration: none; display: inline-block;">✎</a>
-                  <a (click)="openViewModal(student)" class="icon-btn view-btn" title="View">👁</a>
-                  <a (click)="deleteStudent(student.id)" class="icon-btn delete-btn" title="Delete">🗑</a>
+                <td data-label="Roll No"><span class="badge">{{ student.rollNo }}</span></td>
+                <td data-label="Student Name" class="fw-medium">{{ student.name }}</td>
+                <td data-label="Gender">{{ student.gender === 'M' ? 'Male' : (student.gender === 'F' ? 'Female' : 'Other') }}</td>
+                <td data-label="Class & Section">{{ student.classSectionId }}</td>
+                <td data-label="Contact">{{ student.mobileNo }}</td>
+                <td data-label="Actions" class="actions">
+                  @if (authService.isAdmin()) {
+                    <a [routerLink]="['/students/edit', student.id]" class="icon-btn edit-btn" title="Edit" aria-label="Edit student">✎</a>
+                  }
+                  <button type="button" (click)="openViewModal(student)" class="icon-btn view-btn" title="View" aria-label="View student details">👁</button>
+                  @if (authService.isAdmin()) {
+                    <button type="button" (click)="deleteStudent(student.id)" class="icon-btn delete-btn" title="Delete" aria-label="Delete student">🗑</button>
+                  }
                 </td>
               </tr>
             } @empty {
@@ -69,7 +75,7 @@
             <span class="badge" [class.badge-active]="t.enrollmentStatus === 'ACTIVE'">{{ t.enrollmentStatus }}</span>
           </div>
         </div>
-        <button class="close-btn" (click)="closeViewModal()" type="button">&times;</button>
+        <button class="close-btn" (click)="closeViewModal()" type="button" aria-label="Close modal">&times;</button>
       </div>
 
       <div class="modal-body">
@@ -103,7 +109,7 @@
             <span class="value">{{ t.mobileNo || 'Not Provided' }}</span>
           </div>
           <div class="info-item">
-            <span class="label">Aadhar Number</span>
+            <span class="label">Identity Number</span>
             <span class="value">{{ t.aadharNo || 'Not Provided' }}</span>
           </div>
           <div class="info-item">
@@ -130,10 +136,12 @@
           </div>
         </div>
       </div>
-
-      <div class="modal-footer">
-        <a [routerLink]="['/students/edit', t.id]" class="btn-primary" (click)="closeViewModal()">Edit Profile</a>
-      </div>
+      
+      @if (authService.isAdmin()) {
+        <div class="modal-footer">
+          <a [routerLink]="['/students/edit', t.id]" class="btn-primary" (click)="closeViewModal()">Edit Profile</a>
+        </div>
+      }
     </div>
   </div>
 }

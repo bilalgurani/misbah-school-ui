@@ -134,30 +134,36 @@ export class StudentAttendance implements OnInit {
   }
 
   submitAttendance() {
-    const sectionId = this.selectedSectionId();
-    const date = this.selectedDate();
+  const sectionId = this.selectedSectionId();
+  const date = this.selectedDate();
 
-    if (!sectionId || !date) return;
-
-    const payload: MarkAttendanceRequest = {
-      classSectionId: sectionId,
-      date: date,
-      entries: this.students().map(s => ({
-        studentId: s.id,
-        status: s.status
-      }))
-    };
-
-    this.isSubmitting.set(true);
-    this.api.saveAttendance(payload).subscribe({
-      next: () => {
-        this.isSubmitting.set(false);
-        this.toast.show('Attendance submitted successfully!');
-      },
-      error: (err) => {
-        this.isSubmitting.set(false);
-        this.toast.show('Failed to save attendance', err);
-      }
-    });
+  // Prevent submission if there are no students loaded
+  if (this.students().length === 0) {
+    this.toast.show('Cannot submit attendance. No students found in this section.');
+    return;
   }
+
+  if (!sectionId || !date) return;
+
+  const payload: MarkAttendanceRequest = {
+    classSectionId: sectionId,
+    date: date,
+    entries: this.students().map(s => ({
+      studentId: s.id,
+      status: s.status
+    }))
+  };
+
+  this.isSubmitting.set(true);
+  this.api.saveAttendance(payload).subscribe({
+    next: () => {
+      this.isSubmitting.set(false);
+      this.toast.show('Attendance submitted successfully!');
+    },
+    error: (err) => {
+      this.isSubmitting.set(false);
+      this.toast.show('Failed to save attendance', err);
+    }
+  });
+}
 }

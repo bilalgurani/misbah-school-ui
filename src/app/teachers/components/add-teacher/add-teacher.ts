@@ -6,9 +6,10 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TeacherService } from '../../teacher.service';
 import { ToastService } from '../../../shared/services/toast.service';
+import { ToastComponent } from '../../../shared/component/toast.component';
 
 @Component({
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, ToastComponent],
   selector: 'app-add-teacher',
   styleUrl: './add-teacher.scss',
   templateUrl: './add-teacher.html',
@@ -39,7 +40,7 @@ export class AddTeacher implements OnInit {
     this.teacherForm = this.fb.group({
       name: ['', Validators.required],
     email: [''],
-    phoneNo: ['', Validators.required],
+    mobileNo: ['', Validators.required],
     dob: [''],
     address: [''],
     subjectSpecialization: ['', Validators.required],

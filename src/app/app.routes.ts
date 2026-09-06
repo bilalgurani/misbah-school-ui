@@ -12,6 +12,8 @@ import { Login } from './auth/login/login';
 import { ChangePassword } from './auth/change-password/change-password';
 import { AdminDashboard } from './admin-dashboard/admin-dashboard';
 import { AuthGuards } from './auth/auth.guard';
+import { Shell } from './shell/shell';
+import { Register } from './auth/register/register';
 
 export const routes: Routes = [
   // Public Route
@@ -20,34 +22,33 @@ export const routes: Routes = [
     component: Login, 
     canActivate: [AuthGuards.redirectIfAuthenticatedGuard] 
   },
-  
-  // Protected Common Routes
-  { path: 'change-password', component: ChangePassword, canActivate: [AuthGuards.authGuard] },
-  { path: 'dashboard', component: Dashboard, canActivate: [AuthGuards.authGuard] },
 
-  // Admin Workspace
-  { 
-    path: 'admin', 
-    component: AdminDashboard, 
-    canActivate: [AuthGuards.roleGuard('ADMIN')] // FIXED: Replaced redirect guard with roleGuard
+  {
+    path: '',
+    component: Shell,
+    canActivate: [AuthGuards.authGuard],   // guard runs once, on the parent
+    children: [
+      {path: 'register', component: Register, canActivate: [AuthGuards.roleGuard('ADMIN')]},
+      { path: 'change-password', component: ChangePassword },
+      { path: 'dashboard', component: Dashboard },
+      { path: 'admin', component: AdminDashboard, canActivate: [AuthGuards.roleGuard('ADMIN')] },
+
+      { path: 'students', component: StudentDirectory },
+      { path: 'student-attendance', component: StudentAttendance },
+      { path: 'students/add', component: AddStudent, canActivate: [AuthGuards.roleGuard('ADMIN')] },
+      { path: 'students/edit/:id', component: AddStudent, canActivate: [AuthGuards.roleGuard('ADMIN')] },
+
+      { path: 'teachers', component: TeacherDirectory, canActivate: [AuthGuards.roleGuard('ADMIN')] },
+      { path: 'teacher-attendance', component: TeacherAttendance },
+      { path: 'teachers/add', component: AddTeacher, canActivate: [AuthGuards.roleGuard('ADMIN')] },
+      { path: 'teachers/edit/:id', component: AddTeacher, canActivate: [AuthGuards.roleGuard('ADMIN')] },
+
+      { path: 'financials', component: FinancialLedger, canActivate: [AuthGuards.roleGuard('ADMIN')] },
+
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: '**', redirectTo: 'dashboard' }
+    ]
   },
 
-  // --- STUDENTS SECTION ---
-  { path: 'students', component: StudentDirectory, canActivate: [AuthGuards.authGuard] },
-  { path: 'student-attendance', component: StudentAttendance, canActivate: [AuthGuards.authGuard] },
-  { path: 'students/add', component: AddStudent, canActivate: [AuthGuards.roleGuard('ADMIN')] },
-  { path: 'students/edit/:id', component: AddStudent, canActivate: [AuthGuards.roleGuard('ADMIN')] },
-
-  // --- TEACHERS SECTION ---
-  { path: 'teachers', component: TeacherDirectory, canActivate: [AuthGuards.roleGuard('ADMIN')] },
-  { path: 'teacher-attendance', component: TeacherAttendance, canActivate: [AuthGuards.authGuard] },
-  { path: 'teachers/add', component: AddTeacher, canActivate: [AuthGuards.roleGuard('ADMIN')] },
-  { path: 'teachers/edit/:id', component: AddTeacher, canActivate: [AuthGuards.roleGuard('ADMIN')] },
-
-  // -- FINANCE SECTION --
-  { path: 'financials', component: FinancialLedger, canActivate: [AuthGuards.roleGuard('ADMIN')] },
-
-  // Fallbacks
-  { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
-  { path: '**', redirectTo: 'dashboard' }
+  { path: '**', redirectTo: 'login' } 
 ];

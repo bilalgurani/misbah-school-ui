@@ -10,7 +10,6 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
     provideZonelessChangeDetection(),
-    provideHttpClient(withInterceptors([jwtInterceptor])),
     provideHttpClient(withInterceptors([apiBaseInterceptor, jwtInterceptor]))
   ]
 };

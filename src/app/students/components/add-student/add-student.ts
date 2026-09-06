@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { StudentService } from '../../student.service';
-import { ToastComponent } from '../../../shared/component/toast.component';
 import { ToastService } from '../../../shared/services/toast.service';
 
 @Component({
@@ -43,23 +42,69 @@ export class AddStudent {
       fatherName: ['', Validators.required],
       motherName: ['', Validators.required],
       dob: ['', Validators.required],
-      aadharNo: [''],
+      aadharNo: ['', Validators.pattern('^[0-9]{12}$')], // Updated to 12 digits for Aadhaar
       address: [''],
       mobileNo: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
       dateOfAdmission: [''],
       emergencyContactName: [''],
       emergencyContactNo: [''],
       enrollmentStatus: ['ACTIVE', Validators.required],
-      classSectionId: [1, Validators.required],
+      classSectionId: [1],
       bloodGroup: ['']
     });
   }
 
   private loadStudentData(id: string): void {
     this.studentService.getStudentById(id).subscribe({
-      next: (student) => this.studentForm.patchValue(student),
+      next: (student) => {
+        // Remove spaces and non-digit characters from numerical fields upon loading
+        const sanitizedData = {
+          ...student,
+          aadharNo: student.aadharNo ? student.aadharNo.replace(/\s+/g, '') : '',
+          mobileNo: student.mobileNo ? student.mobileNo.replace(/\D/g, '').slice(-10) : '',
+          emergencyContactNo: student.emergencyContactNo ? student.emergencyContactNo.replace(/\D/g, '').slice(-10) : ''
+        };
+
+        this.studentForm.patchValue(sanitizedData);
+        
+        if (this.studentForm.invalid) {
+          this.logInvalidControls();
+        }
+      },
       error: (err) => this.toast.show('Error fetching student data:', err)
     });
+  }
+
+  private logInvalidControls(): void {
+    const invalidControls: string[] = [];
+    const controls = this.studentForm.controls;
+    for (const name in controls) {
+      if (controls[name].invalid) {
+        invalidControls.push(name);
+      }
+    }
+    console.warn('Form is invalid due to the following controls:', invalidControls);
+  }
+
+  /**
+   * Trims whitespace from text inputs and strips spaces from strictly numeric ID fields.
+   */
+  private prepareFormData(): any {
+    const rawValue = { ...this.studentForm.value };
+
+    Object.keys(rawValue).forEach((key) => {
+      if (typeof rawValue[key] === 'string') {
+        // Strip spaces completely for specific numeric/ID fields
+        if (['aadharNo', 'mobileNo', 'emergencyContactNo', 'rollNo', 'satsNo'].includes(key)) {
+          rawValue[key] = rawValue[key].replace(/\s+/g, '');
+        } else {
+          // Standard trim for regular text fields
+          rawValue[key] = rawValue[key].trim();
+        }
+      }
+    });
+
+    return rawValue;
   }
 
   onSubmit(): void {
@@ -69,7 +114,7 @@ export class AddStudent {
     }
 
     this.isSubmitting.set(true);
-    const formData = this.studentForm.value;
+    const formData = this.prepareFormData();
     const id = this.studentId();
 
     if (this.isEditMode() && id) {

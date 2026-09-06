@@ -68,34 +68,40 @@
     </div>
   </div>
 
-  <!-- Roster Data Table -->
+  <!-- Responsive Card-to-Table Roster Container -->
   <div class="table-card">
-    <table class="roster-table">
-      <thead>
-        <tr>
-          <th class="col-roll">Emp ID</th>
-          <th class="col-name">Teacher Name</th>
-          <th class="col-status">Status</th>
-          <th class="col-actions">Toggle Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- NOTE: Looping over filteredTeachers() so the search bar works! -->
+    <div class="roster-table">
+      <!-- Desktop Column Headers -->
+      <div class="roster-header">
+        <div class="col-roll">Emp ID</div>
+        <div class="col-name">Teacher Name</div>
+        <div class="col-status">Status</div>
+        <div class="col-actions">Toggle Status</div>
+      </div>
+
+      <!-- Rows / Mobile Cards -->
+      <div class="roster-body">
         @for (teacher of filteredTeachers(); track teacher.id) {
-          <tr [class.is-absent]="teacher.status === 'ABSENT'">
-            <td class="col-roll">{{ teacher.teacherId }}</td>
-            <td class="col-name">
+          <div class="roster-row" [class.is-absent]="teacher.status === 'ABSENT'">
+            <div class="col-roll">
+              <span class="mobile-label">Emp ID:</span>
+              {{ teacher.teacherId }}
+            </div>
+            
+            <div class="col-name">
               <div class="student-profile">
                 <div class="avatar">{{ teacher.name.charAt(0) }}</div>
                 <span class="name-text">{{ teacher.name }}</span>
               </div>
-            </td>
-            <td class="col-status">
+            </div>
+
+            <div class="col-status">
               <span class="badge" [class.badge-present]="teacher.status === 'PRESENT'" [class.badge-absent]="teacher.status === 'ABSENT'">
                 {{ teacher.status }}
               </span>
-            </td>
-            <td class="col-actions">
+            </div>
+
+            <div class="col-actions">
               <div class="btn-group">
                 <button 
                   class="btn-status btn-present" 
@@ -110,11 +116,11 @@
                   Absent
                 </button>
               </div>
-            </td>
-          </tr>
+            </div>
+          </div>
         }
-      </tbody>
-    </table>
+      </div>
+    </div>
   </div>
 
   <!-- Bottom Submit Footer -->

@@ -2,7 +2,6 @@ $brand-color: #1976d2;
 $border-color: #e2e8f0;
 $text-primary: #0f172a;
 $text-secondary: #64748b;
-
 $success-color: #16a34a;
 $success-bg: #f0fdf4;
 $danger-color: #dc2626;
@@ -11,40 +10,49 @@ $danger-bg: #fef2f2;
 .attendance-container {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-/* Header & Controls */
+/* Header & Inputs */
 .header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 16px;
   background: #ffffff;
-  padding: 20px;
+  padding: 16px;
   border-radius: 12px;
   border: 1px solid $border-color;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+
+  @media (min-width: 768px) {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
 }
 
 .filters {
   display: flex;
-  align-items: center;
-  gap: 16px;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+
+  @media (min-width: 480px) {
+    flex-direction: row;
+  }
 
   .control-wrapper {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    min-width: 190px;
+    gap: 4px;
 
     .control-label {
       font-size: 11px;
       font-weight: 700;
       color: $text-secondary;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
     }
 
     .input-container {
@@ -54,19 +62,18 @@ $danger-bg: #fef2f2;
 
       .control-icon {
         position: absolute;
-        left: 12px;
-        width: 18px;
-        height: 18px;
+        left: 10px;
+        width: 16px;
+        height: 16px;
         fill: $text-secondary;
         pointer-events: none;
-        transition: fill 0.2s ease;
       }
 
       .chevron-icon {
         position: absolute;
-        right: 12px;
-        width: 20px;
-        height: 20px;
+        right: 10px;
+        width: 18px;
+        height: 18px;
         fill: $text-secondary;
         pointer-events: none;
       }
@@ -74,146 +81,156 @@ $danger-bg: #fef2f2;
       .control {
         width: 100%;
         height: 42px;
-        padding: 0 12px 0 38px;
+        padding: 0 32px;
         border: 1px solid $border-color;
-        border-radius: 10px;
+        border-radius: 8px;
         font-size: 14px;
-        font-weight: 600;
-        color: $text-primary;
-        background-color: #f8fafc;
-        outline: none;
-        cursor: pointer;
-        transition: all 0.2s ease-in-out;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
-
-        &:hover {
-          background-color: #ffffff;
-          border-color: #cbd5e1;
-        }
+        background: #f8fafc;
+        box-sizing: border-box;
 
         &:focus {
-          background-color: #ffffff;
           border-color: $brand-color;
-          box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.12);
-
-          ~ .control-icon {
-            fill: $brand-color;
-          }
+          background: #fff;
         }
       }
 
       .custom-select {
         appearance: none;
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        padding-right: 36px;
-      }
-
-      .custom-date {
-        font-family: inherit;
-
-        &::-webkit-calendar-picker-indicator {
-          cursor: pointer;
-          opacity: 0.6;
-          transition: opacity 0.2s ease;
-
-          &:hover {
-            opacity: 1;
-          }
-        }
       }
     }
   }
 }
 
-/* Stats Summary */
+/* Summary Counters */
 .summary {
   display: flex;
-  gap: 12px;
+  gap: 8px;
+  width: 100%;
+
+  @media (min-width: 768px) {
+    width: auto;
+  }
 
   .stat {
+    flex: 1;
     background: #f8fafc;
     border: 1px solid $border-color;
-    padding: 10px 18px;
-    border-radius: 10px;
-    min-width: 100px;
+    padding: 8px;
+    border-radius: 8px;
+    text-align: center;
 
     .label {
-      display: block;
       font-size: 11px;
-      font-weight: 600;
       color: $text-secondary;
     }
 
     strong {
       display: block;
-      font-size: 20px;
+      font-size: 18px;
       color: $text-primary;
-      margin-top: 2px;
     }
 
-    &.present {
-      background: $success-bg;
-      border-color: #bbf7d0;
-      strong { color: $success-color; }
-    }
-
-    &.absent {
-      background: $danger-bg;
-      border-color: #fecaca;
-      strong { color: $danger-color; }
-    }
+    &.present strong { color: $success-color; }
+    &.absent strong { color: $danger-color; }
   }
 }
 
-/* Table Toolbar */
+/* Toolbar, Search & Bulk Actions */
 .table-toolbar {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: 12px;
 
-  .toolbar-title {
-    font-size: 16px;
-    font-weight: 700;
-    color: $text-primary;
+  @media (min-width: 640px) {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .search-box {
+    position: relative;
+    width: 100%;
+
+    @media (min-width: 640px) {
+      max-width: 300px;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 10px;
+      top: 12px;
+      width: 16px;
+      height: 16px;
+      fill: $text-secondary;
+    }
+
+    .search-input {
+      width: 100%;
+      height: 40px;
+      padding: 0 32px 0 36px;
+      border: 1px solid $border-color;
+      border-radius: 8px;
+      box-sizing: border-box;
+    }
+
+    .clear-btn {
+      position: absolute;
+      right: 8px;
+      top: 10px;
+      border: none;
+      background: none;
+      color: $text-secondary;
+    }
   }
 
   .bulk-actions {
     display: flex;
-    gap: 8px;
+    gap: 10px;
+    width: 100%;
+
+    @media (min-width: 640px) {
+      width: auto; /* Fits comfortably on larger screens */
+    }
 
     .btn {
+      flex: 1;
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 6px;
-      padding: 8px 14px;
+      height: 40px;
+      padding: 0 16px;
       border-radius: 8px;
-      font-size: 13px;
       font-weight: 600;
+      font-size: 13px;
+      border: 1px solid $border-color;
+      background: #ffffff;
       cursor: pointer;
-      border: 1px solid transparent;
-      transition: all 0.15s ease;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+
+      @media (min-width: 640px) {
+        flex: initial; /* Allows buttons to take as much comfortable width as needed */
+        padding: 0 20px;
+      }
 
       svg {
         width: 16px;
         height: 16px;
+        flex-shrink: 0;
       }
 
-      &.btn-outline-success {
-        background-color: #ffffff;
-        border-color: #bbf7d0;
-        color: $success-color;
-
+      &.btn-outline-success { 
+        color: $success-color; 
+        border-color: #bbf7d0; 
         &:hover {
           background-color: $success-bg;
         }
       }
 
-      &.btn-outline-danger {
-        background-color: #ffffff;
-        border-color: #fecaca;
-        color: $danger-color;
-
+      &.btn-outline-danger { 
+        color: $danger-color; 
+        border-color: #fecaca; 
         &:hover {
           background-color: $danger-bg;
         }
@@ -222,226 +239,141 @@ $danger-bg: #fef2f2;
   }
 }
 
-/* Table Card Layout */
-.table-card {
+/* Card-to-Table Roster Container */
+.roster-container {
   background: #ffffff;
   border: 1px solid $border-color;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
-}
 
-.roster-table {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: left;
+  .roster-header {
+    display: none;
 
-  th {
-    background: #f8fafc;
-    padding: 12px 16px;
-    font-size: 12px;
-    font-weight: 600;
-    color: $text-secondary;
-    border-bottom: 1px solid $border-color;
-  }
-
-  td {
-    padding: 12px 16px;
-    border-bottom: 1px solid $border-color;
-    font-size: 14px;
-    color: $text-primary;
-    vertical-align: middle;
-  }
-
-  tr:last-child td {
-    border-bottom: none;
-  }
-
-  tr.is-absent {
-    background-color: #fffafb;
-  }
-
-  .col-roll {
-    width: 80px;
-    font-weight: 600;
-    color: $text-secondary;
-  }
-
-  .student-profile {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-
-    .avatar {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background-color: #e0e7ff;
-      color: $brand-color;
-      font-weight: 700;
-      font-size: 13px;
+    @media (min-width: 640px) {
       display: grid;
-      place-items: center;
-    }
-
-    .name-text {
-      font-weight: 600;
-    }
-  }
-
-  /* Status Badges */
-  .badge {
-    display: inline-block;
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-
-    &.badge-present {
-      background-color: $success-bg;
-      color: $success-color;
-    }
-
-    &.badge-absent {
-      background-color: $danger-bg;
-      color: $danger-color;
-    }
-  }
-
-  /* Status Toggle Buttons */
-  .btn-group {
-    display: inline-flex;
-    background-color: #f1f5f9;
-    padding: 3px;
-    border-radius: 8px;
-    gap: 2px;
-
-    .btn-status {
-      border: none;
-      background: none;
-      padding: 6px 14px;
+      grid-template-columns: 80px 1fr 100px 160px;
+      padding: 12px 16px;
+      background: #f8fafc;
       font-size: 12px;
-      font-weight: 600;
+      font-weight: 700;
       color: $text-secondary;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: all 0.15s ease;
-
-      &.btn-present.active {
-        background-color: $success-color;
-        color: #ffffff;
-      }
-
-      &.btn-absent.active {
-        background-color: $danger-color;
-        color: #ffffff;
-      }
+      border-bottom: 1px solid $border-color;
     }
   }
-}
 
-/* Submit Footer */
-.form-footer {
-  display: flex;
-  justify-content: flex-end;
-
-  .submit-btn {
-    padding: 12px 28px;
-    background-color: $brand-color;
-    color: #ffffff;
-    border: none;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: opacity 0.2s ease;
-
-    &:hover {
-      opacity: 0.9;
-    }
-  }
-}
-
-.table-toolbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-
-  .toolbar-title {
-    font-size: 16px;
-    font-weight: 700;
-    color: $text-primary;
-  }
-
-  .search-box {
-    position: relative;
+  .roster-body {
     display: flex;
-    align-items: center;
-    flex: 1;
-    max-width: 320px;
-    .search-icon {
-      position: absolute;
-      left: 12px;
-      width: 18px;
-      height: 18px;
-      fill: $text-secondary;
-      pointer-events: none;
-      transition: fill 0.2s ease;
-    }
+    flex-direction: column;
 
-    .search-input {
-      width: 100%;
-      height: 38px;
-      padding: 0 32px 0 38px;
-      border: 1px solid $border-color;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 500;
-      color: $text-primary;
-      background-color: #ffffff;
-      outline: none;
-      transition: all 0.2s ease;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+    .roster-item {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 12px 16px;
+      border-bottom: 1px solid $border-color;
 
-      &::placeholder {
-        color: #94a3b8;
+      &:last-child { border-bottom: none; }
+      &.is-absent { background-color: #fffafb; }
+
+      @media (min-width: 640px) {
+        display: grid;
+        grid-template-columns: 80px 1fr 100px 160px;
+        align-items: center;
+        gap: 0;
       }
 
-      &:focus {
-        border-color: $brand-color;
-        box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.12);
+      .item-col {
+        display: flex;
+        align-items: center;
+      }
 
-        ~ .search-icon {
-          fill: $brand-color;
+      .col-roll {
+        font-weight: 600;
+        color: $text-secondary;
+        font-size: 13px;
+      }
+
+      .col-name {
+        gap: 10px;
+        font-weight: 600;
+
+        .avatar {
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          background-color: #e0e7ff;
+          color: $brand-color;
+          font-weight: 700;
+          display: grid;
+          place-items: center;
+        }
+      }
+
+      .col-status {
+        .badge {
+          padding: 4px 10px;
+          border-radius: 12px;
+          font-size: 11px;
+          font-weight: 700;
+
+          &.badge-present { background: $success-bg; color: $success-color; }
+          &.badge-absent { background: $danger-bg; color: $danger-color; }
+        }
+      }
+
+      .col-actions {
+        width: 100%;
+
+        @media (min-width: 640px) {
+          width: auto;
+        }
+
+        .btn-group {
+          display: flex;
+          width: 100%;
+          background: #f1f5f9;
+          padding: 3px;
+          border-radius: 8px;
+          box-sizing: border-box;
+
+          .btn-status {
+            flex: 1;
+            border: none;
+            background: none;
+            padding: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            color: $text-secondary;
+            border-radius: 6px;
+            cursor: pointer;
+
+            &.btn-present.active { background: $success-color; color: #fff; }
+            &.btn-absent.active { background: $danger-color; color: #fff; }
+          }
         }
       }
     }
+  }
+}
 
-    .clear-btn {
-      position: absolute;
-      right: 8px;
-      background: none;
-      border: none;
-      padding: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      border-radius: 50%;
-      color: $text-secondary;
+/* Footer Submit */
+.form-footer {
+  .submit-btn {
+    width: 100%;
+    height: 48px;
+    background: $brand-color;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
 
-      &:hover {
-        background-color: #f1f5f9;
-        color: $text-primary;
-      }
-
-      svg {
-        width: 14px;
-        height: 14px;
-      }
+    @media (min-width: 640px) {
+      width: auto;
+      padding: 0 32px;
+      margin-left: auto;
+      display: block;
     }
   }
 }

@@ -13,36 +13,43 @@ import { AuthService } from '../auth.service';
 })
 export class Login {
   private fb = inject(FormBuilder);
-  private auth = inject(AuthService);
+  private authService = inject(AuthService);
   private router = inject(Router);
 
   isLoading = signal(false);
+  errorMessage = signal<string | null>(null);
+  showPassword = signal(false);
 
   loginForm: FormGroup = this.fb.group({
     username: ['', Validators.required],
     password: ['', Validators.required]
   });
 
-  onLogin() {
-    if (this.loginForm.invalid) return;
-    this.isLoading.set(true);
+  togglePasswordVisibility(): void {
+    this.showPassword.update((visible) => !visible);
+  }
 
-    this.auth.login(this.loginForm.value).subscribe({
-      next: (res) => {
+  onLogin(): void {
+    if (this.loginForm.invalid) {
+      this.loginForm.markAllAsTouched();
+      return;
+    }
+
+    this.isLoading.set(true);
+    this.errorMessage.set(null); // Clear previous errors
+
+    this.authService.login(this.loginForm.value as any).subscribe({
+      next: () => {
         this.isLoading.set(false);
-        
-        // Execute navigation and capture failure diagnostics
-        this.router.navigate(['/dashboard']).then((success) => {
-          if (!success) {
-            console.error('Navigation to /dashboard was blocked by a route guard.');
-          }
-        }).catch((err) => {
-          console.error('Navigation error during transition:', err);
-        });
+        this.router.navigate(['/dashboard']);
       },
       error: (err) => {
         this.isLoading.set(false);
-        console.error('Login request failed:', err);
+        if (err.status === 401) {
+          this.errorMessage.set('Invalid username or password.');
+        } else {
+          this.errorMessage.set('An unexpected error occurred. Please try again.');
+        }
       }
     });
   }

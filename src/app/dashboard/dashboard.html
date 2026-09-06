@@ -1,11 +1,12 @@
 <div class="dashboard-container">
   <header class="dashboard-header">
-    <div>
+    <div class="header-text">
       <h1 class="title">School Overview</h1>
       <p class="subtitle">Real-time stats and metrics for Misbah School</p>
     </div>
     <button class="btn-refresh" (click)="fetchDashboardStats()" [disabled]="isLoading()">
-      <span [class.spin]="isLoading()">&#x21bb;</span> Refresh
+      <span [class.spin]="isLoading()">&#x21bb;</span>
+      <span>Refresh</span>
     </button>
   </header>
 
@@ -72,9 +73,6 @@
       </div>
     </div>
   }
-
-  <!-- Monthly Attendance Trends Chart -->
-   <!-- <app-dashboard-charts></app-dashboard-charts> -->
 </div>
 
 <!-- Pending Classes Modal -->
@@ -83,7 +81,7 @@
     <div class="modal-card" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h3>Pending Attendance Breakdown</h3>
-        <button class="close-btn" (click)="closePendingModal()" type="button">&times;</button>
+        <button class="close-btn" (click)="closePendingModal()" type="button" aria-label="Close modal">&times;</button>
       </div>
 
       <div class="modal-body">
@@ -104,10 +102,10 @@
             <tbody>
               @for (item of stats()?.pendingClasses; track item.classSectionId) {
                 <tr>
-                  <td class="fw-medium">{{ item.className }}</td>
-                  <td><span class="badge">{{ item.sectionName }}</span></td>
-                  <td>{{ item.totalStudents }} students</td>
-                  <td>
+                  <td data-label="Class" class="fw-medium">{{ item.className }}</td>
+                  <td data-label="Section"><span class="badge">{{ item.sectionName }}</span></td>
+                  <td data-label="Active Students">{{ item.totalStudents }} students</td>
+                  <td data-label="Action">
                     <a 
                       [routerLink]="['/student-attendance']" 
                       [queryParams]="{ classSectionId: item.classSectionId }"

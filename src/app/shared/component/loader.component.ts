@@ -24,6 +24,12 @@ import { Component, Input } from "@angular/core";
       padding: 2rem;
       width: 100%;
     }
+      .spinner-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      }
     .loader-container.overlay {
       position: absolute;
       top: 0;

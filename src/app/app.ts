@@ -1,11 +1,10 @@
 import { Component, inject, signal } from '@angular/core';
-import { Shell } from './shell/shell';
 import { ToastComponent } from './shared/component/toast.component';
 import { AuthService } from './auth/auth.service';
 import { RouterOutlet } from '@angular/router';
 
 @Component({
-  imports: [Shell, ToastComponent, RouterOutlet],
+  imports: [ToastComponent, RouterOutlet],
   selector: 'app-root',
   styleUrl: './app.scss',
   templateUrl: './app.html',

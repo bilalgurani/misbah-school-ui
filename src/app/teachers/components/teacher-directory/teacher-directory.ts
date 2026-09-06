@@ -9,7 +9,7 @@ interface FullTeacherDto {
   id: string;
   name: string;
   email: string;
-  phoneNo: string;
+  mobileNo: string;
   dob: string;
   dateOfJoining: string;
   address: string;
@@ -63,9 +63,17 @@ export class TeacherDirectory {
     });
   }
 
+
   openViewModal(teacher: FullTeacherDto) {
-    this.selectedTeacher.set(teacher);
-    this.isModalOpen.set(true);
+    this.teacherService.getFullTeacherById(teacher.id).subscribe({
+      next: (fullTeacher) => {
+        this.selectedTeacher.set(fullTeacher);
+        this.isModalOpen.set(true);
+      },
+      error: (err) => {
+        this.toast.show('Failed to load full teacher details', err);
+      }
+    });
   }
 
   closeViewModal() {

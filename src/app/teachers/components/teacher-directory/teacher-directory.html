@@ -37,7 +37,7 @@
                 <td class="fw-medium">{{ teacher.name }}</td>
                 <td>{{ teacher.subject }}</td>
                 <td>{{ teacher.qualification }}</td>
-                <td>{{ teacher.phoneNo }}</td>
+                <td>{{ teacher.mobileNo }}</td>
                 <td class="actions">
                   <a [routerLink]="['/teachers/edit', teacher.id]" class="icon-btn edit-btn" title="Edit">✎</a>
                   <a (click)="openViewModal(teacher)" class="icon-btn view-btn" title="View">👁</a>
@@ -82,7 +82,7 @@
           </div>
           <div class="info-item">
             <span class="label">Phone Number</span>
-            <span class="value">{{ t.phoneNo || 'Not Provided' }}</span>
+            <span class="value">{{ t.mobileNo || 'Not Provided' }}</span>
           </div>
           <div class="info-item">
             <span class="label">Email Address</span>

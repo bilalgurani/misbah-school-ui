@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { StudentService } from '../../student.service';
 import { ToastService } from '../../../shared/services/toast.service';
 import { LoaderComponent } from '../../../shared/component/loader.component';
+import { AuthService } from '../../../auth/auth.service';
 
 interface FullStudentDto {
   id: number;
@@ -34,6 +35,7 @@ interface FullStudentDto {
 export class StudentDirectory {
   private studentService = inject(StudentService);
   private toast = inject(ToastService);
+  public authService = inject(AuthService);
 
   students = signal<any[]>([]);
   isLoading = signal<boolean>(false);
