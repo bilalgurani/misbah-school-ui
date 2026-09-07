@@ -1,6 +1,16 @@
 <div class="auth-wrapper">
+  <!-- Dynamic blurred school background overlay -->
+  <div class="bg-overlay"></div>
+
   <form [formGroup]="loginForm" (ngSubmit)="onLogin()" class="auth-card" novalidate>
-    <h2>Misbah School Portal</h2>
+    <!-- Brand / Header Section -->
+    <div class="brand-header">
+      <div class="school-logo">
+        <img src="/assets/images/sana-misbah-logo.jpeg" alt="Sana Misbah Public School Logo" class="brand-logo-img" />
+      </div>
+      <h2>Misbah School Portal</h2>
+      <p class="subtitle">Sign in to access your dashboard</p>
+    </div>
 
     <!-- Server-Side Auth Error Alert -->
     @if (errorMessage()) {
@@ -16,6 +26,7 @@
     <div class="form-group">
       <label for="username">Username</label>
       <input 
+        #usernameInput
         id="username"
         type="text" 
         formControlName="username" 
@@ -23,6 +34,8 @@
         autocomplete="username"
         autocapitalize="none"
         spellcheck="false"
+        enterkeyhint="next"
+        (keydown.enter)="$event.preventDefault(); passwordInput.focus()"
         [class.is-invalid]="loginForm.get('username')?.invalid && loginForm.get('username')?.touched"
       />
       @if (loginForm.get('username')?.invalid && loginForm.get('username')?.touched) {
@@ -35,11 +48,14 @@
       <label for="password">Password</label>
       <div class="password-input-container">
         <input 
+          #passwordInput
           id="password"
           [type]="showPassword() ? 'text' : 'password'" 
           formControlName="password" 
           class="form-control"
           autocomplete="current-password"
+          enterkeyhint="go"
+          (keydown.enter)="$event.preventDefault(); onLogin()"
           [class.is-invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
         />
         <button 
