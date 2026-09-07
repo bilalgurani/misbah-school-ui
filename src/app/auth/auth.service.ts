@@ -44,6 +44,7 @@ export class AuthService {
   currentEmail = signal<string | null>(localStorage.getItem('email'));
   currentRole = signal<string | null>(localStorage.getItem('role'));
   currentTeacherId = signal<string | null>(localStorage.getItem('teacher_id'));
+  isLoggedIn = signal<boolean>(this.hasValidToken());
 
   // Reactive Computed property for template reactivity (@if (auth.isAuthenticated()))
   isAuthenticated = computed(() => !!this.currentUser() && !!this.getToken());
@@ -69,6 +70,27 @@ export class AuthService {
         this.currentRole.set(normalizedRole);
       })
     );
+  }
+
+  logoutServerAndCleanState() {
+    // 1. Call Backend to Revoke Token / Clear HttpOnly Cookies
+    return this.http.post('/api/auth/logout', {}).pipe(
+      // Even if server call fails (e.g. offline), still proceed to clear local state
+      catchError(() => of(null)),
+      tap(() => {
+        // 2. Clear tokens from Storage
+        localStorage.removeItem('access_token');
+        sessionStorage.clear();
+
+        // 3. Reset Reactive Signals/State
+        this.isLoggedIn.set(false);
+        this.currentUser.set(null);
+      })
+    );
+  }
+
+  private hasValidToken(): boolean {
+    return !!localStorage.getItem('access_token');
   }
 
   fetchProfile(): Observable<UserProfile> {
