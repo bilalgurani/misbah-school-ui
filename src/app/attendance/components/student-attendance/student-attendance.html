@@ -43,63 +43,80 @@
     </div>
   </header>
 
-  <div class="table-toolbar">
-    <div class="search-box">
-      <svg class="search-icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-      <input type="text" class="search-input" placeholder="Search student or roll no..." 
-        [value]="searchQuery()"
-        (input)="searchQuery.set($any($event.target).value)"/>
-      @if (searchQuery()) {
-        <button class="clear-btn" (click)="searchQuery.set('')" type="button">✕</button>
-      }
+  <!-- Hide search box and bulk actions when no students are present -->
+  @if (students().length > 0) {
+    <div class="table-toolbar">
+      <div class="search-box">
+        <svg class="search-icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        <input type="text" class="search-input" placeholder="Search student or roll no..." 
+          [value]="searchQuery()"
+          (input)="searchQuery.set($any($event.target).value)"/>
+        @if (searchQuery()) {
+          <button class="clear-btn" (click)="searchQuery.set('')" type="button">✕</button>
+        }
+      </div>
+      <div class="bulk-actions">
+        <button class="btn btn-outline-success" (click)="markAll('PRESENT')">Mark All Present</button>
+        <button class="btn btn-outline-danger" (click)="markAll('ABSENT')">Mark All Absent</button>
+      </div>
     </div>
-    <div class="bulk-actions">
-      <button class="btn btn-outline-success" (click)="markAll('PRESENT')">Mark All Present</button>
-      <button class="btn btn-outline-danger" (click)="markAll('ABSENT')">Mark All Absent</button>
-    </div>
-  </div>
+  }
 
   <div class="roster-container">
-    <div class="roster-header">
-      <span>Roll No</span>
-      <span>Student Name</span>
-      <span>Status</span>
-      <span>Action</span>
-    </div>
+    @if (isLoading()) {
+      <div class="empty-state">Loading students...</div>
+    } @else if (students().length === 0) {
+      <div class="empty-state">
+        <p>No students found in Class {{ selectedSectionName() }}</p>
+      </div>
+    } @else {
+      <div class="roster-header">
+        <span>Roll No</span>
+        <span>Student Name</span>
+        <span>Status</span>
+        <span>Action</span>
+      </div>
 
-    <div class="roster-body">
-      @for (student of filteredStudents(); track student.id) {
-        <div class="roster-item" [class.is-absent]="student.status === 'ABSENT'">
-          <div class="item-col col-roll">#{{ student.rollNo }}</div>
-          
-          <div class="item-col col-name">
-            <div class="avatar">{{ student.name.charAt(0) }}</div>
-            <span class="name-text">{{ student.name }}</span>
-          </div>
+      <div class="roster-body">
+        @for (student of filteredStudents(); track student.id) {
+          <div class="roster-item" [class.is-absent]="student.status === 'ABSENT'">
+            <div class="item-col col-roll">#{{ student.rollNo }}</div>
+            
+            <div class="item-col col-name">
+              <div class="avatar">{{ student.name.charAt(0) }}</div>
+              <span class="name-text">{{ student.name }}</span>
+            </div>
 
-          <div class="item-col col-status">
-            <span class="badge" [class.badge-present]="student.status === 'PRESENT'" [class.badge-absent]="student.status === 'ABSENT'">
-              {{ student.status }}
-            </span>
-          </div>
+            <div class="item-col col-status">
+              <span class="badge" [class.badge-present]="student.status === 'PRESENT'" [class.badge-absent]="student.status === 'ABSENT'">
+                {{ student.status }}
+              </span>
+            </div>
 
-          <div class="item-col col-actions">
-            <div class="btn-group">
-              <button class="btn-status btn-present" [class.active]="student.status === 'PRESENT'" (click)="setStatus(student.id, 'PRESENT')">
-                Present
-              </button>
-              <button class="btn-status btn-absent" [class.active]="student.status === 'ABSENT'" (click)="setStatus(student.id, 'ABSENT')">
-                Absent
-              </button>
+            <div class="item-col col-actions">
+              <div class="btn-group">
+                <button class="btn-status btn-present" [class.active]="student.status === 'PRESENT'" (click)="setStatus(student.id, 'PRESENT')">
+                  Present
+                </button>
+                <button class="btn-status btn-absent" [class.active]="student.status === 'ABSENT'" (click)="setStatus(student.id, 'ABSENT')">
+                  Absent
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      }
-    </div>
+        } @empty {
+          <div class="empty-state">
+            <p>No students match your search criteria.</p>
+          </div>
+        }
+      </div>
+    }
   </div>
 
+  @if (students().length > 0) {
   <footer class="form-footer">
-    <button [disabled]="students().length === 0 || isSubmitting() || isLoading()" 
-    class="submit-btn" (click)="submitAttendance()">Save & Submit Attendance</button>
+    <button [disabled]="students().length === 0 || isSubmitting() || isLoading() || this.isAttendanceIncomplete()" 
+      class="submit-btn" (click)="submitAttendance()">Save & Submit Attendance</button>
   </footer>
+}
 </div>

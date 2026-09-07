@@ -1,0 +1,47 @@
+<div class="history-timeline">
+  @if (isLoading()) {
+    <p>Loading history...</p>
+  } @else {
+    <!-- Exit Records Section (if any exists) -->
+    @if (exitRecords().length > 0) {
+      <div class="exit-banner">
+        <h4>Exit / Withdrawal Record</h4>
+        @for (exit of exitRecords(); track exit.id) {
+          <div class="exit-card">
+            <div class="exit-header">
+              <span class="badge badge-exit">{{ exit.exitType }}</span>
+              <span class="exit-date">Date: {{ exit.exitDate }}</span>
+            </div>
+            <div class="exit-details">
+              <p><strong>Reason:</strong> {{ exit.reasonCategory }} - {{ exit.reasonNotes || 'N/A' }}</p>
+              @if (exit.destinationSchool) {
+                <p><strong>Destination:</strong> {{ exit.destinationSchool }}</p>
+              }
+              @if (exit.tcNumber) {
+                <p><strong>TC No:</strong> {{ exit.tcNumber }} (Issued: {{ exit.tcIssuedOn || 'N/A' }})</p>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Enrollment History Timeline -->
+    <h4 class="section-title">Academic History</h4>
+    <div class="timeline">
+      @for (item of enrollments(); track item.id) {
+        <div class="timeline-item">
+          <div class="timeline-marker"></div>
+          <div class="timeline-content">
+            <span class="timeline-date">{{ item.enrolledOn }}</span>
+            <div class="timeline-title">Year #{{ item.academicYearId }} — Section #{{ item.classSectionId }}</div>
+            <p>Roll No: {{ item.rollNo || 'N/A' }}</p>
+            <span class="badge" [class.badge-active]="item.status === 'ACTIVE'">{{ item.status }}</span>
+          </div>
+        </div>
+      } @empty {
+        <p class="text-muted">No historical records found for this student.</p>
+      }
+    </div>
+  }
+</div>

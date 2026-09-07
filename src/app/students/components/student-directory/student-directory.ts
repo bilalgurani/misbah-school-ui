@@ -5,6 +5,8 @@ import { StudentService } from '../../student.service';
 import { ToastService } from '../../../shared/services/toast.service';
 import { LoaderComponent } from '../../../shared/component/loader.component';
 import { AuthService } from '../../../auth/auth.service';
+import { ExitStudentModal } from '../../../academics/components/exit-student-modal/exit-student-modal';
+import { StudentHistoryTab } from '../../../academics/components/student-history-tab/student-history-tab';
 
 interface FullStudentDto {
   id: number;
@@ -24,10 +26,15 @@ interface FullStudentDto {
   emergencyContactNo: string | null;
   enrollmentStatus: 'ACTIVE' | 'INACTIVE' | 'ALUMNI' | string;
   classSectionId: number | null;
+  
+  // ADD THESE TWO PROPERTIES:
+  currentEnrollmentId?: number | null;
+  currentAcademicYearId?: number | null;
 }
 
 @Component({
-  imports: [FormsModule, RouterModule, LoaderComponent],
+  imports: [FormsModule, RouterModule, LoaderComponent, ExitStudentModal,
+    StudentHistoryTab],
   selector: 'app-student-directory',
   styleUrl: './student-directory.scss',
   templateUrl: './student-directory.html',
@@ -43,6 +50,25 @@ export class StudentDirectory {
 
   selectedStudent = signal<FullStudentDto | null>(null);
   isModalOpen = signal<boolean>(false);
+
+  isExitModalOpen = signal<boolean>(false);
+  selectedStudentForExit = signal<any | null>(null);
+
+  openExitModal(student: FullStudentDto): void {
+    const targetStudent = this.selectedStudent() || student;
+
+    this.closeViewModal(); 
+    this.selectedStudentForExit.set(targetStudent);
+    this.isExitModalOpen.set(true);
+  }
+
+  onExitModalClosed(submitted: boolean): void {
+    this.isExitModalOpen.set(false);
+    this.selectedStudentForExit.set(null);
+    if (submitted) {
+      this.loadStudents(); // Refresh table list
+    }
+  }
 
   filteredStudents = computed(() => {
     const query = this.searchQuery().toLowerCase().trim();

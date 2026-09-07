@@ -463,3 +463,14 @@ $danger-bg: color-mix(in oklch, var(--destructive) 15%, transparent);
     }
   }
 }
+
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 16px;
+  text-align: center;
+  color: $text-secondary;
+  font-size: 14px;
+  font-weight: 500;
+}

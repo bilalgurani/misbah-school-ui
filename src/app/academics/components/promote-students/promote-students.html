@@ -1,0 +1,109 @@
+<div class="directory-container">
+  <div class="page-header">
+    <h2>Promote / Detain Batch</h2>
+  </div>
+
+  <div class="card toolbar-card">
+    <div class="form-row">
+      <!-- Source Section Picker -->
+      <div class="form-group">
+        <label>Source Section (Current) <span class="required-asterisk">*</span></label>
+        <select 
+          [ngModel]="sourceSectionId()" 
+          (ngModelChange)="onSourceSectionChange($event)" 
+          class="form-input"
+        >
+          <option [ngValue]="null">-- Select Source Section --</option>
+          @for (sec of classSections(); track sec.id) {
+            <option [ngValue]="sec.id">{{ sec.displayName || (sec.levelName + ' - ' + sec.division) }}</option>
+          }
+        </select>
+      </div>
+
+      <!-- Target Academic Year Picker -->
+      <div class="form-group">
+        <label>Target Academic Year <span class="required-asterisk">*</span></label>
+        <select 
+          [ngModel]="targetYearId()" 
+          (ngModelChange)="targetYearId.set($event)" 
+          class="form-input"
+        >
+          <option [ngValue]="null">-- Select Academic Year --</option>
+          @for (y of academicYears(); track y.id) {
+            <option [ngValue]="y.id">{{ y.name }}</option>
+          }
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Roll No</th>
+            <th>Student Name</th>
+            <th>Outcome</th>
+            <th>Target Section</th>
+            <th>New Roll No</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (isLoadingStudents()) {
+            <tr>
+              <td colspan="5" class="text-center py-4">Loading active students...</td>
+            </tr>
+          } @else if (students().length === 0) {
+            <tr>
+              <td colspan="5" class="text-center py-4">
+                {{ sourceSectionId() ? 'No active students found in this section.' : 'Please select a source section to view students.' }}
+              </td>
+            </tr>
+          } @else {
+            @for (s of students(); track s.studentId) {
+              <tr>
+                <td data-label="Roll No">{{ s.currentRollNo }}</td>
+                <td data-label="Student Name" class="fw-medium">{{ s.studentName }}</td>
+                <td data-label="Outcome">
+                  <select [(ngModel)]="s.outcome" class="form-input">
+                    <option value="PROMOTED">PROMOTED</option>
+                    <option value="DETAINED">DETAINED</option>
+                  </select>
+                </td>
+                <td data-label="Target Section">
+                  <select [(ngModel)]="s.targetClassSectionId" class="form-input">
+                    <option [ngValue]="null">-- Select Target --</option>
+                    @for (sec of classSections(); track sec.id) {
+                      <option [ngValue]="sec.id">{{ sec.displayName || (sec.levelName + ' - ' + sec.division) }}</option>
+                    }
+                  </select>
+                </td>
+                <td data-label="New Roll No">
+                  <input type="text" [(ngModel)]="s.targetRollNo" class="form-input">
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+    
+    <div class="card-footer">
+      <!-- Validation Hint Message -->
+      @if (!targetYearId()) {
+        <span class="validation-warning-text">⚠️ Please select a Target Academic Year to process promotions.</span>
+      } @else if (students().length === 0) {
+        <span class="validation-warning-text">⚠️ Select a Source Section with active students to continue.</span>
+      }
+
+      <button 
+        class="btn-primary" 
+        [disabled]="isSubmitting() || !targetYearId() || students().length === 0" 
+        (click)="submitPromotions()"
+      >
+        {{ isSubmitting() ? 'Processing...' : 'Process Promotions' }}
+      </button>
+    </div>
+  </div>
+</div>

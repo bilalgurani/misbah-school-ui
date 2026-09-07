@@ -26,13 +26,12 @@
       </div>
 
       <nav class="nav-list">
-        
-          <a routerLink="/dashboard" routerLinkActive="active-link" class="nav-link" (click)="closeSidebar()">
-            <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
-            </svg>
-            <span>Home</span>
-          </a>
+        <a routerLink="/dashboard" routerLinkActive="active-link" class="nav-link" (click)="closeSidebar()">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+          </svg>
+          <span>Home</span>
+        </a>
 
         <!-- STUDENTS SECTION -->
         <div class="nav-section-title">STUDENTS</div>
@@ -51,12 +50,39 @@
           <span>Attendance</span>
         </a>
 
+        <!-- NEW: STUDENT HISTORY / EXIT RECORDS LINK -->
+        <a routerLink="/students/history" routerLinkActive="active-link" class="nav-link" (click)="closeSidebar()">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/>
+          </svg>
+          <span>Exit History</span>
+        </a>
+
         @if(authService.isAdmin()) {
           <a routerLink="/students/add" routerLinkActive="active-link" class="nav-link" (click)="closeSidebar()">
             <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
               <path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
             </svg>
             <span>Add Student</span>
+          </a>
+        }
+
+        <!-- ACADEMIC & PROMOTION SECTION (ADMIN ONLY) -->
+        @if(authService.isAdmin()) {
+          <div class="nav-section-title">ACADEMICS</div>
+
+          <a routerLink="/academic-years" routerLinkActive="active-link" class="nav-link" (click)="closeSidebar()">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+            </svg>
+            <span>Academic Years</span>
+          </a>
+
+          <a routerLink="/promote-students" routerLinkActive="active-link" class="nav-link" (click)="closeSidebar()">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M16 6l1.41 1.41-3.59 3.59 1.41 1.41 3.59-3.59L20 10V6h-4zM5 19h14v-2H5v2zm0-4h14v-2H5v2zm0-4h8V9H5v2z"/>
+            </svg>
+            <span>Promote Students</span>
           </a>
         }
 
@@ -149,14 +175,6 @@
                 </a>
               </li>
             }
-            <!-- @if (authService.isAdmin()) {
-              <li>
-                <a [routerLink]="['/reset-password']" (click)="closeMenu()">
-                  <svg class="svg-icon" viewBox="0 0 512 512" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <title>log-in</title> <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g id="icon" fill="#0a0a0a" transform="translate(42.666667, 42.666667)"> <path d="M405.333333,3.55271368e-14 L405.333333,426.666667 L170.666667,426.666667 L170.666667,341.333333 L213.333333,341.333333 L213.333333,384 L362.666667,384 L362.666667,42.6666667 L213.333333,42.6666667 L213.333333,85.3333333 L170.666667,85.3333333 L170.666667,3.55271368e-14 L405.333333,3.55271368e-14 Z M74.6666667,138.666667 C108.491057,138.666667 137.06239,161.157677 146.241432,192.000465 L320,192 L320,234.666667 L298.666667,234.666667 L298.666667,277.333333 L234.666667,277.333333 L234.666667,234.666667 L146.241432,234.666202 C137.06239,265.508989 108.491057,288 74.6666667,288 C33.4294053,288 7.10542736e-15,254.570595 7.10542736e-15,213.333333 C7.10542736e-15,172.096072 33.4294053,138.666667 74.6666667,138.666667 Z M74.6666667,181.333333 C56.9935547,181.333333 42.6666667,195.660221 42.6666667,213.333333 C42.6666667,231.006445 56.9935547,245.333333 74.6666667,245.333333 C92.3397787,245.333333 106.666667,231.006445 106.666667,213.333333 C106.666667,195.660221 92.3397787,181.333333 74.6666667,181.333333 Z" id="Combined-Shape"> </path> </g> </g> </g></svg>
-                  <span>Reset Password</span>
-                </a>
-              </li>
-            } -->
             <li>
               <a href="#" (click)="$event.preventDefault(); closeMenu()">
                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z"/></svg>

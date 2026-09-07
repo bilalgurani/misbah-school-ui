@@ -5,7 +5,6 @@ import { LoaderComponent } from '../shared/component/loader.component';
 import { DashboardStats } from './models/dashboard.models';
 import { DashboardService } from './services/dashboard-api.service';
 import { ToastService } from '../shared/services/toast.service';
-import { DashboardCharts } from './components/dashboard-charts/dashboard-charts';
 
 @Component({
   selector: 'app-dashboard',
