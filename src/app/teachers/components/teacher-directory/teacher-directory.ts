@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { TeacherService } from '../../teacher.service';
 import { ToastService } from '../../../shared/services/toast.service';
 import { LoaderComponent } from '../../../shared/component/loader.component';
+import { AuthService } from '../../../auth/auth.service';
 interface FullTeacherDto {
   id: string;
   name: string;
@@ -27,6 +28,7 @@ interface FullTeacherDto {
 export class TeacherDirectory {
   private teacherService = inject(TeacherService);
   private toast = inject(ToastService);
+  public authService = inject(AuthService);
 
   teachers = signal<any[]>([]);
   isLoading = signal<boolean>(false);
