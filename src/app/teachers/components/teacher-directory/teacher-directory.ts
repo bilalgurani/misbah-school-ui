@@ -86,6 +86,7 @@ export class TeacherDirectory {
       this.teacherService.deleteTeacher(id).subscribe({
         next: () => {
           this.teachers.update(list => list.filter(t => t.id !== id));
+          this.toast.show('Teacher deleted successfully');
         },
         error: (err) => this.toast.show('Failed to delete teacher', err)
       });

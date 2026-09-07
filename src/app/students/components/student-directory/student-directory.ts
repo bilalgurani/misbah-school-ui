@@ -93,6 +93,7 @@ export class StudentDirectory {
       this.studentService.deleteStudent(id).subscribe({
         next: () => {
           this.students.update(list => list.filter(s => s.id !== id));
+          this.toast.show('Student deleted successfully');
         },
         error: (err) => this.toast.show('Failed to delete student', err)
       });

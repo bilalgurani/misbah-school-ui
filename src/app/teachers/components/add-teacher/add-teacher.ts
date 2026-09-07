@@ -69,7 +69,10 @@ export class AddTeacher implements OnInit {
 
     if (this.isEditMode() && id) {
       this.teacherService.updateTeacher(id, formData).subscribe({
-        next: () => this.handleSuccess(),
+        next: () => {
+          this.handleSuccess();
+          this.toast.show('Teacher updated successfully');
+        },
         error: (err) => {
           this.toast.show('Update failed:', err);
           this.isSubmitting.set(false);
@@ -77,7 +80,10 @@ export class AddTeacher implements OnInit {
       });
     } else {
       this.teacherService.createTeacher(formData).subscribe({
-        next: () => this.handleSuccess(),
+        next: () => {
+          this.handleSuccess();
+          this.toast.show('Teacher created successfully');
+        },
         error: (err) => {
           this.toast.show('Creation failed:', err);
           this.isSubmitting.set(false);

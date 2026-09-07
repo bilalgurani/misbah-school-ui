@@ -119,7 +119,10 @@ export class AddStudent {
 
     if (this.isEditMode() && id) {
       this.studentService.updateStudent(id, formData).subscribe({
-        next: () => this.handleSuccess(),
+        next: () => {
+          this.handleSuccess();
+          this.toast.show('Student updated successfully');
+        },
         error: (err) => {
           this.toast.show('Update failed:', err);
           this.isSubmitting.set(false);
@@ -127,7 +130,10 @@ export class AddStudent {
       });
     } else {
       this.studentService.createStudent(formData).subscribe({
-        next: () => this.handleSuccess(),
+        next: () => {
+          this.handleSuccess();
+          this.toast.show('Student created successfully');
+        },
         error: (err) => {
           this.toast.show('Creation failed:', err);
           this.isSubmitting.set(false);

@@ -13,6 +13,7 @@ import { ChangePassword } from './auth/change-password/change-password';
 import { AuthGuards } from './auth/auth.guard';
 import { Shell } from './shell/shell';
 import { Register } from './auth/register/register';
+import { UserManagement } from './user-management/user-management';
 
 export const routes: Routes = [
   // Public Route
@@ -30,6 +31,7 @@ export const routes: Routes = [
       {path: 'register', component: Register, canActivate: [AuthGuards.roleGuard('ADMIN')]},
       { path: 'change-password', component: ChangePassword },
       { path: 'dashboard', component: Dashboard },
+      { path: 'reset-password', component: UserManagement},
       { path: 'admin', component: Dashboard, canActivate: [AuthGuards.roleGuard('ADMIN')] },
 
       { path: 'students', component: StudentDirectory },
