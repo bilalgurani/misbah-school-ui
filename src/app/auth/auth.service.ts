@@ -74,17 +74,23 @@ export class AuthService {
 
   logoutServerAndCleanState() {
     // 1. Call Backend to Revoke Token / Clear HttpOnly Cookies
-    return this.http.post('/logout', {}).pipe(
+    return this.http.post(`${this.apiUrl}/logout`, {}).pipe(
       // Even if server call fails (e.g. offline), still proceed to clear local state
       catchError(() => of(null)),
       tap(() => {
         // 2. Clear tokens from Storage
-        localStorage.removeItem('access_token');
+        localStorage.removeItem('token');
+        localStorage.removeItem('username');
+        localStorage.removeItem('role');
+        localStorage.removeItem('email');
         sessionStorage.clear();
 
         // 3. Reset Reactive Signals/State
         this.isLoggedIn.set(false);
         this.currentUser.set(null);
+        this.currentEmail.set(null);
+        this.currentRole.set(null);
+        this.currentTeacherId.set(null);
       })
     );
   }
