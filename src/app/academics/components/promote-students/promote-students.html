@@ -37,7 +37,7 @@
     </div>
   </div>
 
-  <div class="card">
+  <div class="card table-card">
     <div class="table-responsive">
       <table class="data-table">
         <thead>
@@ -52,35 +52,35 @@
         <tbody>
           @if (isLoadingStudents()) {
             <tr>
-              <td colspan="5" class="text-center py-4">Loading active students...</td>
+              <td colspan="5" class="empty-state text-center py-4">Loading active students...</td>
             </tr>
           } @else if (students().length === 0) {
             <tr>
-              <td colspan="5" class="text-center py-4">
+              <td colspan="5" class="empty-state text-center py-4">
                 {{ sourceSectionId() ? 'No active students found in this section.' : 'Please select a source section to view students.' }}
               </td>
             </tr>
           } @else {
             @for (s of students(); track s.studentId) {
-              <tr>
-                <td data-label="Roll No">{{ s.currentRollNo }}</td>
-                <td data-label="Student Name" class="fw-medium">{{ s.studentName }}</td>
-                <td data-label="Outcome">
-                  <select [(ngModel)]="s.outcome" class="form-input">
+              <tr class="student-row">
+                <td data-label="Roll No" class="roll-cell">{{ s.currentRollNo }}</td>
+                <td data-label="Student Name" class="fw-medium name-cell">{{ s.studentName }}</td>
+                <td data-label="Outcome" class="input-cell">
+                  <select [(ngModel)]="s.outcome" class="form-input table-control">
                     <option value="PROMOTED">PROMOTED</option>
                     <option value="DETAINED">DETAINED</option>
                   </select>
                 </td>
-                <td data-label="Target Section">
-                  <select [(ngModel)]="s.targetClassSectionId" class="form-input">
+                <td data-label="Target Section" class="input-cell">
+                  <select [(ngModel)]="s.targetClassSectionId" class="form-input table-control">
                     <option [ngValue]="null">-- Select Target --</option>
                     @for (sec of classSections(); track sec.id) {
                       <option [ngValue]="sec.id">{{ sec.displayName || (sec.levelName + ' - ' + sec.division) }}</option>
                     }
                   </select>
                 </td>
-                <td data-label="New Roll No">
-                  <input type="text" [(ngModel)]="s.targetRollNo" class="form-input">
+                <td data-label="New Roll No" class="input-cell">
+                  <input type="text" [(ngModel)]="s.targetRollNo" class="form-input table-control" placeholder="New Roll #">
                 </td>
               </tr>
             }
@@ -90,15 +90,16 @@
     </div>
     
     <div class="card-footer">
-      <!-- Validation Hint Message -->
-      @if (!targetYearId()) {
-        <span class="validation-warning-text">⚠️ Please select a Target Academic Year to process promotions.</span>
-      } @else if (students().length === 0) {
-        <span class="validation-warning-text">⚠️ Select a Source Section with active students to continue.</span>
-      }
+      <div class="validation-container">
+        @if (!targetYearId()) {
+          <span class="validation-warning-text">⚠️ Select Target Academic Year</span>
+        } @else if (students().length === 0) {
+          <span class="validation-warning-text">⚠️ Select Source Section with students</span>
+        }
+      </div>
 
       <button 
-        class="btn-primary" 
+        class="btn-primary process-btn" 
         [disabled]="isSubmitting() || !targetYearId() || students().length === 0" 
         (click)="submitPromotions()"
       >

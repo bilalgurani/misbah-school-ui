@@ -62,17 +62,19 @@
           <label>Year Name (e.g., 2026-2027)</label>
           <input type="text" [(ngModel)]="newYear.name" placeholder="YYYY-YYYY" class="form-input">
         </div>
-        <div class="form-group">
-          <label>Start Date</label>
-          <input type="date" [(ngModel)]="newYear.startDate" class="form-input">
-        </div>
-        <div class="form-group">
-          <label>End Date</label>
-          <input type="date" [(ngModel)]="newYear.endDate" class="form-input">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Start Date</label>
+            <input type="date" [(ngModel)]="newYear.startDate" class="form-input">
+          </div>
+          <div class="form-group">
+            <label>End Date</label>
+            <input type="date" [(ngModel)]="newYear.endDate" class="form-input">
+          </div>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn-primary" (click)="saveYear()">Save Academic Year</button>
+        <button class="btn-primary full-width-mobile" (click)="saveYear()">Save Academic Year</button>
       </div>
     </div>
   </div>

@@ -74,7 +74,7 @@ export class AuthService {
 
   logoutServerAndCleanState() {
     // 1. Call Backend to Revoke Token / Clear HttpOnly Cookies
-    return this.http.post('/api/auth/logout', {}).pipe(
+    return this.http.post('/logout', {}).pipe(
       // Even if server call fails (e.g. offline), still proceed to clear local state
       catchError(() => of(null)),
       tap(() => {
