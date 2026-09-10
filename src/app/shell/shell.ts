@@ -49,8 +49,6 @@ export class Shell implements OnInit {
 
   onLogout(): void {
     this.closeMenu();
-    this.authService.logoutServerAndCleanState().subscribe(() => {
-      this.router.navigate(['/login'], { replaceUrl: true });
-  });
+    this.authService.logout();
   }
 }

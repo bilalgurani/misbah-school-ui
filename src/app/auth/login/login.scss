@@ -22,11 +22,10 @@ $danger-bg: color-mix(in oklch, var(--destructive, #dc2626) 12%, transparent);
     position: absolute;
     inset: 0;
     background: 
-      linear-gradient(135deg, rgba(15, 23, 42, 0.82) 0%, rgba(30, 41, 59, 0.90) 100%),
-      url('https://images.unsplash.com/photo-1580582932707-520aed937b7b?q=80&w=1600&auto=format&fit=crop') center/cover no-repeat;
+      url('../../../assets/images/misbah-future-1.jpg') center/cover no-repeat;
     z-index: 1;
-    transform: scale(1.02); /* Prevents white edges when blurred */
-    filter: blur(4px);
+    transform: scale(1.02);
+    filter: blur(2px);
   }
 
   .auth-card {

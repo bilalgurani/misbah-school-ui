@@ -34,10 +34,19 @@ export interface RegisterRequest {
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+
+  
   private http = inject(HttpClient);
   private router = inject(Router);
   
   private apiUrl = `${environment.apiUrl}/auth`;
+
+  constructor() {
+  const token = localStorage.getItem('token');
+  if (token && !this.isTokenExpired(token)) {
+    this.scheduleAutoLogout(token);
+  }
+}
 
   // Reactive Signals synchronized with initial localStorage
   currentUser = signal<string | null>(localStorage.getItem('username'));
@@ -52,52 +61,68 @@ export class AuthService {
   isTeacher = computed(() => this.currentRole() === 'TEACHER');
 
   login(credentials: LoginRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/login`, credentials).pipe(
-      tap((response) => {
-        // Strip 'ROLE_' prefix if present to standardize on 'ADMIN' or 'TEACHER'
-        const normalizedRole = response.role.replace('ROLE_', '');
+  return this.http.post<AuthResponse>(`${this.apiUrl}/login`, credentials).pipe(
+    tap((response) => {
+      const normalizedRole = response.role.replace('ROLE_', '');
 
-        localStorage.setItem('token', response.token);
-        localStorage.setItem('username', response.username);
-        localStorage.setItem('role', normalizedRole);
-        if (response.teacher_id) {
-          localStorage.setItem('teacher_id', response.teacher_id);
-          this.currentTeacherId.set(response.teacher_id);
-        }
+      localStorage.setItem('token', response.token);
+      localStorage.setItem('username', response.username);
+      localStorage.setItem('role', normalizedRole);
 
-        // Setting signals forces Angular to instantly re-evaluate app layouts & guards
-        this.currentUser.set(response.username);
-        this.currentRole.set(normalizedRole);
-      })
-    );
-  }
-
-  logoutServerAndCleanState() {
-    // 1. Call Backend to Revoke Token / Clear HttpOnly Cookies
-    return this.http.post(`${this.apiUrl}/logout`, {}).pipe(
-      // Even if server call fails (e.g. offline), still proceed to clear local state
-      catchError(() => of(null)),
-      tap(() => {
-        // 2. Clear tokens from Storage
-        localStorage.removeItem('token');
-        localStorage.removeItem('username');
-        localStorage.removeItem('role');
+      if (response.email) {
+        localStorage.setItem('email', response.email);
+        this.currentEmail.set(response.email);
+      } else {
         localStorage.removeItem('email');
-        sessionStorage.clear();
-
-        // 3. Reset Reactive Signals/State
-        this.isLoggedIn.set(false);
-        this.currentUser.set(null);
         this.currentEmail.set(null);
-        this.currentRole.set(null);
-        this.currentTeacherId.set(null);
-      })
-    );
-  }
+      }
 
-  private hasValidToken(): boolean {
-    return !!localStorage.getItem('access_token');
+      if (response.teacher_id) {
+        localStorage.setItem('teacher_id', response.teacher_id);
+        this.currentTeacherId.set(response.teacher_id);
+      } else {
+        localStorage.removeItem('teacher_id');
+        this.currentTeacherId.set(null);
+      }
+
+      this.currentUser.set(response.username);
+      this.currentRole.set(normalizedRole);
+      this.isLoggedIn.set(true);
+
+      this.scheduleAutoLogout(response.token);
+    })
+  );
+}
+
+  private isTokenExpired(token: string): boolean {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.exp * 1000 < Date.now();
+  } catch {
+    return true;
   }
+}
+
+private hasValidToken(): boolean {
+  const token = localStorage.getItem('token');
+  return !!token && !this.isTokenExpired(token);
+}
+
+private scheduleAutoLogout(token: string): void {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const msUntilExpiry = payload.exp * 1000 - Date.now();
+    if (msUntilExpiry > 0) {
+      setTimeout(() => this.forceLocalLogout(), msUntilExpiry);
+    }
+  } catch { /* ignore malformed token */ }
+}
+
+/** Clears local session only — no backend call. Use this from the interceptor
+ *  when a 401 tells us the token is already invalid server-side. */
+forceLocalLogout(): void {
+  this.clearLocalSession();
+}
 
   fetchProfile(): Observable<UserProfile> {
   return this.http.get<UserProfile>(`${this.apiUrl}/user`).pipe(
@@ -132,25 +157,31 @@ export class AuthService {
 }
 
 private clearLocalSession(): void {
-  // 1. Remove auth-specific keys explicitly (avoids wiping non-auth app data)
   localStorage.removeItem('token');
   localStorage.removeItem('username');
   localStorage.removeItem('role');
   localStorage.removeItem('teacher_id');
+  localStorage.removeItem('email');
+  sessionStorage.clear();
 
-  // 2. Reset reactive signals
+  this.isLoggedIn.set(false);
   this.currentUser.set(null);
+  this.currentEmail.set(null);
   this.currentRole.set(null);
   this.currentTeacherId.set(null);
 
-  // 3. Navigate user to login page
   this.router.navigate(['/login']);
 }
 
 
   getToken(): string | null {
-    return localStorage.getItem('token');
+  const token = localStorage.getItem('token');
+  if (token && this.isTokenExpired(token)) {
+    this.forceLocalLogout();
+    return null;
   }
+  return token;
+}
 
   /**
    * Flexible role checker that accepts either an array of roles or spread strings.

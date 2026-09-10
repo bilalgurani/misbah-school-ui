@@ -9,7 +9,7 @@ export class AuthGuards {
     const router = inject(Router);
 
     // Check both service signal and direct localStorage token existence
-    const hasToken = authService.isAuthenticated() || !!localStorage.getItem('token');
+    const hasToken = authService.isAuthenticated();
 
     if (hasToken) {
       return true;
@@ -22,7 +22,7 @@ export class AuthGuards {
     const authService = inject(AuthService);
     const router = inject(Router);
 
-    const hasToken = authService.isAuthenticated() || !!localStorage.getItem('token');
+    const hasToken = authService.isAuthenticated();
 
     if (hasToken) {
       return router.createUrlTree(['/dashboard']);
@@ -36,7 +36,7 @@ export class AuthGuards {
       const authService = inject(AuthService);
       const router = inject(Router);
 
-      const hasToken = authService.isAuthenticated() || !!localStorage.getItem('token');
+      const hasToken = authService.isAuthenticated();
       if (!hasToken) {
         return router.createUrlTree(['/login']);
       }
