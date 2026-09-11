@@ -1,1 +1,79 @@
-<p>exit-records works!</p>
+<div class="directory-container">
+  <div class="page-header">
+    <h2>Student Exit & Withdrawal Records</h2>
+  </div>
+
+  <!-- Search & Filter Header -->
+  <div class="card toolbar-card mb-3">
+    <div class="form-group">
+      <input 
+        type="text" 
+        class="form-input" 
+        placeholder="Search by student name, academic year, TC number, or reason..." 
+        [ngModel]="searchTerm()"
+        (ngModelChange)="onSearch($event)"
+      />
+    </div>
+  </div>
+
+  <!-- Records Table -->
+  <div class="card table-card">
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Student Name</th>
+            <th>Academic Year</th>
+            <th>Exit Type</th>
+            <th>Exit Date</th>
+            <th>Reason</th>
+            <th>Destination School</th>
+            <th>TC Number</th>
+            <th>TC Issued On</th>
+            <th>Recorded By</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (isLoading()) {
+            <tr>
+              <td colspan="9" class="text-center py-4">Loading exit records...</td>
+            </tr>
+          } @else if (filteredRecords().length === 0) {
+            <tr>
+              <td colspan="9" class="text-center py-4 text-muted">
+                No exit records found.
+              </td>
+            </tr>
+          } @else {
+            @for (record of filteredRecords(); track record.id) {
+              <tr>
+                <td data-label="Student Name" class="fw-medium">
+                  {{ record.studentName || 'Student #' + record.studentId }}
+                </td>
+                <td data-label="Academic Year">
+                  {{ record.academicYearName || 'N/A' }}
+                </td>
+                <td data-label="Exit Type">
+                  <span class="badge badge-exit">{{ record.exitType }}</span>
+                </td>
+                <td data-label="Exit Date">{{ record.exitDate }}</td>
+                <td data-label="Reason">
+                  {{ record.reasonCategory }} 
+                  @if (record.reasonNotes) {
+                    <small class="d-block text-muted">({{ record.reasonNotes }})</small>
+                  }
+                </td>
+                <td data-label="Destination">{{ record.destinationSchool || 'N/A' }}</td>
+                <td data-label="TC Number">{{ record.tcNumber || 'N/A' }}</td>
+                <td data-label="TC Issued On">{{ record.tcIssuedOn || 'N/A' }}</td>
+                <td data-label="Recorded By">
+                  {{ record.recordedByUserName || 'N/A' }}
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

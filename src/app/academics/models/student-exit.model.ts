@@ -1,9 +1,9 @@
 export interface StudentExitRequestDto {
-  currentEnrollmentId: number;
+  currentEnrollmentId?: number;
   academicYearId: number;
   exitDate: string;
-  exitType: 'TRANSFERRED_OUT' | 'DROPPED_OUT';
-  reasonCategory: 'FAMILY_RELOCATION' | 'ACADEMIC' | 'FINANCIAL' | 'PERSONAL' | 'OTHER';
+  exitType: 'TRANSFERRED_OUT' | 'DROPPED_OUT' | string;
+  reasonCategory: 'FAMILY_RELOCATION' | 'ACADEMIC' | 'FINANCIAL' | 'PERSONAL' | 'OTHER' | string;
   reasonNotes?: string;
   destinationSchool?: string;
   tcNumber?: string;
@@ -13,6 +13,9 @@ export interface StudentExitRequestDto {
 export interface StudentExitRecord extends StudentExitRequestDto {
   id: number;
   studentId: number;
+  studentName?: string;
+  academicYearName?: string;
   recordedByUserId?: number;
+  recordedByUserName?: string;
   createdAt?: string;
 }

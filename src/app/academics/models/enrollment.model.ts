@@ -7,7 +7,11 @@ export interface StudentEnrollment {
   status: 'ACTIVE' | 'PROMOTED' | 'DETAINED' | 'LEFT' | 'TRANSFERRED_OUT';
   enrolledOn: string;
   statusUpdatedOn?: string;
-  classSectionName?: string; // Optional populated display field
+  classSectionName?: string; 
+  sectionName?: string;
+  className?: string;
+  name?: string;
+  academicYearName?: string; 
 }
 
 export interface PromotionItemDto {

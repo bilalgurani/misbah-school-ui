@@ -6,7 +6,6 @@ import { ToastService } from '../../../shared/services/toast.service';
 import { LoaderComponent } from '../../../shared/component/loader.component';
 import { AuthService } from '../../../auth/auth.service';
 import { ExitStudentModal } from '../../../academics/components/exit-student-modal/exit-student-modal';
-import { StudentHistoryTab } from '../../../academics/components/student-history-tab/student-history-tab';
 
 interface FullStudentDto {
   id: number;
@@ -33,8 +32,7 @@ interface FullStudentDto {
 }
 
 @Component({
-  imports: [FormsModule, RouterModule, LoaderComponent, ExitStudentModal,
-    StudentHistoryTab],
+  imports: [FormsModule, RouterModule, LoaderComponent, ExitStudentModal],
   selector: 'app-student-directory',
   styleUrl: './student-directory.scss',
   templateUrl: './student-directory.html',

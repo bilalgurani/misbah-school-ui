@@ -64,6 +64,17 @@
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
+            },
+            "local-prod-api": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.local-ui-prod-api.ts"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"
@@ -76,6 +87,9 @@
             },
             "development": {
               "buildTarget": "misbah-school:build:development"
+            },
+            "local-prod-api": {
+              "buildTarget": "misbah-school:build:local-prod-api"
             }
           },
           "defaultConfiguration": "development"

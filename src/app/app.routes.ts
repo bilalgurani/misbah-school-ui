@@ -17,6 +17,7 @@ import { UserManagement } from './user-management/user-management';
 import { AcademicYears } from './academics/components/academic-years/academic-years';
 import { PromoteStudents } from './academics/components/promote-students/promote-students';
 import { StudentHistoryTab } from './academics/components/student-history-tab/student-history-tab';
+import { ExitRecords } from './academics/components/exit-records/exit-records';
 
 export const routes: Routes = [
   // Public Route
@@ -40,7 +41,10 @@ export const routes: Routes = [
       // Academic Management Routes
       { path: 'academic-years', component: AcademicYears, canActivate: [AuthGuards.roleGuard('ADMIN')] },
       { path: 'promote-students', component: PromoteStudents, canActivate: [AuthGuards.roleGuard('ADMIN')] },
-      { path: 'students/history', component: StudentHistoryTab },
+      { path: 'students/history', component: StudentHistoryTab, canActivate: [AuthGuards.roleGuard('ADMIN')] },
+      { path: 'students/:studentId/history', component: StudentHistoryTab, canActivate: [AuthGuards.roleGuard('ADMIN')] },
+      { path: 'students/exit-history', component: ExitRecords, canActivate: [AuthGuards.roleGuard('ADMIN')] },
+      
 
       { path: 'students', component: StudentDirectory },
       { path: 'student-attendance', component: StudentAttendance },

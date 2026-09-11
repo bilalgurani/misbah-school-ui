@@ -17,4 +17,8 @@ export class StudentExitService {
   getExitRecords(studentId: number): Observable<StudentExitRecord[]> {
     return this.http.get<StudentExitRecord[]>(`${this.apiUrl}/${studentId}/exit-records`);
   }
+
+  getAllExitRecords(): Observable<StudentExitRecord[]> {
+    return this.http.get<StudentExitRecord[]>(`${this.apiUrl}/exit-records`);
+  }
 }

@@ -155,19 +155,16 @@
           </div>
         </div>
 
-        <hr class="modal-divider" />
-
-        <!-- INTEGRATION 1: Academic & Exit History Timeline -->
-        <div class="history-section">
-          <h4>Academic & Enrollment History</h4>
-          <app-student-history-tab [studentId]="t.id"></app-student-history-tab>
-        </div>
       </div>
       
       <div class="modal-footer">
         @if (authService.isAdmin()) {
           <a [routerLink]="['/students/edit', t.id]" class="btn-secondary" (click)="closeViewModal()">Edit Profile</a>
-          
+
+          <a [routerLink]="['/students', t.id, 'history']" class="btn-secondary" (click)="closeViewModal()">
+      View History
+    </a>
+
           <!-- INTEGRATION 2: Trigger Exit Record Modal for Active Students -->
           @if (t.enrollmentStatus === 'ACTIVE') {
             <button type="button" class="btn-danger" (click)="openExitModal(t)">Record Exit / Issue TC</button>
