@@ -1,20 +1,20 @@
 <div class="modal-backdrop" (click)="cancel()">
-  <div class="modal-card" (click)="$event.stopPropagation()">
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="exit-modal-title" (click)="$event.stopPropagation()">
     <div class="modal-header">
-      <h3>Record Student Exit</h3>
-      <button class="close-btn" (click)="cancel()">&times;</button>
+      <h3 id="exit-modal-title">Record Student Exit</h3>
+      <button type="button" class="close-btn" (click)="cancel()" aria-label="Close modal">&times;</button>
     </div>
     <div class="modal-body">
       <div class="form-group">
-        <label>Exit Type</label>
-        <select [(ngModel)]="form.exitType" class="form-input">
+        <label for="exit-type">Exit Type</label>
+        <select id="exit-type" [(ngModel)]="form.exitType" class="form-input">
           <option value="TRANSFERRED_OUT">Transferred Out</option>
           <option value="DROPPED_OUT">Dropped Out</option>
         </select>
       </div>
       <div class="form-group">
-        <label>Reason Category</label>
-        <select [(ngModel)]="form.reasonCategory" class="form-input">
+        <label for="exit-reason">Reason Category</label>
+        <select id="exit-reason" [(ngModel)]="form.reasonCategory" class="form-input">
           <option value="FAMILY_RELOCATION">Family Relocation</option>
           <option value="ACADEMIC">Academic</option>
           <option value="FINANCIAL">Financial</option>
@@ -23,28 +23,29 @@
         </select>
       </div>
       <div class="form-group">
-        <label>Exit Date</label>
-        <input type="date" [(ngModel)]="form.exitDate" class="form-input">
+        <label for="exit-date">Exit Date</label>
+        <input id="exit-date" type="date" [(ngModel)]="form.exitDate" class="form-input">
       </div>
       <div class="form-group">
-        <label>Destination School</label>
-        <input type="text" [(ngModel)]="form.destinationSchool" class="form-input">
+        <label for="exit-destination">Destination School</label>
+        <input id="exit-destination" type="text" [(ngModel)]="form.destinationSchool" class="form-input">
       </div>
       <div class="form-group">
-        <label>TC Number</label>
-        <input type="text" [(ngModel)]="form.tcNumber" class="form-input">
+        <label for="exit-tc-number">TC Number</label>
+        <input id="exit-tc-number" type="text" [(ngModel)]="form.tcNumber" class="form-input">
       </div>
       <div class="form-group">
-        <label>TC Issued Date</label>
-        <input type="date" [(ngModel)]="form.tcIssuedOn" class="form-input">
+        <label for="exit-tc-date">TC Issued Date</label>
+        <input id="exit-tc-date" type="date" [(ngModel)]="form.tcIssuedOn" class="form-input">
       </div>
-      <div class="form-group">
-        <label>Notes</label>
-        <textarea [(ngModel)]="form.reasonNotes" class="form-input" rows="3"></textarea>
+      <div class="form-group full-width">
+        <label for="exit-notes">Notes</label>
+        <textarea id="exit-notes" [(ngModel)]="form.reasonNotes" class="form-input" rows="3"></textarea>
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn-primary" (click)="submitExit()">Submit Exit Record</button>
+      <button type="button" class="btn-secondary" (click)="cancel()">Cancel</button>
+      <button type="button" class="btn-primary" (click)="submitExit()">Submit Exit Record</button>
     </div>
   </div>
 </div>

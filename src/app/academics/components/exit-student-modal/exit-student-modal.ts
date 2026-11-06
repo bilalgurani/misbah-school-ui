@@ -8,7 +8,7 @@ import { AcademicYearService } from '../../services/academic-year.service';
 @Component({
   imports: [CommonModule, FormsModule],
   selector: 'app-exit-student-modal',
-  styleUrls: ['./exit-student-modal.scss', '../../shared/academic-shared.scss'],
+  styleUrls: ['../../shared/academic-shared.scss', './exit-student-modal.scss'],
   templateUrl: './exit-student-modal.html',
 })
 export class ExitStudentModal implements OnInit {

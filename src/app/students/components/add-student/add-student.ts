@@ -4,6 +4,8 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { StudentService } from '../../student.service';
 import { ToastService } from '../../../shared/services/toast.service';
+import { AttendanceApiService } from '../../../attendance/services/attendance-api.service';
+import { ClassSection } from '../../../attendance/models/attendance.models';
 
 @Component({
   imports: [CommonModule, ReactiveFormsModule, RouterModule],
@@ -17,14 +19,17 @@ export class AddStudent {
   private route = inject(ActivatedRoute);
   private studentService = inject(StudentService);
   private toast = inject(ToastService);
+  private attendanceApi = inject(AttendanceApiService);
 
   studentForm!: FormGroup;
+  classSections = signal<ClassSection[]>([]);
   isSubmitting = signal<boolean>(false);
   isEditMode = signal<boolean>(false);
   studentId = signal<string | null>(null);
 
   ngOnInit(): void {
     this.initForm();
+    this.loadClassSections();
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.studentId.set(id);
@@ -33,10 +38,17 @@ export class AddStudent {
     }
   }
 
+  private loadClassSections(): void {
+    this.attendanceApi.getClassSections().subscribe({
+      next: (sections) => this.classSections.set(sections),
+      error: (err) => this.toast.show('Failed to load classes', err)
+    });
+  }
+
   private initForm(): void {
     this.studentForm = this.fb.group({
       name: ['', Validators.required],
-      rollNo: [''],
+      rollNo: ['', [Validators.required, Validators.pattern(/\S/)]],
       satsNo: [''],
       gender: ['', Validators.required],
       fatherName: ['', Validators.required],
@@ -49,7 +61,7 @@ export class AddStudent {
       emergencyContactName: [''],
       emergencyContactNo: [''],
       enrollmentStatus: ['ACTIVE', Validators.required],
-      classSectionId: [1],
+      classSectionId: [null, Validators.required],
       bloodGroup: ['']
     });
   }
