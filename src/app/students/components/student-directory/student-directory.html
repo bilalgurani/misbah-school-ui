@@ -31,6 +31,7 @@
               <th>Gender</th>
               <th>Class & Section</th>
               <th>Contact</th>
+              <th>Status</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -53,6 +54,14 @@
                     <span class="text-muted">—</span>
                   }
                 </td>
+                <td data-label="Status">
+                  <span class="badge"
+                    [class.badge-active]="student.enrollmentStatus === 'ACTIVE'"
+                    [class.badge-left]="student.enrollmentStatus === 'LEFT'"
+                    [class.badge-alumni]="student.enrollmentStatus === 'ALUMNI'">
+                    {{ student.enrollmentStatus || 'N/A' }}
+                  </span>
+                </td>
                 <td data-label="Actions" class="actions">
                   @if (authService.isAdmin()) {
                     <a [routerLink]="['/students/edit', student.id]" class="icon-btn edit-btn" title="Edit" aria-label="Edit student">
@@ -71,7 +80,7 @@
               </tr>
             } @empty {
               <tr>
-                <td colspan="6" class="empty-state">No students found matching</td>
+                <td colspan="7" class="empty-state">No students found matching</td>
                 
               </tr>
             }

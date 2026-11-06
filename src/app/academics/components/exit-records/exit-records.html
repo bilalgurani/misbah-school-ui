@@ -3,21 +3,22 @@
     <h2>Student Exit & Withdrawal Records</h2>
   </div>
 
-  <!-- Search & Filter Header -->
-  <div class="card toolbar-card mb-3">
-    <div class="form-group">
-      <input 
-        type="text" 
-        class="form-input" 
-        placeholder="Search by student name, academic year, TC number, or reason..." 
-        [ngModel]="searchTerm()"
-        (ngModelChange)="onSearch($event)"
-      />
+  <div class="card">
+    <div class="toolbar">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <input
+          type="text"
+          placeholder="Search by student, academic year, TC number or reason..."
+          aria-label="Search exit records"
+          [ngModel]="searchTerm()"
+          (ngModelChange)="onSearch($event)"
+        />
+      </div>
     </div>
-  </div>
 
-  <!-- Records Table -->
-  <div class="card table-card">
     <div class="table-responsive">
       <table class="data-table">
         <thead>
@@ -36,11 +37,11 @@
         <tbody>
           @if (isLoading()) {
             <tr>
-              <td colspan="9" class="text-center py-4">Loading exit records...</td>
+              <td colspan="9" class="empty-state">Loading exit records...</td>
             </tr>
           } @else if (filteredRecords().length === 0) {
             <tr>
-              <td colspan="9" class="text-center py-4 text-muted">
+              <td colspan="9" class="empty-state">
                 No exit records found.
               </td>
             </tr>
@@ -60,7 +61,7 @@
                 <td data-label="Reason">
                   {{ record.reasonCategory }} 
                   @if (record.reasonNotes) {
-                    <small class="d-block text-muted">({{ record.reasonNotes }})</small>
+                    <small>({{ record.reasonNotes }})</small>
                   }
                 </td>
                 <td data-label="Destination">{{ record.destinationSchool || 'N/A' }}</td>

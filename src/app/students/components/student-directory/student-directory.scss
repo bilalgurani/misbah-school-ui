@@ -176,6 +176,16 @@ $bg-alt: var(--muted);
       background: color-mix(in oklch, var(--chart-3) 15%, transparent);
       color: var(--chart-3);
     }
+
+    &.badge-left {
+      background: color-mix(in oklch, var(--destructive) 12%, transparent);
+      color: var(--destructive);
+    }
+
+    &.badge-alumni {
+      background: color-mix(in oklch, var(--chart-2) 15%, transparent);
+      color: var(--chart-2);
+    }
   }
 
   .fw-medium {

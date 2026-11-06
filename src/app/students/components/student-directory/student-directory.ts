@@ -45,7 +45,6 @@ export class StudentDirectory {
   students = signal<any[]>([]);
   isLoading = signal<boolean>(false);
   searchQuery = signal<string>('');
-
   selectedStudent = signal<FullStudentDto | null>(null);
   isModalOpen = signal<boolean>(false);
 
