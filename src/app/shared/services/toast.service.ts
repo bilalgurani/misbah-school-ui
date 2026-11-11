@@ -8,10 +8,11 @@ export class ToastService {
   type = signal<'success' | 'error'>('success');
   private timer: any = null;
 
-  show(msg: string, toastType: 'success' | 'error' = 'success') {
+  // Callers often pass the caught error as the 2nd arg; anything other than 'success' counts as an error.
+  show(msg: string, toastType?: unknown) {
     if (this.timer) clearTimeout(this.timer);
     this.message.set(msg);
-    this.type.set(toastType);
+    this.type.set(toastType === undefined || toastType === 'success' ? 'success' : 'error');
 
     this.timer = setTimeout(() => {
       this.message.set(null);
