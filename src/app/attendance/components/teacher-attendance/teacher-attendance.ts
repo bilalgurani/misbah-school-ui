@@ -89,7 +89,7 @@ export class TeacherAttendance {
       },
       error: (err) => {
         this.isLoading.set(false);
-        this.toast.show('Failed to load teacher roster.', err);
+        this.toast.showError(err, 'Failed to load teacher roster.');
       }
     });
   }

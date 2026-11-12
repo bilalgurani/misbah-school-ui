@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { StudentExitRecord } from '../../models/student-exit.model';
 import { StudentExitService } from '../../services/student-exit.service';
+import { ToastService } from '../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-exit-records',
@@ -13,6 +14,7 @@ import { StudentExitService } from '../../services/student-exit.service';
 })
 export class ExitRecords implements OnInit {
   private exitService = inject(StudentExitService);
+  private toast = inject(ToastService);
 
   allExitRecords = signal<StudentExitRecord[]>([]);
   filteredRecords = signal<StudentExitRecord[]>([]);
@@ -32,7 +34,7 @@ export class ExitRecords implements OnInit {
         this.isLoading.set(false);
       },
       error: (err) => {
-        console.error('Failed to load exit records:', err);
+        this.toast.showError(err, 'Failed to load exit records.');
         this.isLoading.set(false);
       }
     });

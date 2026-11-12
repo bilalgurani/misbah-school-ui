@@ -27,7 +27,12 @@ export class Shell implements OnInit {
   ngOnInit(): void {
     // Fetch latest user profile in background to sync any changes
     this.authService.fetchProfile().subscribe({
-      error: (err) => console.error('Failed to sync user profile:', err)
+      error: (err) => {
+        // A rejected token (revoked or invalid) means the session is no longer usable.
+        if (err?.status === 401 || err?.status === 403) {
+          this.authService.forceLocalLogout();
+        }
+      }
     });
   }
 

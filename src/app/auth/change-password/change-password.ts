@@ -1,7 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment';
+import { ToastService } from '../../shared/services/toast.service';
+import { AuthService } from '../auth.service';
 
 @Component({
   imports: [ReactiveFormsModule],
@@ -12,7 +14,8 @@ import { Router } from '@angular/router';
 export class ChangePassword {
   private fb = inject(FormBuilder);
   private http = inject(HttpClient);
-  private router = inject(Router);
+  private toast = inject(ToastService);
+  private authService = inject(AuthService);
   isLoading = signal(false);
 
   passForm: FormGroup = this.fb.group({
@@ -24,13 +27,17 @@ export class ChangePassword {
     if (this.passForm.invalid) return;
     this.isLoading.set(true);
 
-    this.http.post('/api/auth/change-password', this.passForm.value).subscribe({
+    this.http.post(`${environment.apiUrl}/auth/change-password`, this.passForm.value, { responseType: 'text' }).subscribe({
       next: () => {
         this.isLoading.set(false);
-        alert('Password updated successfully!');
-        this.router.navigate(['/dashboard']);
+        this.toast.show('Password updated. Please sign in again.');
+        // The server revokes the current token on password change.
+        this.authService.forceLocalLogout();
       },
-      error: () => this.isLoading.set(false)
+      error: (err) => {
+        this.isLoading.set(false);
+        this.toast.showError(err, 'Failed to update password.');
+      }
     });
   }
 }

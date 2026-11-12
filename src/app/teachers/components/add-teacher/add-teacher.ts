@@ -6,10 +6,9 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TeacherService } from '../../teacher.service';
 import { ToastService } from '../../../shared/services/toast.service';
-import { ToastComponent } from '../../../shared/component/toast.component';
 
 @Component({
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, ToastComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
   selector: 'app-add-teacher',
   styleUrl: './add-teacher.scss',
   templateUrl: './add-teacher.html',
@@ -53,7 +52,7 @@ export class AddTeacher implements OnInit {
   private loadTeacherData(id: string): void {
     this.teacherService.getTeacherById(id).subscribe({
       next: (teacher) => this.teacherForm.patchValue(teacher),
-      error: (err) => this.toast.show('Error fetching teacher data:', err)
+      error: (err) => this.toast.showError(err, 'Failed to load teacher data.')
     });
   }
 
@@ -74,7 +73,7 @@ export class AddTeacher implements OnInit {
           this.toast.show('Teacher updated successfully');
         },
         error: (err) => {
-          this.toast.show('Update failed:', err);
+          this.toast.showError(err, 'Failed to update teacher.');
           this.isSubmitting.set(false);
         }
       });
@@ -85,7 +84,7 @@ export class AddTeacher implements OnInit {
           this.toast.show('Teacher created successfully');
         },
         error: (err) => {
-          this.toast.show('Creation failed:', err);
+          this.toast.showError(err, 'Failed to create teacher.');
           this.isSubmitting.set(false);
         }
       });

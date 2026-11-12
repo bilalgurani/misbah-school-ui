@@ -37,7 +37,7 @@ export class Dashboard implements OnInit {
         this.isLoading.set(false);
       },
       error: () => {
-        this.toast.show('Failed to load dashboard statistics. Please try again.');
+        this.toast.show('Failed to load dashboard statistics. Please try again.', 'error');
         this.hasError.set(true);
         this.isLoading.set(false);
       }

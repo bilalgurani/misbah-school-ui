@@ -18,4 +18,11 @@ export class ToastService {
       this.message.set(null);
     }, 3500);
   }
+
+  // API errors arrive as {message}, a plain string, or nothing (network down).
+  showError(err: any, fallback: string) {
+    const body = err?.error;
+    const apiMessage = typeof body === 'string' ? body : body?.message;
+    this.show(apiMessage || (err?.status === 0 ? 'Cannot reach the server. Check your connection.' : fallback), 'error');
+  }
 }

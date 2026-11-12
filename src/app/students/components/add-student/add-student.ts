@@ -41,7 +41,7 @@ export class AddStudent {
   private loadClassSections(): void {
     this.attendanceApi.getClassSections().subscribe({
       next: (sections) => this.classSections.set(sections),
-      error: (err) => this.toast.show('Failed to load classes', err)
+      error: (err) => this.toast.showError(err, 'Failed to load classes')
     });
   }
 
@@ -83,7 +83,7 @@ export class AddStudent {
           this.logInvalidControls();
         }
       },
-      error: (err) => this.toast.show('Error fetching student data:', err)
+      error: (err) => this.toast.showError(err, 'Failed to load student data.')
     });
   }
 
@@ -136,7 +136,7 @@ export class AddStudent {
           this.toast.show('Student updated successfully');
         },
         error: (err) => {
-          this.toast.show('Update failed:', err);
+          this.toast.showError(err, 'Failed to update student.');
           this.isSubmitting.set(false);
         }
       });
@@ -147,7 +147,7 @@ export class AddStudent {
           this.toast.show('Student created successfully');
         },
         error: (err) => {
-          this.toast.show('Creation failed:', err);
+          this.toast.showError(err, 'Failed to create student.');
           this.isSubmitting.set(false);
         }
       });

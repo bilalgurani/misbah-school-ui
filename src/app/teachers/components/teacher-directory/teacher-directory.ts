@@ -6,6 +6,7 @@ import { TeacherService } from '../../teacher.service';
 import { ToastService } from '../../../shared/services/toast.service';
 import { LoaderComponent } from '../../../shared/component/loader.component';
 import { AuthService } from '../../../auth/auth.service';
+import { ConfirmDialogComponent } from '../../../shared/component/confirm-dialog.component';
 interface FullTeacherDto {
   id: string;
   name: string;
@@ -20,7 +21,7 @@ interface FullTeacherDto {
 }
 
 @Component({
-  imports: [CommonModule, RouterModule, FormsModule, LoaderComponent],
+  imports: [CommonModule, RouterModule, FormsModule, LoaderComponent, ConfirmDialogComponent],
   selector: 'app-teacher-directory',
   styleUrl: './teacher-directory.scss',
   templateUrl: './teacher-directory.html',
@@ -37,6 +38,9 @@ export class TeacherDirectory {
   // Modal State Signals
   selectedTeacher = signal<FullTeacherDto | null>(null);
   isModalOpen = signal<boolean>(false);
+
+  teacherToDelete = signal<any | null>(null);
+  isDeleting = signal<boolean>(false);
 
   filteredTeachers = computed(() => {
     const query = this.searchQuery().toLowerCase().trim();
@@ -59,7 +63,7 @@ export class TeacherDirectory {
         this.isLoading.set(false);
       },
       error: (err) => {
-        this.toast.show('Failed to load teachers', err);
+        this.toast.showError(err, 'Failed to load teachers');
         this.isLoading.set(false);
       }
     });
@@ -73,7 +77,7 @@ export class TeacherDirectory {
         this.isModalOpen.set(true);
       },
       error: (err) => {
-        this.toast.show('Failed to load full teacher details', err);
+        this.toast.showError(err, 'Failed to load full teacher details');
       }
     });
   }
@@ -83,15 +87,30 @@ export class TeacherDirectory {
     this.selectedTeacher.set(null);
   }
 
-  deleteTeacher(id: string): void {
-    if (confirm('Are you sure you want to delete this teacher?')) {
-      this.teacherService.deleteTeacher(id).subscribe({
-        next: () => {
-          this.teachers.update(list => list.filter(t => t.id !== id));
-          this.toast.show('Teacher deleted successfully');
-        },
-        error: (err) => this.toast.show('Failed to delete teacher', err)
-      });
-    }
+  deleteTeacher(): void {
+    const target = this.teacherToDelete();
+    if (!target) return;
+
+    this.isDeleting.set(true);
+    this.teacherService.deleteTeacher(target.id).subscribe({
+      next: () => {
+        this.teachers.update(list => list.filter(t => t.id !== target.id));
+        this.toast.show('Teacher deleted successfully');
+        this.cancelDelete();
+      },
+      error: (err) => {
+        this.isDeleting.set(false);
+        this.toast.showError(err, 'Failed to delete teacher');
+      }
+    });
+  }
+
+  requestDelete(teacher: any): void {
+    this.teacherToDelete.set(teacher);
+  }
+
+  cancelDelete(): void {
+    this.teacherToDelete.set(null);
+    this.isDeleting.set(false);
   }
 }

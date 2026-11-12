@@ -7,6 +7,7 @@ import { AcademicYear } from '../../models/academic-year.model';
 import { PromotionItemDto } from '../../models/enrollment.model';
 import { AttendanceApiService } from '../../../attendance/services/attendance-api.service';
 import { ClassSection } from '../../../attendance/models/attendance.models';
+import { ToastService } from '../../../shared/services/toast.service';
 
 interface StudentPromotionRow extends PromotionItemDto {
   studentName: string;
@@ -23,6 +24,7 @@ export class PromoteStudents implements OnInit {
   private enrollmentService = inject(EnrollmentService);
   private yearService = inject(AcademicYearService);
   private attendanceApi = inject(AttendanceApiService);
+  private toast = inject(ToastService);
 
   academicYears = signal<AcademicYear[]>([]);
   classSections = signal<ClassSection[]>([]);
@@ -36,10 +38,16 @@ export class PromoteStudents implements OnInit {
 
   ngOnInit(): void {
     // Fetch academic years
-    this.yearService.getAll().subscribe(years => this.academicYears.set(years));
+    this.yearService.getAll().subscribe({
+      next: years => this.academicYears.set(years),
+      error: err => this.toast.showError(err, 'Failed to load academic years.')
+    });
 
     // Fetch class sections using AttendanceApiService
-    this.attendanceApi.getClassSections().subscribe(sections => this.classSections.set(sections));
+    this.attendanceApi.getClassSections().subscribe({
+      next: sections => this.classSections.set(sections),
+      error: err => this.toast.showError(err, 'Failed to load classes.')
+    });
   }
 
   onSourceSectionChange(sectionId: number | null): void {
@@ -76,7 +84,7 @@ export class PromoteStudents implements OnInit {
         this.isLoadingStudents.set(false);
       },
       error: (err) => {
-        console.error('Failed to load active students:', err);
+        this.toast.showError(err, 'Failed to load students.');
         this.students.set([]);
         this.isLoadingStudents.set(false);
       }
@@ -86,13 +94,13 @@ export class PromoteStudents implements OnInit {
   submitPromotions(): void {
     const targetYr = Number(this.targetYearId());
     if (!targetYr || this.students().length === 0) {
-      alert('Please select a target academic year.');
+      this.toast.show('Please select a target academic year.', 'error');
       return;
     }
 
     const hasInvalidTarget = this.students().some(s => !s.targetClassSectionId);
     if (hasInvalidTarget) {
-      alert('Please select a target class section for all students before submitting.');
+      this.toast.show('Please select a target class section for all students before submitting.', 'error');
       return;
     }
 
@@ -112,14 +120,13 @@ export class PromoteStudents implements OnInit {
     this.enrollmentService.promoteOrDetain(payload).subscribe({
       next: () => {
         this.isSubmitting.set(false);
-        alert('Promotions processed successfully!');
+        this.toast.show('Promotions processed successfully!');
         this.students.set([]);
         this.sourceSectionId.set(null);
       },
       error: (err) => {
-        console.error('Promotion failed error details:', err);
         this.isSubmitting.set(false);
-        alert(`Failed to process promotions: ${err.error?.message || err.statusText || 'Unknown error'}`);
+        this.toast.showError(err, 'Failed to process promotions.');
       }
     });
   }

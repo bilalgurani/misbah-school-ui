@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { StudentExitRequestDto } from '../../models/student-exit.model';
 import { StudentExitService } from '../../services/student-exit.service';
 import { AcademicYearService } from '../../services/academic-year.service';
+import { ToastService } from '../../../shared/services/toast.service';
 
 @Component({
   imports: [CommonModule, FormsModule],
@@ -20,6 +21,8 @@ export class ExitStudentModal implements OnInit {
 
   private exitService = inject(StudentExitService);
   private academicYearService = inject(AcademicYearService);
+  private toast = inject(ToastService);
+  isSubmitting = false;
 
   form: StudentExitRequestDto = {
     currentEnrollmentId: 0,
@@ -49,7 +52,7 @@ export class ExitStudentModal implements OnInit {
             this.form.academicYearId = year.id;
           }
         },
-        error: (err) => console.error('Failed to load active academic year', err)
+        error: (err) => this.toast.showError(err, 'Failed to load the current academic year.')
       });
     }
   }
@@ -61,9 +64,25 @@ export class ExitStudentModal implements OnInit {
       academicYearId: this.form.academicYearId || Number(this.academicYearId) || 0,
     };
 
+    if (!payload.currentEnrollmentId || !payload.academicYearId) {
+      this.toast.show('Missing enrollment or academic year for this student.', 'error');
+      return;
+    }
+    if (!payload.exitDate) {
+      this.toast.show('Please choose an exit date.', 'error');
+      return;
+    }
+
+    this.isSubmitting = true;
     this.exitService.recordExit(this.studentId, payload).subscribe({
-      next: () => this.closed.emit(true),
-      error: (err) => console.error('Failed to record exit', err)
+      next: () => {
+        this.toast.show('Exit recorded successfully.');
+        this.closed.emit(true);
+      },
+      error: (err) => {
+        this.isSubmitting = false;
+        this.toast.showError(err, 'Failed to record exit.');
+      }
     });
   }
 

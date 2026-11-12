@@ -5,6 +5,7 @@ import { EnrollmentService } from '../../services/enrollment.service';
 import { StudentExitService } from '../../services/student-exit.service';
 import { StudentEnrollment } from '../../models/enrollment.model';
 import { StudentExitRecord } from '../../models/student-exit.model';
+import { ToastService } from '../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-student-history-tab',
@@ -21,6 +22,7 @@ export class StudentHistoryTab {
 
   private enrollmentService = inject(EnrollmentService);
   private exitService = inject(StudentExitService);
+  private toast = inject(ToastService);
 
   enrollments = signal<StudentEnrollment[]>([]);
   exitRecords = signal<StudentExitRecord[]>([]);
@@ -48,7 +50,7 @@ export class StudentHistoryTab {
           this.isLoading.set(false);
         },
         error: (err) => {
-          console.error('Failed to load student history:', err);
+          this.toast.showError(err, 'Failed to load student history.');
           this.isLoading.set(false);
         }
       });

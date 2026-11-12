@@ -72,7 +72,7 @@ selectedSectionName = computed(() => {
           this.fetchAttendanceOrStudents();
         }
       },
-      error: (err) => this.toast.show('Failed to load sections', err)
+      error: (err) => this.toast.showError(err, 'Failed to load sections')
     });
   }
 
@@ -124,7 +124,7 @@ selectedSectionName = computed(() => {
         this.isLoading.set(false);
       },
       error: (err) => {
-        this.toast.show('Failed to load students', err);
+        this.toast.showError(err, 'Failed to load students');
         this.isLoading.set(false);
       }
     });
@@ -152,13 +152,13 @@ submitAttendance() {
   const date = this.selectedDate();
 
   if (this.students().length === 0) {
-    this.toast.show('Cannot submit attendance. No students found in this section.');
+    this.toast.show('Cannot submit attendance. No students found in this section.', 'error');
     return;
   }
 
   // Prevent submit if any student status is unassigned
   if (this.isAttendanceIncomplete()) {
-    this.toast.show('Please mark attendance for all students before submitting.');
+    this.toast.show('Please mark attendance for all students before submitting.', 'error');
     return;
   }
 
@@ -181,7 +181,7 @@ submitAttendance() {
     },
     error: (err) => {
       this.isSubmitting.set(false);
-      this.toast.show('Failed to save attendance', err);
+      this.toast.showError(err, 'Failed to save attendance');
     }
   });
 }

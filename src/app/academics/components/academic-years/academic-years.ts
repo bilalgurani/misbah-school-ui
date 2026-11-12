@@ -59,7 +59,7 @@ export class AcademicYears implements OnInit {
         this.toast.show('Academic year created successfully.');
       },
       error: () => {
-        this.toast.show('Failed to create academic year. Please try again.');
+        this.toast.show('Failed to create academic year. Please try again.', 'error');
       }
     });
   }
