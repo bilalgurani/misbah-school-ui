@@ -1,7 +1,7 @@
 <div class="directory-container">
   <div class="page-header">
     <h2>Academic Years</h2>
-    <button class="btn-primary" (click)="openCreateModal()">+ Create Next Year</button>
+    <button type="button" class="btn-primary" (click)="openCreateModal()">+ Create Next Year</button>
   </div>
 
   <div class="card">
@@ -34,7 +34,8 @@
                 </td>
                 <td data-label="Actions" class="actions">
                   @if (!year.current && year.id) {
-                    <button class="btn-secondary" (click)="markAsCurrent(year.id)">Set as Current</button>
+                    <button type="button" class="btn-secondary" (click)="markAsCurrent(year.id)">Set as Current</button>
+                    <button type="button" class="btn-danger" (click)="requestDelete(year)" [attr.aria-label]="'Delete ' + year.name">Delete</button>
                   }
                 </td>
               </tr>
@@ -52,30 +53,44 @@
 
 @if (showModal()) {
   <div class="modal-backdrop" (click)="closeModal()">
-    <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="year-modal-title" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h3>Create Academic Year</h3>
-        <button class="close-btn" (click)="closeModal()">&times;</button>
+        <h3 id="year-modal-title">Create Academic Year</h3>
+        <button type="button" class="close-btn" (click)="closeModal()" aria-label="Close modal">&times;</button>
       </div>
       <div class="modal-body">
         <div class="form-group">
-          <label>Year Name (e.g., 2026-2027)</label>
-          <input type="text" [(ngModel)]="newYear.name" placeholder="YYYY-YYYY" class="form-input">
+          <label for="year-name">Year Name (e.g., 2026-2027)</label>
+          <input id="year-name" type="text" [(ngModel)]="newYear.name" placeholder="YYYY-YYYY" class="form-input">
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label>Start Date</label>
-            <input type="date" [(ngModel)]="newYear.startDate" class="form-input">
+            <label for="year-start">Start Date</label>
+            <input id="year-start" type="date" [(ngModel)]="newYear.startDate" class="form-input">
           </div>
           <div class="form-group">
-            <label>End Date</label>
-            <input type="date" [(ngModel)]="newYear.endDate" class="form-input">
+            <label for="year-end">End Date</label>
+            <input id="year-end" type="date" [(ngModel)]="newYear.endDate" class="form-input">
           </div>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn-primary full-width-mobile" (click)="saveYear()">Save Academic Year</button>
+        <button type="button" class="btn-secondary" (click)="closeModal()">Cancel</button>
+        <button type="button" class="btn-primary" [disabled]="isSaving()" (click)="saveYear()">
+          {{ isSaving() ? 'Saving...' : 'Save Academic Year' }}
+        </button>
       </div>
     </div>
   </div>
+}
+
+@if (yearToDelete(); as target) {
+  <app-confirm-dialog
+    title="Delete Academic Year"
+    [message]="'Are you sure you want to delete ' + target.name + '? This action cannot be undone.'"
+    confirmLabel="Delete"
+    [busy]="isDeleting()"
+    (confirmed)="deleteYear()"
+    (cancelled)="cancelDelete()">
+  </app-confirm-dialog>
 }
