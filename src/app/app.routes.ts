@@ -37,7 +37,7 @@ export const routes: Routes = [
       {path: 'register', component: Register, canActivate: [AuthGuards.roleGuard('ADMIN')]},
       { path: 'change-password', component: ChangePassword },
       { path: 'dashboard', component: Dashboard },
-      { path: 'reset-password', component: UserManagement},
+      { path: 'reset-password', component: UserManagement, canActivate: [AuthGuards.roleGuard('ADMIN')] },
       { path: 'admin', component: Dashboard, canActivate: [AuthGuards.roleGuard('ADMIN')] },
 
       // Academic Management Routes
