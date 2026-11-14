@@ -16,6 +16,7 @@ export class ChangePassword {
   private http = inject(HttpClient);
   private toast = inject(ToastService);
   private authService = inject(AuthService);
+  mustChange = this.authService.mustChangePassword;
   isLoading = signal(false);
 
   passForm: FormGroup = this.fb.group({

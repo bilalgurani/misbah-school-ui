@@ -16,6 +16,7 @@ export interface AuthResponse {
   username: string;
   email?: string;
   teacher_id?: string | null;
+  must_change_password?: boolean;
 }
 
 export interface UserProfile {
@@ -23,6 +24,7 @@ export interface UserProfile {
   email: string;
   role: string;
   teacher_id?: string | null;
+  must_change_password?: boolean;
 }
 
 export interface RegisterRequest {
@@ -53,6 +55,7 @@ export class AuthService {
   currentEmail = signal<string | null>(localStorage.getItem('email'));
   currentRole = signal<string | null>(localStorage.getItem('role'));
   currentTeacherId = signal<string | null>(localStorage.getItem('teacher_id'));
+  mustChangePassword = signal<boolean>(localStorage.getItem('must_change_password') === 'true');
   isLoggedIn = signal<boolean>(this.hasValidToken());
 
   // Reactive Computed property for template reactivity (@if (auth.isAuthenticated()))
@@ -84,6 +87,8 @@ export class AuthService {
         localStorage.removeItem('teacher_id');
         this.currentTeacherId.set(null);
       }
+
+      this.setMustChangePassword(!!response.must_change_password);
 
       this.currentUser.set(response.username);
       this.currentRole.set(normalizedRole);
@@ -141,8 +146,22 @@ forceLocalLogout(): void {
         localStorage.setItem('teacher_id', profile.teacher_id);
         this.currentTeacherId.set(profile.teacher_id);
       }
+
+      // Only trust the profile when the server actually reports the flag.
+      if (profile.must_change_password !== undefined) {
+        this.setMustChangePassword(profile.must_change_password);
+      }
     })
   );
+}
+
+private setMustChangePassword(value: boolean): void {
+  if (value) {
+    localStorage.setItem('must_change_password', 'true');
+  } else {
+    localStorage.removeItem('must_change_password');
+  }
+  this.mustChangePassword.set(value);
 }
 
   register(data: RegisterRequest): Observable<any> {
@@ -162,8 +181,10 @@ private clearLocalSession(): void {
   localStorage.removeItem('role');
   localStorage.removeItem('teacher_id');
   localStorage.removeItem('email');
+  localStorage.removeItem('must_change_password');
   sessionStorage.clear();
 
+  this.mustChangePassword.set(false);
   this.isLoggedIn.set(false);
   this.currentUser.set(null);
   this.currentEmail.set(null);

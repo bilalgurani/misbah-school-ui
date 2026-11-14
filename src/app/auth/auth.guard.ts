@@ -1,6 +1,6 @@
 // src/app/auth/auth.guard.ts
 import { inject } from '@angular/core';
-import { CanActivateFn, Router } from '@angular/router';
+import { CanActivateChildFn, CanActivateFn, Router } from '@angular/router';
 import { AuthService } from './auth.service';
 
 export class AuthGuards {
@@ -25,7 +25,19 @@ export class AuthGuards {
     const hasToken = authService.isAuthenticated();
 
     if (hasToken) {
-      return router.createUrlTree(['/dashboard']);
+      return router.createUrlTree([authService.mustChangePassword() ? '/change-password' : '/dashboard']);
+    }
+
+    return true;
+  };
+
+  // Locks users with a temporary password to the change-password page.
+  static passwordChangeGuard: CanActivateChildFn = (_route, state) => {
+    const authService = inject(AuthService);
+    const router = inject(Router);
+
+    if (authService.mustChangePassword() && !state.url.startsWith('/change-password')) {
+      return router.createUrlTree(['/change-password']);
     }
 
     return true;

@@ -32,6 +32,7 @@ export const routes: Routes = [
     path: '',
     component: Shell,
     canActivate: [AuthGuards.authGuard],   // guard runs once, on the parent
+    canActivateChild: [AuthGuards.passwordChangeGuard],
     children: [
       {path: 'register', component: Register, canActivate: [AuthGuards.roleGuard('ADMIN')]},
       { path: 'change-password', component: ChangePassword },

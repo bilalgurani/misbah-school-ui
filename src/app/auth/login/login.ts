@@ -41,7 +41,7 @@ export class Login {
     this.authService.login(this.loginForm.value as any).subscribe({
       next: () => {
         this.isLoading.set(false);
-        this.router.navigate(['/dashboard']);
+        this.router.navigate([this.authService.mustChangePassword() ? '/change-password' : '/dashboard']);
       },
       error: (err) => {
         this.isLoading.set(false);
