@@ -1,0 +1,293 @@
+<div class="report-container">
+  <header class="report-header no-print">
+    <div class="header-text">
+      <h1 class="title">Daily Attendance Report</h1>
+      <p class="subtitle">School-wide attendance summary for the selected date</p>
+    </div>
+
+    <div class="toolbar">
+      <label class="date-field">
+        <span>Report date</span>
+        <input
+          type="date"
+          [ngModel]="selectedDate()"
+          (ngModelChange)="selectedDate.set($event)"
+          [max]="maxDate"
+        />
+      </label>
+      <button type="button" class="btn btn-primary" (click)="generate()" [disabled]="isLoading() || !selectedDate()">
+        <span [class.spin]="isLoading()">&#x21bb;</span>
+        <span>Generate</span>
+      </button>
+      <button type="button" class="btn btn-outline" (click)="downloadCsv()" [disabled]="!report()">
+        Download CSV
+      </button>
+      <button type="button" class="btn btn-outline" (click)="print()" [disabled]="!report()">
+        Print / Save PDF
+      </button>
+    </div>
+  </header>
+
+  @if (isLoading()) {
+    <app-loader message="Compiling attendance report..."></app-loader>
+  }
+
+  @if (hasError() && !isLoading()) {
+    <div class="banner banner-error no-print">
+      <p>Could not generate the report. Please check your connection and try again.</p>
+    </div>
+  }
+
+  @if (!isLoading() && report(); as r) {
+    <div class="print-heading">
+      <h2>Sana Misbah School</h2>
+      <p>Daily Attendance Report</p>
+    </div>
+
+    <div class="report-meta">
+      <strong>{{ r.date | date: 'fullDate' }}</strong>
+      <span>Generated {{ r.generatedAt | date: 'dd MMM yyyy, hh:mm a' }}</span>
+    </div>
+
+    @if (r.markedSections === 0) {
+      <div class="banner banner-warn">
+        <p>No student attendance has been marked for this date. It may be a holiday or attendance is still pending.</p>
+      </div>
+    } @else if (r.pendingSections.length > 0) {
+      <div class="banner banner-warn">
+        <p>
+          Attendance is pending for {{ r.pendingSections.length }} of {{ r.totalSections }} class sections.
+          Figures below cover only the {{ r.markedSections }} marked sections.
+        </p>
+      </div>
+    }
+
+    @if (r.failedSections.length > 0) {
+      <div class="banner banner-error">
+        <p>Data could not be loaded for: {{ failedNames(r) }}. Their numbers are excluded.</p>
+      </div>
+    }
+
+    <!-- Headline figures -->
+    <section class="kpi-grid">
+      <div class="kpi-card" [class.low]="isLow(r.attendancePct)">
+        <div class="kpi-title">Overall Attendance</div>
+        <div class="kpi-value">
+          @if (r.attendancePct !== null) { {{ r.attendancePct | number: '1.0-1' }}% } @else { &mdash; }
+        </div>
+        <div class="kpi-subtext">{{ r.present + r.late }} of {{ r.markedStudents }} students attended</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-title">Present</div>
+        <div class="kpi-value">{{ r.present }}</div>
+        <div class="kpi-subtext">On time</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-title">Late</div>
+        <div class="kpi-value">{{ r.late }}</div>
+        <div class="kpi-subtext">Counted as attended</div>
+      </div>
+      <div class="kpi-card danger">
+        <div class="kpi-title">Absent</div>
+        <div class="kpi-value">{{ r.absent }}</div>
+        <div class="kpi-subtext">Needs follow-up</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-title">Classes Marked</div>
+        <div class="kpi-value">{{ r.markedSections }}/{{ r.totalSections }}</div>
+        <div class="kpi-subtext">{{ r.pendingSections.length }} pending</div>
+      </div>
+      <div class="kpi-card" [class.low]="r.staff.marked && isLow(r.staff.attendancePct)">
+        <div class="kpi-title">Teachers Present</div>
+        <div class="kpi-value">
+          @if (r.staff.marked) { {{ r.staff.present + r.staff.late }}/{{ r.staff.totalTeachers }} } @else { &mdash; }
+        </div>
+        <div class="kpi-subtext">
+          @if (!r.staff.available) { Unavailable }
+          @else if (!r.staff.marked) { Not marked }
+          @else { {{ r.staff.absent }} absent }
+        </div>
+      </div>
+    </section>
+
+    <!-- Highlights -->
+    @if (r.bestClass) {
+      <section class="highlights">
+        <div class="highlight good">
+          <span class="label">Highest attendance</span>
+          <strong>{{ r.bestClass.displayName }}</strong>
+          <span>{{ r.bestClass.attendancePct | number: '1.0-1' }}%</span>
+        </div>
+        @if (r.lowestClass) {
+          <div class="highlight" [class.bad]="isLow(r.lowestClass.attendancePct)">
+            <span class="label">Lowest attendance</span>
+            <strong>{{ r.lowestClass.displayName }}</strong>
+            <span>{{ r.lowestClass.attendancePct | number: '1.0-1' }}%</span>
+          </div>
+        }
+        <div class="highlight" [class.bad]="r.lowAttendanceClasses.length > 0">
+          <span class="label">Classes below {{ lowThreshold }}%</span>
+          <strong>{{ r.lowAttendanceClasses.length }}</strong>
+          <span>{{ lowNames(r) }}</span>
+        </div>
+      </section>
+    }
+
+    <div class="two-col">
+      <!-- Gender-wise -->
+      <section class="panel">
+        <h3>Gender-wise Attendance</h3>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr><th>Group</th><th class="num">Marked</th><th class="num">Attended</th><th class="num">Absent</th><th class="num">%</th></tr>
+            </thead>
+            <tbody>
+              @for (g of r.genders; track g.label) {
+                <tr>
+                  <td class="fw-medium">{{ g.label }}</td>
+                  <td class="num">{{ g.total }}</td>
+                  <td class="num">{{ g.attended }}</td>
+                  <td class="num">{{ g.absent }}</td>
+                  <td class="num">{{ g.attendancePct === null ? '—' : (g.attendancePct | number: '1.0-1') + '%' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Staff -->
+      <section class="panel">
+        <h3>Teaching Staff</h3>
+        @if (!r.staff.available) {
+          <p class="empty-state">Teacher attendance could not be loaded.</p>
+        } @else if (!r.staff.marked) {
+          <p class="empty-state">Teacher attendance has not been marked for this date.</p>
+        } @else {
+          <div class="staff-stats">
+            <div><strong>{{ r.staff.totalTeachers }}</strong><span>Total</span></div>
+            <div><strong>{{ r.staff.present }}</strong><span>Present</span></div>
+            <div><strong>{{ r.staff.late }}</strong><span>Late</span></div>
+            <div><strong>{{ r.staff.absent }}</strong><span>Absent</span></div>
+            <div><strong>{{ r.staff.attendancePct | number: '1.0-1' }}%</strong><span>Attendance</span></div>
+          </div>
+          @if (r.staff.absentees.length > 0) {
+            <ul class="name-list">
+              @for (t of r.staff.absentees; track t.teacherId) {
+                <li>
+                  <span>{{ t.name }} <small>({{ t.employeeId }})</small></span>
+                  <span class="badge" [class.badge-absent]="t.status === 'ABSENT'" [class.badge-late]="t.status === 'LATE'">{{ t.status }}</span>
+                </li>
+              }
+            </ul>
+          } @else {
+            <p class="empty-state">All teachers are present.</p>
+          }
+        }
+      </section>
+    </div>
+
+    <!-- Class-wise -->
+    <section class="panel">
+      <h3>Class-wise Attendance</h3>
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Class</th>
+              <th class="num">On roll</th>
+              <th class="num">Present</th>
+              <th class="num">Late</th>
+              <th class="num">Absent</th>
+              <th class="num">Attendance</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (c of r.classRows; track c.classSectionId) {
+              <tr [class.row-low]="isLow(c.attendancePct)">
+                <td data-label="Class" class="fw-medium">{{ c.displayName }}</td>
+                <td data-label="On roll" class="num">{{ c.enrolled }}</td>
+                <td data-label="Present" class="num">{{ c.marked ? c.present : '—' }}</td>
+                <td data-label="Late" class="num">{{ c.marked ? c.late : '—' }}</td>
+                <td data-label="Absent" class="num">{{ c.marked ? c.absent : '—' }}</td>
+                <td data-label="Attendance" class="num">
+                  @if (c.attendancePct !== null) {
+                    <span class="bar"><span class="bar-fill" [class.low]="isLow(c.attendancePct)" [style.width.%]="c.attendancePct"></span></span>
+                    {{ c.attendancePct | number: '1.0-1' }}%
+                  } @else { — }
+                </td>
+                <td data-label="Status">
+                  @if (c.failed) { <span class="badge badge-absent">Load failed</span> }
+                  @else if (!c.marked) { <span class="badge badge-pending">Pending</span> }
+                  @else if (isLow(c.attendancePct)) { <span class="badge badge-absent">Low</span> }
+                  @else { <span class="badge badge-ok">Marked</span> }
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="7" class="empty-state">No class sections found.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Student follow-up lists -->
+    <section class="panel">
+      <h3>Absent Students ({{ absentStudents().length }})</h3>
+      @if (absentStudents().length > 0) {
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead><tr><th>Class</th><th>Roll No</th><th>Student</th></tr></thead>
+            <tbody>
+              @for (a of absentStudents(); track a.studentId) {
+                <tr>
+                  <td data-label="Class">{{ a.className }}</td>
+                  <td data-label="Roll No">{{ a.rollNo }}</td>
+                  <td data-label="Student" class="fw-medium">{{ a.name }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <p class="empty-state">No absentees in the marked classes.</p>
+      }
+    </section>
+
+    @if (lateStudents().length > 0) {
+      <section class="panel">
+        <h3>Late Arrivals ({{ lateStudents().length }})</h3>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead><tr><th>Class</th><th>Roll No</th><th>Student</th></tr></thead>
+            <tbody>
+              @for (a of lateStudents(); track a.studentId) {
+                <tr>
+                  <td data-label="Class">{{ a.className }}</td>
+                  <td data-label="Roll No">{{ a.rollNo }}</td>
+                  <td data-label="Student" class="fw-medium">{{ a.name }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+    }
+
+    @if (r.pendingSections.length > 0) {
+      <section class="panel">
+        <h3>Attendance Not Yet Marked ({{ r.pendingSections.length }})</h3>
+        <ul class="name-list">
+          @for (c of r.pendingSections; track c.classSectionId) {
+            <li>
+              <span>{{ c.displayName }}</span>
+              <span class="badge badge-pending">{{ c.enrolled }} students</span>
+            </li>
+          }
+        </ul>
+      </section>
+    }
+  }
+</div>

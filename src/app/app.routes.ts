@@ -18,6 +18,7 @@ import { AcademicYears } from './academics/components/academic-years/academic-ye
 import { PromoteStudents } from './academics/components/promote-students/promote-students';
 import { StudentHistoryTab } from './academics/components/student-history-tab/student-history-tab';
 import { ExitRecords } from './academics/components/exit-records/exit-records';
+import { AttendanceReportComponent } from './reports/components/attendance-report/attendance-report';
 
 export const routes: Routes = [
   // Public Route
@@ -57,6 +58,7 @@ export const routes: Routes = [
       { path: 'teachers/edit/:id', component: AddTeacher, canActivate: [AuthGuards.roleGuard('ADMIN')] },
 
       { path: 'financials', component: FinancialLedger, canActivate: [AuthGuards.roleGuard('ADMIN')] },
+      { path: 'reports/attendance', component: AttendanceReportComponent, canActivate: [AuthGuards.roleGuard('ADMIN')] },
 
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: '**', redirectTo: 'dashboard' }

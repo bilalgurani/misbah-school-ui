@@ -49,6 +49,24 @@ select {
 
 
 
+@media print {
+  .sidenav,
+  .top-header,
+  .sidebar-backdrop,
+  .no-print {
+    display: none !important;
+  }
+
+  .shell {
+    display: block !important;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
 body {
   font-family: 'Roboto', sans-serif;
   min-height: 100vh;
