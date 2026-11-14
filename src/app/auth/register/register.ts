@@ -44,12 +44,22 @@ export class Register implements OnInit {
   ngOnInit(): void {
     this.loadUnlinkedTeachers();
 
+    this.updateTeacherIdValidation(this.registerForm.get('role')?.value);
+
     // Reset teacherId if role is switched away from TEACHER
     this.registerForm.get('role')?.valueChanges.subscribe((selectedRole) => {
       if (selectedRole !== 'TEACHER') {
         this.registerForm.get('teacherId')?.setValue(null);
       }
+      this.updateTeacherIdValidation(selectedRole);
     });
+  }
+
+  // A teacher login must be linked to a teacher record, otherwise attendance can't be marked.
+  private updateTeacherIdValidation(role: string): void {
+    const control = this.registerForm.get('teacherId');
+    control?.setValidators(role === 'TEACHER' ? [Validators.required] : []);
+    control?.updateValueAndValidity();
   }
 
   loadUnlinkedTeachers(): void {

@@ -54,7 +54,7 @@ export const routes: Routes = [
       { path: 'students/edit/:id', component: AddStudent, canActivate: [AuthGuards.roleGuard('ADMIN')] },
 
       { path: 'teachers', component: TeacherDirectory, canActivate: [AuthGuards.roleGuard('ADMIN')] },
-      { path: 'teacher-attendance', component: TeacherAttendance },
+      { path: 'teacher-attendance', component: TeacherAttendance, canActivate: [AuthGuards.roleGuard('ADMIN')] },
       { path: 'teachers/add', component: AddTeacher, canActivate: [AuthGuards.roleGuard('ADMIN')] },
       { path: 'teachers/edit/:id', component: AddTeacher, canActivate: [AuthGuards.roleGuard('ADMIN')] },
 
