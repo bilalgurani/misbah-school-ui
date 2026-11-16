@@ -4,9 +4,10 @@ import { AttendanceApiService } from "../../services/attendance-api.service";
 import { ClassSection, LocalStudentUI, MarkAttendanceRequest } from "../../models/attendance.models";
 import { ToastService } from "../../../shared/services/toast.service";
 import { ActivatedRoute } from "@angular/router";
+import { AbsenceAlert } from "../../../messaging/absence-alert/absence-alert";
 
 @Component({
-  imports: [FormsModule],
+  imports: [FormsModule, AbsenceAlert],
   selector: 'app-student-attendance',
   styleUrl: './student-attendance.scss',
   templateUrl: './student-attendance.html',
@@ -25,6 +26,7 @@ export class StudentAttendance implements OnInit {
   searchQuery = signal<string>('');
   isLoading = signal<boolean>(false);
   isSubmitting = signal<boolean>(false);
+  attendanceSaved = signal<boolean>(false);
 
 
 // Derived counts
@@ -86,6 +88,7 @@ selectedSectionName = computed(() => {
     if (!sectionId || !date) return;
 
     this.isLoading.set(true);
+    this.attendanceSaved.set(false);
 
     // 1. Try loading existing attendance record first
     this.api.getAttendance(sectionId, date).subscribe({
@@ -99,6 +102,7 @@ selectedSectionName = computed(() => {
             status: r.status
           }));
           this.students.set(mapped);
+          this.attendanceSaved.set(true);
           this.isLoading.set(false);
         } else {
           // 2. Fall back to raw student roster if attendance isn't marked yet
@@ -131,12 +135,14 @@ selectedSectionName = computed(() => {
   }
 
   setStatus(id: number, status: 'PRESENT' | 'ABSENT') {
+    this.attendanceSaved.set(false);
     this.students.update(list =>
       list.map(s => s.id === id ? { ...s, status } : s)
     );
   }
 
   markAll(status: 'PRESENT' | 'ABSENT') {
+    this.attendanceSaved.set(false);
     this.students.update(list => list.map(s => ({ ...s, status })));
   }
 
@@ -177,6 +183,7 @@ submitAttendance() {
   this.api.saveAttendance(payload).subscribe({
     next: () => {
       this.isSubmitting.set(false);
+      this.attendanceSaved.set(true);
       this.toast.show('Attendance submitted successfully!');
     },
     error: (err) => {

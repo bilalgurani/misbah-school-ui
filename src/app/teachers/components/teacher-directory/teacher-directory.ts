@@ -7,6 +7,8 @@ import { ToastService } from '../../../shared/services/toast.service';
 import { LoaderComponent } from '../../../shared/component/loader.component';
 import { AuthService } from '../../../auth/auth.service';
 import { ConfirmDialogComponent } from '../../../shared/component/confirm-dialog.component';
+import { downloadCsv, toCsv } from '../../../shared/utils/csv.util';
+import { todayIso } from '../../../shared/utils/date.util';
 interface FullTeacherDto {
   id: string;
   name: string;
@@ -53,6 +55,19 @@ export class TeacherDirectory {
 
   ngOnInit(): void {
     this.loadTeachers();
+  }
+
+  exportCsv(): void {
+    const rows = this.filteredTeachers();
+    if (rows.length === 0) {
+      this.toast.show('No teachers to export.', 'error');
+      return;
+    }
+    const csv = toCsv([
+      ['Name', 'Email', 'Subject', 'Qualification', 'Mobile'],
+      ...rows.map(t => [t.name, t.email, t.subject, t.qualification, t.mobileNo])
+    ]);
+    downloadCsv(`teachers-${todayIso()}.csv`, csv);
   }
 
   loadTeachers(): void {

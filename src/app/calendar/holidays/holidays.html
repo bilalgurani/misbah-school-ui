@@ -1,0 +1,191 @@
+<div class="directory-container">
+  <div class="page-header">
+    <div>
+      <h2>School Calendar &amp; Holidays</h2>
+      <p class="subtitle">Working days and holidays for the academic year. Sundays are a weekly off automatically.</p>
+    </div>
+    @if (isAdmin()) {
+      <button type="button" class="btn-primary" (click)="openModal()">+ Add Holiday</button>
+    }
+  </div>
+
+  <section class="card summary-card">
+    @if (summaryLoading()) {
+      <app-loader message="Calculating working days..."></app-loader>
+    } @else if (summaryError() || !summary()) {
+      <div class="state-box">
+        <p>The working days summary is not available right now.</p>
+        <button type="button" class="btn-secondary" (click)="loadSummary()">Retry</button>
+      </div>
+    } @else if (summary(); as s) {
+      <div class="summary-head">
+        <h3>Working days &mdash; {{ s.academicYear }}</h3>
+        <span class="muted">{{ toDate(s.startDate) | date: 'dd MMM yyyy' }} to {{ toDate(s.endDate) | date: 'dd MMM yyyy' }}</span>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-title">Days in year</div>
+          <div class="kpi-value">{{ s.totalDays }}</div>
+          <div class="kpi-subtext">{{ s.weeklyOffDays }} Sundays off</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">Holidays</div>
+          <div class="kpi-value">{{ s.holidays }}</div>
+          <div class="kpi-subtext">Excluding Sundays</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">Working days</div>
+          <div class="kpi-value">{{ s.workingDaysTotal }}</div>
+          <div class="kpi-subtext">In the whole year</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">Elapsed so far</div>
+          <div class="kpi-value">{{ s.workingDaysElapsed }}</div>
+          <div class="kpi-subtext">Working days to date</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">Attendance taken</div>
+          <div class="kpi-value">{{ s.daysAttendanceTaken }}</div>
+          <div class="kpi-subtext">Days</div>
+        </div>
+        <div class="kpi-card" [class.danger]="s.daysAttendanceMissing > 0">
+          <div class="kpi-title">Missing attendance</div>
+          <div class="kpi-value">{{ s.daysAttendanceMissing }}</div>
+          <div class="kpi-subtext">Working days</div>
+        </div>
+      </div>
+
+      <p class="explain">
+        School was scheduled to run <strong>{{ s.workingDaysElapsed }}</strong> days so far; attendance was taken on
+        <strong>{{ s.daysAttendanceTaken }}</strong>;
+        @if (s.daysAttendanceMissing > 0) {
+          <strong>{{ s.daysAttendanceMissing }}</strong> working {{ s.daysAttendanceMissing === 1 ? 'day has' : 'days have' }} no attendance:
+        } @else {
+          no working days are missing attendance.
+        }
+      </p>
+
+      @if (s.missingDates.length > 0) {
+        <div class="chips">
+          @for (d of s.missingDates; track d) {
+            <span class="chip">{{ toDate(d) | date: 'EEE, dd MMM yyyy' }}</span>
+          }
+        </div>
+      }
+    }
+  </section>
+
+  <section class="card toolbar-card">
+    <div class="range-row">
+      <div class="form-group">
+        <label for="h-year">Academic year</label>
+        <select id="h-year" class="form-input" [ngModel]="selectedYearId()" (ngModelChange)="onYearChange($event)">
+          <option [ngValue]="''">Custom range</option>
+          @for (y of years(); track y.id) {
+            <option [ngValue]="y.id">{{ y.name }}{{ y.current ? ' (current)' : '' }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="h-from">From</label>
+        <input id="h-from" type="date" class="form-input" [ngModel]="from()" (ngModelChange)="from.set($event)" />
+      </div>
+      <div class="form-group">
+        <label for="h-to">To</label>
+        <input id="h-to" type="date" class="form-input" [ngModel]="to()" (ngModelChange)="to.set($event)" />
+      </div>
+      <button type="button" class="btn-secondary apply-btn" (click)="applyRange()" [disabled]="listLoading()">Show</button>
+    </div>
+  </section>
+
+  <div class="card">
+    @if (listLoading()) {
+      <app-loader message="Loading holidays..."></app-loader>
+    } @else if (listError()) {
+      <div class="state-box">
+        <p>Holidays could not be loaded.</p>
+        <button type="button" class="btn-secondary" (click)="loadHolidays()">Retry</button>
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Day</th>
+              <th>Holiday</th>
+              <th>Type</th>
+              @if (isAdmin()) { <th>Actions</th> }
+            </tr>
+          </thead>
+          <tbody>
+            @for (h of sortedHolidays(); track h.id) {
+              <tr>
+                <td data-label="Date" class="fw-medium">{{ toDate(h.date) | date: 'dd MMM yyyy' }}</td>
+                <td data-label="Day">{{ toDate(h.date) | date: 'EEEE' }}</td>
+                <td data-label="Holiday">{{ h.name }}</td>
+                <td data-label="Type"><span class="badge badge-{{ h.type.toLowerCase() }}">{{ h.type }}</span></td>
+                @if (isAdmin()) {
+                  <td data-label="Actions" class="actions">
+                    <button type="button" class="btn-danger" (click)="requestDelete(h)" [attr.aria-label]="'Delete ' + h.name">Delete</button>
+                  </td>
+                }
+              </tr>
+            } @empty {
+              <tr>
+                <td [attr.colspan]="isAdmin() ? 5 : 4" class="empty-state">No holidays in this date range.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>
+
+@if (showModal()) {
+  <div class="modal-backdrop" (click)="closeModal()">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="holiday-modal-title" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 id="holiday-modal-title">Add Holiday</h3>
+        <button type="button" class="close-btn" (click)="closeModal()" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="holiday-date">Date</label>
+          <input id="holiday-date" type="date" class="form-input" [(ngModel)]="newHoliday.date" />
+        </div>
+        <div class="form-group">
+          <label for="holiday-name">Name</label>
+          <input id="holiday-name" type="text" class="form-input" maxlength="120" [(ngModel)]="newHoliday.name" placeholder="e.g. Independence Day" />
+        </div>
+        <div class="form-group">
+          <label for="holiday-type">Type</label>
+          <select id="holiday-type" class="form-input" [(ngModel)]="newHoliday.type">
+            @for (t of types; track t) {
+              <option [value]="t">{{ t }}</option>
+            }
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" (click)="closeModal()">Cancel</button>
+        <button type="button" class="btn-primary" [disabled]="isSaving()" (click)="saveHoliday()">
+          {{ isSaving() ? 'Saving...' : 'Save Holiday' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (holidayToDelete(); as target) {
+  <app-confirm-dialog
+    title="Delete Holiday"
+    [message]="'Delete ' + target.name + ' (' + target.date + ')? That day will count as a working day again.'"
+    confirmLabel="Delete"
+    [busy]="isDeleting()"
+    (confirmed)="deleteHoliday()"
+    (cancelled)="cancelDelete()">
+  </app-confirm-dialog>
+}

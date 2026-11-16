@@ -1,9 +1,13 @@
 <div class="directory-container">
   <div class="page-header">
     <h2>Teacher Directory</h2>
-    @if (authService.isAdmin()) {
-      <a routerLink="/teachers/add" class="btn-primary">+ Add Teacher</a>
-    }
+    <div style="display:flex;flex-wrap:wrap;gap:0.5rem">
+      <button type="button" class="btn-primary" style="border:none;cursor:pointer;font-family:inherit"
+        (click)="exportCsv()" [disabled]="isLoading()">Export CSV</button>
+      @if (authService.isAdmin()) {
+        <a routerLink="/teachers/add" class="btn-primary">+ Add Teacher</a>
+      }
+    </div>
   </div>
 
   <div class="card">

@@ -1,0 +1,61 @@
+<div class="page-container receipt-page">
+  <div class="page-header no-print">
+    <h2>Fee Receipt</h2>
+    <div class="header-actions">
+      <a routerLink="/fees/collect" class="btn-secondary">Back to Collection</a>
+      @if (receipt()) {
+        <button type="button" class="btn-primary" (click)="print()">Print</button>
+      }
+    </div>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loader-container no-print">
+      <app-loader message="Loading receipt..."></app-loader>
+    </div>
+  } @else if (receipt(); as r) {
+    <article class="receipt" aria-label="Fee receipt">
+      <header class="receipt-header">
+        <h1>{{ r.schoolName }}</h1>
+        <p class="receipt-title">Fee Receipt</p>
+      </header>
+
+      <div class="receipt-meta">
+        <div><span class="label">Receipt No</span><strong>{{ r.receiptNo }}</strong></div>
+        <div><span class="label">Date</span><strong>{{ r.paidOn | date: 'dd MMM yyyy' }}</strong></div>
+        <div><span class="label">Academic Year</span><strong>{{ r.academicYear }}</strong></div>
+      </div>
+
+      <dl class="receipt-details">
+        <div><dt>Student</dt><dd>{{ r.studentName }}</dd></div>
+        <div><dt>Class</dt><dd>{{ r.className }}</dd></div>
+        <div><dt>Father's Name</dt><dd>{{ r.fatherName || '-' }}</dd></div>
+        <div><dt>Installment</dt><dd>{{ r.installmentName }}</dd></div>
+        <div><dt>Payment Mode</dt><dd>{{ r.mode }}</dd></div>
+        <div><dt>Reference</dt><dd>{{ r.reference || '-' }}</dd></div>
+      </dl>
+
+      <div class="receipt-amount">
+        <div class="amount-line">
+          <span>Amount Received</span>
+          <strong>{{ r.amount | inr }}</strong>
+        </div>
+        <p class="amount-words">{{ words() }}</p>
+        <div class="balance-line">
+          <span>Balance after this payment</span>
+          <strong>{{ r.balanceAfter | inr }}</strong>
+        </div>
+      </div>
+
+      <footer class="receipt-footer">
+        <div>
+          <span class="label">Received by</span>
+          <strong>{{ r.recordedBy || '-' }}</strong>
+        </div>
+        <div class="signature">Authorised Signatory</div>
+      </footer>
+    </article>
+  } @else if (loadFailed()) {
+    <div class="alert alert-error no-print">Receipt could not be loaded.</div>
+  }
+</div>

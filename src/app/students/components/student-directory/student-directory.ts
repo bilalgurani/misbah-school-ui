@@ -7,7 +7,10 @@ import { LoaderComponent } from '../../../shared/component/loader.component';
 import { AuthService } from '../../../auth/auth.service';
 import { ExitStudentModal } from '../../../academics/components/exit-student-modal/exit-student-modal';
 import { ConfirmDialogComponent } from '../../../shared/component/confirm-dialog.component';
-
+import { AttendanceApiService } from '../../../attendance/services/attendance-api.service';
+import { ClassSection } from '../../../attendance/models/attendance.models';
+import { downloadCsv, toCsv } from '../../../shared/utils/csv.util';
+import { todayIso } from '../../../shared/utils/date.util';
 interface FullStudentDto {
   id: number;
   name: string;
@@ -41,9 +44,11 @@ interface FullStudentDto {
 export class StudentDirectory {
   private studentService = inject(StudentService);
   private toast = inject(ToastService);
+  private attendanceApi = inject(AttendanceApiService);
   public authService = inject(AuthService);
 
   students = signal<any[]>([]);
+  classSections = signal<ClassSection[]>([]);
   isLoading = signal<boolean>(false);
   searchQuery = signal<string>('');
   selectedStudent = signal<FullStudentDto | null>(null);
@@ -82,6 +87,32 @@ export class StudentDirectory {
 
   ngOnInit(): void {
     this.loadStudents();
+    this.attendanceApi.getClassSections().subscribe({
+      next: (sections) => this.classSections.set(sections),
+      error: () => this.classSections.set([])
+    });
+  }
+
+  exportCsv(): void {
+    const rows = this.filteredStudents();
+    if (rows.length === 0) {
+      this.toast.show('No students to export.', 'error');
+      return;
+    }
+    const sectionNames = new Map(this.classSections().map(s => [s.id, s.displayName]));
+    const genderLabel = (g: string | null) => g === 'M' ? 'Male' : g === 'F' ? 'Female' : g ? 'Other' : '';
+    const csv = toCsv([
+      ['Name', 'Roll No', 'Class', 'Gender', 'Mobile', 'Status'],
+      ...rows.map(s => [
+        s.name,
+        s.rollNo,
+        sectionNames.get(s.classSectionId) ?? s.classSectionId,
+        genderLabel(s.gender),
+        s.mobileNo,
+        s.enrollmentStatus
+      ])
+    ]);
+    downloadCsv(`students-${todayIso()}.csv`, csv);
   }
 
   loadStudents(): void {

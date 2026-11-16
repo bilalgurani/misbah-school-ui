@@ -1,0 +1,34 @@
+<button type="button" class="notify-btn" [disabled]="absentCount() === 0" (click)="open()">
+  Notify parents of absentees ({{ absentCount() }})
+</button>
+
+@if (isOpen()) {
+  <div class="modal-backdrop" (click)="close()">
+    <div class="modal-card" role="alertdialog" aria-modal="true" aria-labelledby="absence-title" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 id="absence-title">Notify Parents</h3>
+        <button type="button" class="close-btn" (click)="close()" aria-label="Close dialog">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>Send an absence alert to the parents of <strong>{{ absentCount() }}</strong> absent student(s)?</p>
+        <label class="check-row">
+          <input type="checkbox" [ngModel]="sendSms()" (ngModelChange)="sendSms.set($event)">
+          <span>SMS</span>
+        </label>
+        <label class="check-row">
+          <input type="checkbox" [ngModel]="sendWhatsapp()" (ngModelChange)="sendWhatsapp.set($event)">
+          <span>WhatsApp</span>
+        </label>
+        @if (!sendSms() && !sendWhatsapp()) {
+          <span class="hint-error">Choose at least one channel.</span>
+        }
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" [disabled]="isSending()" (click)="close()">Cancel</button>
+        <button type="button" class="btn-primary" [disabled]="isSending() || (!sendSms() && !sendWhatsapp())" (click)="send()">
+          {{ isSending() ? 'Sending...' : 'Send Alerts' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

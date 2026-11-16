@@ -1,0 +1,149 @@
+<div class="page-container">
+  <div class="page-header">
+    <h2>Fee Setup</h2>
+  </div>
+
+  <div class="card">
+    <h3 class="card-title">Create Installment</h3>
+    <form class="card-body setup-form" [formGroup]="form" (ngSubmit)="create()" novalidate>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="fee-name">Installment Name</label>
+          <input id="fee-name" type="text" class="form-input" formControlName="name" placeholder="e.g. Term 1"
+            [class.invalid]="submitted() && form.controls.name.invalid">
+          @if (submitted() && form.controls.name.invalid) {
+            <span class="field-error">Name is required.</span>
+          }
+        </div>
+        <div class="form-group">
+          <label for="fee-amount">Amount (INR)</label>
+          <input id="fee-amount" type="number" min="1" step="0.01" class="form-input" formControlName="amount"
+            [class.invalid]="submitted() && form.controls.amount.invalid">
+          @if (submitted() && form.controls.amount.invalid) {
+            <span class="field-error">Enter an amount greater than 0.</span>
+          }
+        </div>
+        <div class="form-group">
+          <label for="fee-due">Due Date</label>
+          <input id="fee-due" type="date" class="form-input" formControlName="dueDate"
+            [class.invalid]="submitted() && form.controls.dueDate.invalid">
+          @if (submitted() && form.controls.dueDate.invalid) {
+            <span class="field-error">Due date is required.</span>
+          }
+        </div>
+        <div class="form-group">
+          <label for="fee-year">Academic Year</label>
+          <select id="fee-year" class="form-input" formControlName="academicYearId">
+            <option [ngValue]="null">Current year</option>
+            @for (year of academicYears(); track year.id) {
+              <option [ngValue]="year.id">{{ year.name }}{{ year.current ? ' (current)' : '' }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <div class="levels">
+        <div class="levels-header">
+          <span class="levels-title">Apply to class levels</span>
+          @if (classLevels().length > 0) {
+            <label class="check-row">
+              <input type="checkbox" [checked]="allSelected()" (change)="toggleAllLevels()">
+              <span>Select all</span>
+            </label>
+          }
+        </div>
+        <div class="levels-grid">
+          @for (level of classLevels(); track level.id) {
+            <label class="check-row level-chip" [class.selected]="isLevelSelected(level.id)">
+              <input type="checkbox" [checked]="isLevelSelected(level.id)" (change)="toggleLevel(level.id)">
+              <span>{{ level.name }}</span>
+            </label>
+          } @empty {
+            <span class="text-muted">No class levels found.</span>
+          }
+        </div>
+        @if (submitted() && selectedLevelIds().length === 0) {
+          <span class="field-error">Select at least one class level.</span>
+        }
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn-primary" [disabled]="isSaving()">
+          {{ isSaving() ? 'Saving...' : 'Create Installment' }}
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="toolbar">
+      <div class="form-group filter">
+        <label for="filter-year">Academic Year</label>
+        <select id="filter-year" class="form-input" [ngModel]="filterYearId()" (ngModelChange)="onFilterYear($event)">
+          <option [ngValue]="null">Current year</option>
+          @for (year of academicYears(); track year.id) {
+            <option [ngValue]="year.id">{{ year.name }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-group filter">
+        <label for="filter-level">Class Level</label>
+        <select id="filter-level" class="form-input" [ngModel]="filterLevelId()" (ngModelChange)="onFilterLevel($event)">
+          <option [ngValue]="null">All levels</option>
+          @for (level of classLevels(); track level.id) {
+            <option [ngValue]="level.id">{{ level.name }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    @if (isLoading()) {
+      <div class="loader-container">
+        <app-loader message="Loading installments..."></app-loader>
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Class Level</th>
+              <th>Installment</th>
+              <th class="num">Amount</th>
+              <th>Due Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of installments(); track item.id) {
+              <tr>
+                <td data-label="Class Level" class="fw-medium">{{ item.classLevelName }}</td>
+                <td data-label="Installment">{{ item.name }}</td>
+                <td data-label="Amount" class="num">{{ item.amount | inr }}</td>
+                <td data-label="Due Date">{{ item.dueDate | date: 'dd MMM yyyy' }}</td>
+                <td data-label="Actions" class="actions">
+                  <button type="button" class="btn-danger btn-sm" (click)="requestDelete(item)"
+                    [attr.aria-label]="'Delete ' + item.name + ' for ' + item.classLevelName">Delete</button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5" class="empty-state">No fee installments configured yet.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>
+
+@if (installmentToDelete(); as target) {
+  <app-confirm-dialog
+    title="Delete Installment"
+    [message]="'Delete ' + target.name + ' (' + target.classLevelName + ')? This cannot be undone.'"
+    confirmLabel="Delete"
+    [busy]="isDeleting()"
+    (confirmed)="deleteInstallment()"
+    (cancelled)="cancelDelete()">
+  </app-confirm-dialog>
+}

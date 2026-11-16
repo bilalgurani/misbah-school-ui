@@ -115,6 +115,9 @@
 
   @if (students().length > 0) {
   <footer class="form-footer">
+    @if (attendanceSaved() && selectedSectionId() !== null) {
+      <app-absence-alert [classSectionId]="selectedSectionId()!" [date]="selectedDate()" [absentCount]="absentCount()"></app-absence-alert>
+    }
     <button [disabled]="students().length === 0 || isSubmitting() || isLoading() || this.isAttendanceIncomplete()" 
       class="submit-btn" (click)="submitAttendance()">Save & Submit Attendance</button>
   </footer>

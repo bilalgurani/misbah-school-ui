@@ -1,0 +1,120 @@
+<div class="report-container">
+  <header class="report-header">
+    <div class="header-text">
+      <h1 class="title">Monthly Attendance Register</h1>
+      <p class="subtitle">Day-by-day attendance for a class section</p>
+    </div>
+
+    <div class="toolbar">
+      <label class="field">
+        <span>Class section</span>
+        <select
+          [ngModel]="selectedSectionId()"
+          (ngModelChange)="selectedSectionId.set($event)"
+          [disabled]="sectionsLoading()"
+        >
+          <option [ngValue]="''">{{ sectionsLoading() ? 'Loading...' : 'Select class' }}</option>
+          @for (s of sections(); track s.id) {
+            <option [ngValue]="s.id">{{ s.displayName }}</option>
+          }
+        </select>
+      </label>
+      <label class="field">
+        <span>Month</span>
+        <input type="month" [ngModel]="month()" (ngModelChange)="month.set($event)" />
+      </label>
+      <button type="button" class="btn btn-primary" (click)="generate()" [disabled]="isLoading() || selectedSectionId() === '' || !month()">
+        Generate
+      </button>
+      <button type="button" class="btn btn-outline" (click)="exportCsv()" [disabled]="!report()">Export CSV</button>
+    </div>
+  </header>
+
+  @if (isLoading()) {
+    <app-loader message="Building attendance register..."></app-loader>
+  }
+
+  @if (hasError() && !isLoading()) {
+    <div class="banner banner-error">
+      <p>Could not generate the register. Please check your connection and try again.</p>
+    </div>
+  }
+
+  @if (!isLoading() && !hasError() && !report()) {
+    <p class="empty-state">Choose a class section and month, then press Generate.</p>
+  }
+
+  @if (!isLoading() && report(); as r) {
+    <section class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-title">Working days</div>
+        <div class="kpi-value">{{ r.workingDays }}</div>
+        <div class="kpi-subtext">{{ r.className }} &middot; {{ r.month }}</div>
+      </div>
+      <div class="kpi-card" [class.danger]="r.daysAttendanceTaken < r.workingDays">
+        <div class="kpi-title">Days attendance taken</div>
+        <div class="kpi-value">{{ r.daysAttendanceTaken }}</div>
+        <div class="kpi-subtext">of {{ r.workingDays }} working days</div>
+      </div>
+      <div class="kpi-card" [class.danger]="isLow(r.summary.averageAttendancePct)">
+        <div class="kpi-title">Class average</div>
+        <div class="kpi-value">
+          @if (r.summary.averageAttendancePct !== null && r.summary.averageAttendancePct !== undefined) {
+            {{ r.summary.averageAttendancePct | number: '1.0-1' }}%
+          } @else { &mdash; }
+        </div>
+        <div class="kpi-subtext">{{ r.summary.totalStudents }} students</div>
+      </div>
+    </section>
+
+    @if (r.students.length === 0) {
+      <p class="empty-state">No students are enrolled in this class section.</p>
+    } @else {
+      <div class="legend">
+        <span><b class="cell present">P</b> Present</span>
+        <span><b class="cell absent">A</b> Absent</span>
+        <span><b class="cell late">L</b> Late</span>
+        <span><b class="cell closed">S</b> Sunday</span>
+        <span><b class="cell closed">H</b> Holiday</span>
+        <span class="low-note">Rows highlighted: below {{ lowThreshold }}% attendance</span>
+      </div>
+
+      <div class="register-wrap">
+        <table class="register">
+          <thead>
+            <tr>
+              <th class="sticky-col roll">Roll</th>
+              <th class="sticky-col name">Student</th>
+              @for (c of columns(); track c.date) {
+                <th class="day" [class.closed]="c.closed" [attr.title]="c.closed ? c.date + ' - ' + c.reason : c.date">{{ c.day }}</th>
+              }
+              <th class="total">Present</th>
+              <th class="total">Absent</th>
+              <th class="total">Late</th>
+              <th class="total">%</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of rows(); track row.student.studentId) {
+              <tr [class.row-low]="isLow(row.student.attendancePct)">
+                <td class="sticky-col roll">{{ row.student.rollNo }}</td>
+                <td class="sticky-col name">{{ row.student.name }}</td>
+                @for (cell of row.cells; track $index) {
+                  <td class="day cell" [class]="cell.cls" [attr.title]="cell.cls === 'closed' ? columns()[$index].reason : null">{{ cell.code }}</td>
+                }
+                <td class="total">{{ row.student.present }}</td>
+                <td class="total">{{ row.student.absent }}</td>
+                <td class="total">{{ row.student.late }}</td>
+                <td class="total pct" [class.low]="isLow(row.student.attendancePct)">
+                  @if (row.student.attendancePct !== null && row.student.attendancePct !== undefined) {
+                    {{ row.student.attendancePct | number: '1.0-1' }}%
+                  } @else { &mdash; }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+</div>

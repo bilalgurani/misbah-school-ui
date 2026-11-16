@@ -34,9 +34,21 @@ export interface RegisterRequest {
   role: string;
 }
 
+// Server tokens last 30 minutes; refresh once one has under 10 minutes left and the user was active recently.
+const SessionTiming = {
+  CHECK_INTERVAL_MS: 60_000,
+  REFRESH_BEFORE_EXPIRY_MS: 10 * 60_000,
+  ACTIVE_WINDOW_MS: 20 * 60_000,
+} as const;
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
 
+  private logoutTimer: ReturnType<typeof setTimeout> | null = null;
+  private refreshTimer: ReturnType<typeof setInterval> | null = null;
+  private lastActivity = Date.now();
+  private activityTracked = false;
+  private isRefreshing = false;
   
   private http = inject(HttpClient);
   private router = inject(Router);
@@ -46,7 +58,7 @@ export class AuthService {
   constructor() {
   const token = localStorage.getItem('token');
   if (token && !this.isTokenExpired(token)) {
-    this.scheduleAutoLogout(token);
+    this.startSession(token);
   }
 }
 
@@ -94,7 +106,7 @@ export class AuthService {
       this.currentRole.set(normalizedRole);
       this.isLoggedIn.set(true);
 
-      this.scheduleAutoLogout(response.token);
+      this.startSession(response.token);
     })
   );
 }
@@ -114,13 +126,60 @@ private hasValidToken(): boolean {
 }
 
 private scheduleAutoLogout(token: string): void {
+  if (this.logoutTimer) clearTimeout(this.logoutTimer);
   try {
     const payload = JSON.parse(atob(token.split('.')[1]));
     const msUntilExpiry = payload.exp * 1000 - Date.now();
     if (msUntilExpiry > 0) {
-      setTimeout(() => this.forceLocalLogout(), msUntilExpiry);
+      this.logoutTimer = setTimeout(() => this.forceLocalLogout(), msUntilExpiry);
     }
   } catch { /* ignore malformed token */ }
+}
+
+// Tokens are short-lived. While the user is active we swap in a fresh one in the background;
+// an idle user simply lets it expire. The server caps the whole session regardless of activity.
+private startSession(token: string): void {
+  this.scheduleAutoLogout(token);
+  this.trackActivity();
+
+  if (this.refreshTimer) return;
+  this.refreshTimer = setInterval(() => this.refreshIfActive(), SessionTiming.CHECK_INTERVAL_MS);
+}
+
+private trackActivity(): void {
+  if (this.activityTracked) return;
+  this.activityTracked = true;
+
+  const markActive = () => { this.lastActivity = Date.now(); };
+  for (const event of ['click', 'keydown', 'touchstart', 'scroll', 'mousemove']) {
+    document.addEventListener(event, markActive, { passive: true });
+  }
+}
+
+private refreshIfActive(): void {
+  const token = localStorage.getItem('token');
+  if (!token) return;
+
+  let msUntilExpiry: number;
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    msUntilExpiry = payload.exp * 1000 - Date.now();
+  } catch {
+    return;
+  }
+
+  const isActive = Date.now() - this.lastActivity < SessionTiming.ACTIVE_WINDOW_MS;
+  if (this.isRefreshing || !isActive || msUntilExpiry > SessionTiming.REFRESH_BEFORE_EXPIRY_MS) return;
+
+  this.isRefreshing = true;
+  this.http.post<{ token: string }>(`${this.apiUrl}/refresh`, {}).subscribe({
+    next: ({ token: fresh }) => {
+      this.isRefreshing = false;
+      localStorage.setItem('token', fresh);
+      this.scheduleAutoLogout(fresh);
+    },
+    error: () => { this.isRefreshing = false; }
+  });
 }
 
 /** Clears local session only — no backend call. Use this from the interceptor
@@ -183,6 +242,9 @@ private clearLocalSession(): void {
   localStorage.removeItem('email');
   localStorage.removeItem('must_change_password');
   sessionStorage.clear();
+
+  if (this.logoutTimer) { clearTimeout(this.logoutTimer); this.logoutTimer = null; }
+  if (this.refreshTimer) { clearInterval(this.refreshTimer); this.refreshTimer = null; }
 
   this.mustChangePassword.set(false);
   this.isLoggedIn.set(false);

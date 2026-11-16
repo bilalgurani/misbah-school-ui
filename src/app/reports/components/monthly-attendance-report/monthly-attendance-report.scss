@@ -1,0 +1,320 @@
+.report-container {
+  padding: clamp(1rem, 3vw, 2rem);
+  max-width: 1400px;
+  margin: 0 auto;
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+.report-header {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+
+  @media (min-width: 1000px) {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+}
+
+.title {
+  font-size: clamp(1.35rem, 2.5vw, 1.875rem);
+  font-weight: 700;
+  color: var(--card-foreground);
+  margin: 0 0 0.25rem;
+}
+
+.subtitle {
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--muted-foreground);
+  text-transform: uppercase;
+
+  input,
+  select {
+    min-height: 44px;
+    min-width: 170px;
+    padding: 0 0.75rem;
+    border: 1px solid var(--input);
+    border-radius: var(--radius);
+    background: var(--card);
+    color: var(--foreground);
+    font: inherit;
+    text-transform: none;
+  }
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0.625rem 1.25rem;
+  border-radius: var(--radius);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background-color 0.15s ease;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: var(--primary-foreground);
+
+  &:hover:not(:disabled) {
+    background-color: color-mix(in oklch, var(--primary) 88%, var(--primary-foreground));
+  }
+}
+
+.btn-outline {
+  background: var(--card);
+  color: var(--card-foreground);
+  border-color: var(--border);
+
+  &:hover:not(:disabled) {
+    background: var(--accent);
+    border-color: var(--ring);
+  }
+}
+
+.banner {
+  padding: 0.875rem 1rem;
+  border-radius: var(--radius);
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  border: 1px solid var(--border);
+
+  p {
+    margin: 0;
+  }
+}
+
+.banner-error {
+  background: color-mix(in oklch, var(--destructive) 15%, var(--card));
+  border-color: var(--destructive);
+}
+
+.empty-state {
+  text-align: center;
+  color: var(--muted-foreground);
+  padding: 2rem 0;
+  margin: 0;
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+
+  @media (min-width: 700px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.kpi-card {
+  padding: 1rem;
+  border-radius: var(--radius);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-left: 5px solid var(--chart-3);
+
+  &.danger {
+    border-left-color: var(--destructive);
+  }
+}
+
+.kpi-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--muted-foreground);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.kpi-value {
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+  font-weight: 800;
+  margin: 0.3rem 0;
+  line-height: 1;
+}
+
+.kpi-subtext {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+
+  .cell {
+    display: inline-block;
+    min-width: 1.4rem;
+    margin-right: 0.3rem;
+    text-align: center;
+    border-radius: 4px;
+  }
+
+  .low-note {
+    margin-left: auto;
+  }
+}
+
+.register-wrap {
+  overflow: auto;
+  max-height: 75vh;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.register {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: max-content;
+  min-width: 100%;
+  font-size: 0.8rem;
+
+  th,
+  td {
+    padding: 0.4rem 0.35rem;
+    border-bottom: 1px solid var(--border);
+    border-right: 1px solid color-mix(in oklch, var(--border) 50%, transparent);
+    text-align: center;
+    background: var(--card);
+  }
+
+  thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--muted);
+    color: var(--muted-foreground);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+
+  .sticky-col {
+    position: sticky;
+    z-index: 1;
+    text-align: left;
+    background: var(--card);
+  }
+
+  thead .sticky-col {
+    z-index: 3;
+    background: var(--muted);
+  }
+
+  .roll {
+    left: 0;
+    min-width: 3rem;
+    max-width: 3rem;
+    padding-left: 0.6rem;
+  }
+
+  .name {
+    left: 3rem;
+    min-width: 11rem;
+    max-width: 11rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 600;
+    box-shadow: 2px 0 0 var(--border);
+  }
+
+  .day {
+    min-width: 1.75rem;
+    width: 1.75rem;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .total {
+    min-width: 3.2rem;
+    font-weight: 700;
+  }
+
+  .pct.low {
+    color: var(--destructive);
+  }
+
+  th.closed {
+    background: color-mix(in oklch, var(--muted) 70%, var(--border));
+  }
+
+  tbody tr:hover td {
+    background: var(--accent);
+  }
+
+  tbody tr.row-low td {
+    background: color-mix(in oklch, var(--destructive) 8%, var(--card));
+  }
+}
+
+.cell {
+  font-weight: 700;
+
+  &.present {
+    color: var(--chart-3);
+  }
+
+  &.absent {
+    color: var(--destructive);
+    background: color-mix(in oklch, var(--destructive) 12%, var(--card));
+  }
+
+  &.late {
+    background: color-mix(in oklch, var(--primary) 35%, var(--card));
+  }
+
+  &.closed {
+    color: var(--muted-foreground);
+    background: color-mix(in oklch, var(--muted) 80%, var(--border));
+    cursor: help;
+  }
+}
+
+.register tbody td.cell.closed {
+  background: color-mix(in oklch, var(--muted) 80%, var(--border));
+}
+
+.register tbody td.cell.absent {
+  background: color-mix(in oklch, var(--destructive) 12%, var(--card));
+}
+
+.register tbody td.cell.late {
+  background: color-mix(in oklch, var(--primary) 35%, var(--card));
+}

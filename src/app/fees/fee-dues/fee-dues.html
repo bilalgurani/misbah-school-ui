@@ -1,0 +1,163 @@
+<div class="page-container">
+  <div class="page-header">
+    <h2>Fee Dues</h2>
+    <div class="header-actions">
+      <button type="button" class="btn-secondary" (click)="exportCsv()" [disabled]="isLoading()">Export CSV</button>
+      <button type="button" class="btn-primary" (click)="openReminder()" [disabled]="selectedVisible().length === 0">
+        Send reminder ({{ selectedVisible().length }})
+      </button>
+    </div>
+  </div>
+
+  @if (config(); as cfg) {
+    @if (!cfg.enabled) {
+      <div class="alert alert-warning" role="alert">
+        Messaging is not enabled on the server. Reminders will be recorded as skipped and no SMS or WhatsApp will be sent.
+      </div>
+    }
+  }
+
+  @if (summary(); as s) {
+    <div class="stat-grid">
+      <div class="stat-card"><span class="stat-label">Total Fees</span><span class="stat-value">{{ s.totalAmount | inr }}</span></div>
+      <div class="stat-card success"><span class="stat-label">Collected</span><span class="stat-value">{{ s.totalCollected | inr }}</span></div>
+      <div class="stat-card danger"><span class="stat-label">Outstanding</span><span class="stat-value">{{ s.totalOutstanding | inr }}</span></div>
+      <div class="stat-card danger"><span class="stat-label">Overdue</span><span class="stat-value">{{ s.overdueOutstanding | inr }}</span></div>
+      <div class="stat-card"><span class="stat-label">Collected This Month</span><span class="stat-value">{{ s.collectedThisMonth | inr }}</span></div>
+    </div>
+  }
+
+  @if (lastResult(); as r) {
+    <div class="alert" [class.alert-success]="r.failed === 0" [class.alert-error]="r.failed > 0" role="status">
+      <div>
+        <strong>Last reminder run:</strong>
+        {{ r.total }} total, {{ r.sent }} sent, {{ r.failed }} failed, {{ r.skipped }} skipped.
+        <span class="link-like">See the <a routerLink="/messages">message log</a> for details.</span>
+      </div>
+    </div>
+  }
+
+  <div class="card">
+    <div class="toolbar">
+      <div class="form-group filter">
+        <label for="dues-section">Class / Section</label>
+        <select id="dues-section" class="form-input" [ngModel]="classSectionId()" (ngModelChange)="onSectionChange($event)">
+          <option [ngValue]="null">All classes</option>
+          @for (section of classSections(); track section.id) {
+            <option [ngValue]="section.id">Class {{ section.displayName }}</option>
+          }
+        </select>
+      </div>
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
+          placeholder="Search name, roll, parent, mobile..." aria-label="Search dues">
+      </div>
+      <label class="check-row">
+        <input type="checkbox" [ngModel]="overdueOnly()" (ngModelChange)="onOverdueChange($event)">
+        <span>Overdue only</span>
+      </label>
+    </div>
+
+    @if (isLoading()) {
+      <div class="loader-container">
+        <app-loader message="Loading dues..."></app-loader>
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th class="check-col">
+                <input type="checkbox" [checked]="allSelected()" (change)="toggleAll()"
+                  [disabled]="filteredDues().length === 0" aria-label="Select all students">
+              </th>
+              <th>Roll No</th>
+              <th>Student</th>
+              <th>Class</th>
+              <th>Parent</th>
+              <th class="num">Total</th>
+              <th class="num">Paid</th>
+              <th class="num">Balance</th>
+              <th class="num">Overdue</th>
+              <th>Oldest Due</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (d of filteredDues(); track d.studentId) {
+              <tr>
+                <td data-label="Select" class="check-col">
+                  <input type="checkbox" [checked]="isSelected(d.studentId)" (change)="toggleRow(d.studentId)"
+                    [attr.aria-label]="'Select ' + d.name">
+                </td>
+                <td data-label="Roll No"><span class="badge">{{ d.rollNo ?? '-' }}</span></td>
+                <td data-label="Student" class="fw-medium">{{ d.name }}</td>
+                <td data-label="Class">{{ d.className }}</td>
+                <td data-label="Parent">
+                  {{ d.fatherName || '-' }}
+                  @if (d.mobileNo) {
+                    <a class="phone" [href]="'tel:' + d.mobileNo">{{ d.mobileNo }}</a>
+                  }
+                </td>
+                <td data-label="Total" class="num">{{ d.totalAmount | inr }}</td>
+                <td data-label="Paid" class="num">{{ d.totalPaid | inr }}</td>
+                <td data-label="Balance" class="num fw-medium">{{ d.balance | inr }}</td>
+                <td data-label="Overdue" class="num">
+                  @if (d.overdueAmount > 0) {
+                    <span class="badge badge-danger">{{ d.overdueAmount | inr }}</span>
+                  } @else {
+                    <span class="text-muted">-</span>
+                  }
+                </td>
+                <td data-label="Oldest Due">{{ d.oldestDueDate ? (d.oldestDueDate | date: 'dd MMM yyyy') : '-' }}</td>
+                <td data-label="Action" class="actions">
+                  <a [routerLink]="['/fees/collect']" [queryParams]="{ studentId: d.studentId }" class="btn-secondary btn-sm">Collect</a>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="11" class="empty-state">No outstanding dues found.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>
+
+@if (reminderOpen()) {
+  <div class="modal-backdrop" (click)="closeReminder()">
+    <div class="modal-card" role="alertdialog" aria-modal="true" aria-labelledby="reminder-title" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 id="reminder-title">Send Fee Reminder</h3>
+        <button type="button" class="close-btn" (click)="closeReminder()" aria-label="Close dialog">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>Send a fee reminder to the parents of <strong>{{ selectedVisible().length }}</strong> student(s)?</p>
+        <div class="channel-list">
+          <label class="check-row">
+            <input type="checkbox" [ngModel]="sendSms()" (ngModelChange)="sendSms.set($event)">
+            <span>SMS @if (config() && !config()!.smsConfigured) { <small>(not configured)</small> }</span>
+          </label>
+          <label class="check-row">
+            <input type="checkbox" [ngModel]="sendWhatsapp()" (ngModelChange)="sendWhatsapp.set($event)">
+            <span>WhatsApp @if (config() && !config()!.whatsappConfigured) { <small>(not configured)</small> }</span>
+          </label>
+        </div>
+        @if (channels().length === 0) {
+          <span class="field-hint error">Choose at least one channel.</span>
+        }
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" [disabled]="isSending()" (click)="closeReminder()">Cancel</button>
+        <button type="button" class="btn-primary" [disabled]="isSending() || channels().length === 0" (click)="sendReminders()">
+          {{ isSending() ? 'Sending...' : 'Send Reminder' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

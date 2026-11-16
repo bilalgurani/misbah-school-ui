@@ -60,6 +60,18 @@ export const routes: Routes = [
 
       { path: 'financials', component: FinancialLedger, canActivate: [AuthGuards.roleGuard('ADMIN')] },
       { path: 'reports/attendance', component: AttendanceReportComponent, canActivate: [AuthGuards.roleGuard('ADMIN')] },
+      { path: 'reports/attendance/monthly', loadComponent: () => import('./reports/components/monthly-attendance-report/monthly-attendance-report').then(m => m.MonthlyAttendanceReport) },
+      { path: 'reports/attendance/student', loadComponent: () => import('./reports/components/student-attendance-report/student-attendance-report').then(m => m.StudentAttendanceReport) },
+
+      { path: 'calendar/holidays', loadComponent: () => import('./calendar/holidays/holidays').then(m => m.Holidays) },
+      { path: 'admin/audit-log', loadComponent: () => import('./admin-tools/audit-log/audit-log').then(m => m.AuditLog), canActivate: [AuthGuards.roleGuard('ADMIN')] },
+
+      { path: 'students/import', loadComponent: () => import('./students/components/student-import/student-import').then(m => m.StudentImport), canActivate: [AuthGuards.roleGuard('ADMIN')] },
+      { path: 'fees/setup', loadComponent: () => import('./fees/fee-setup/fee-setup').then(m => m.FeeSetup), canActivate: [AuthGuards.roleGuard('ADMIN')] },
+      { path: 'fees/collect', loadComponent: () => import('./fees/fee-collection/fee-collection').then(m => m.FeeCollection), canActivate: [AuthGuards.roleGuard('ADMIN')] },
+      { path: 'fees/receipt/:id', loadComponent: () => import('./fees/fee-receipt/fee-receipt').then(m => m.FeeReceipt), canActivate: [AuthGuards.roleGuard('ADMIN')] },
+      { path: 'fees/dues', loadComponent: () => import('./fees/fee-dues/fee-dues').then(m => m.FeeDues), canActivate: [AuthGuards.roleGuard('ADMIN')] },
+      { path: 'messages', loadComponent: () => import('./messaging/message-log/message-log').then(m => m.MessageLog), canActivate: [AuthGuards.roleGuard('ADMIN')] },
 
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: '**', redirectTo: 'dashboard' }

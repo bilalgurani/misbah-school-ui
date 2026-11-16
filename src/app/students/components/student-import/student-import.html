@@ -1,0 +1,160 @@
+<div class="page-container">
+  <div class="page-header">
+    <h2>Import Students</h2>
+    <div class="header-actions">
+      <a routerLink="/students" class="btn-secondary">Back to Directory</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 class="card-title">1. Download the template</h3>
+    <div class="card-body step-body">
+      <p class="hint">
+        Fill in one student per row (up to {{ maxRows }} rows). Name, Class and Division are required. Dates can be
+        YYYY-MM-DD, DD-MM-YYYY or DD/MM/YYYY. Gender must be Male, Female or Other. MobileNo must be 10 digits.
+      </p>
+      <div>
+        <button type="button" class="btn-secondary" (click)="downloadTemplate()" [disabled]="sectionsLoading()">Download template</button>
+      </div>
+
+      <div class="sections-box">
+        <span class="box-title">Valid Class / Division values</span>
+        @if (sectionsLoading()) {
+          <app-loader message="Loading classes..."></app-loader>
+        } @else {
+          <div class="section-list">
+            @for (s of sections(); track s.id) {
+              <span class="section-chip" [title]="'Class: ' + s.levelName + ', Division: ' + s.division">
+                <strong>{{ s.displayName }}</strong>
+                <small>Class {{ s.levelName }} / Division {{ s.division }}</small>
+              </span>
+            } @empty {
+              <span class="text-muted">No class sections found.</span>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 class="card-title">2. Upload your CSV</h3>
+    <div class="card-body step-body">
+      <div class="upload-row">
+        <label class="btn-primary file-btn">
+          Choose CSV file
+          <input type="file" accept=".csv,text/csv" (change)="onFileSelected($event)" hidden>
+        </label>
+        @if (fileName()) {
+          <span class="file-name">{{ fileName() }}</span>
+          <button type="button" class="btn-secondary btn-sm" (click)="clearFile()">Clear</button>
+        }
+      </div>
+      @if (isParsing()) {
+        <app-loader message="Reading file..."></app-loader>
+      }
+      @if (fileError()) {
+        <div class="alert alert-error" role="alert">{{ fileError() }}</div>
+      }
+    </div>
+  </div>
+
+  @if (rows().length > 0) {
+    <div class="card">
+      <h3 class="card-title">3. Review and import</h3>
+      <div class="card-body step-body">
+        <div class="counts">
+          <span class="badge">{{ rows().length }} rows</span>
+          <span class="badge badge-success">{{ clientValidCount() }} valid</span>
+          @if (clientInvalidCount() > 0) {
+            <span class="badge badge-danger">{{ clientInvalidCount() }} with errors</span>
+          }
+          @if (importedCount() > 0) {
+            <span class="badge badge-info">{{ importedCount() }} imported</span>
+          }
+        </div>
+        <div class="actions-row">
+          <button type="button" class="btn-secondary" (click)="validateWithServer()"
+            [disabled]="isValidating() || isImporting() || clientValidCount() === 0">
+            {{ isValidating() ? 'Validating...' : 'Validate with server' }}
+          </button>
+          <button type="button" class="btn-primary" (click)="requestImport()"
+            [disabled]="isImporting() || isValidating() || importableRows().length === 0">
+            Import valid rows ({{ importableRows().length }})
+          </button>
+          @if (failedRows().length > 0) {
+            <button type="button" class="btn-secondary" (click)="downloadErrorReport()">Download error report</button>
+          }
+        </div>
+
+        @if (summary(); as s) {
+          <div class="alert" [class.alert-success]="s.failed === 0" [class.alert-error]="s.failed > 0" role="status">
+            @if (s.dryRun) {
+              <strong>Validation result:</strong> {{ s.total }} checked, {{ s.valid }} valid, {{ s.failed }} with errors.
+            } @else {
+              <strong>Import result:</strong> {{ s.total }} processed, {{ s.imported }} imported, {{ s.failed }} failed.
+            }
+          </div>
+        }
+      </div>
+
+      <div class="table-responsive preview-scroll">
+        <table class="data-table preview-table">
+          <thead>
+            <tr>
+              <th>Row</th>
+              <th>Name</th>
+              <th>Roll No</th>
+              <th>Gender</th>
+              <th>Father</th>
+              <th>DOB</th>
+              <th>Mobile</th>
+              <th>Class</th>
+              <th>Division</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (r of rows(); track r.rowNumber) {
+              <tr [class.row-error]="r.clientErrors.length > 0 || r.serverStatus === 'ERROR'"
+                  [class.row-imported]="r.serverStatus === 'IMPORTED'">
+                <td data-label="Row">{{ r.rowNumber }}</td>
+                <td data-label="Name" class="fw-medium" [class.cell-error]="!r.raw.Name">{{ r.raw.Name || '-' }}</td>
+                <td data-label="Roll No">{{ r.raw.RollNo || '-' }}</td>
+                <td data-label="Gender">{{ r.raw.Gender || '-' }}</td>
+                <td data-label="Father">{{ r.raw.FatherName || '-' }}</td>
+                <td data-label="DOB">{{ r.raw.DOB || '-' }}</td>
+                <td data-label="Mobile">{{ r.raw.MobileNo || '-' }}</td>
+                <td data-label="Class" [class.cell-error]="!r.raw.Class">{{ r.raw.Class || '-' }}</td>
+                <td data-label="Division" [class.cell-error]="!r.raw.Division">{{ r.raw.Division || '-' }}</td>
+                <td data-label="Status" class="status-cell">
+                  @if (r.serverStatus === 'IMPORTED') {
+                    <span class="badge badge-info">Imported</span>
+                  } @else if (r.clientErrors.length > 0 || r.serverStatus === 'ERROR') {
+                    <span class="badge badge-danger">Error</span>
+                    <span class="error-text">{{ errorText(r) }}</span>
+                  } @else if (r.serverStatus === 'OK') {
+                    <span class="badge badge-success">Valid (server)</span>
+                  } @else {
+                    <span class="badge badge-success">Valid</span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+</div>
+
+@if (confirmOpen()) {
+  <app-confirm-dialog
+    title="Import Students"
+    [message]="'Import ' + importableRows().length + ' valid student(s)? Rows with errors will be skipped.'"
+    confirmLabel="Import"
+    [busy]="isImporting()"
+    (confirmed)="importRows()"
+    (cancelled)="cancelImport()">
+  </app-confirm-dialog>
+}

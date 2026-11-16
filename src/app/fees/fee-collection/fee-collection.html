@@ -1,0 +1,204 @@
+<div class="page-container">
+  <div class="page-header">
+    <h2>Fee Collection</h2>
+    <div class="header-actions">
+      <a routerLink="/fees/dues" class="btn-secondary">View Dues</a>
+    </div>
+  </div>
+
+  <div class="card search-card">
+    <div class="toolbar">
+      <div class="search-wrap">
+        <div class="search-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+          <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
+            placeholder="Search student by name or roll number..." aria-label="Search students"
+            [disabled]="studentsLoading()">
+        </div>
+        @if (searchQuery().trim()) {
+          <ul class="results" role="listbox">
+            @for (s of matches(); track s.id) {
+              <li>
+                <button type="button" class="result-item" (click)="selectStudent(s)">
+                  <span class="fw-medium">{{ s.name }}</span>
+                  <span class="text-muted">Roll {{ s.rollNo ?? '-' }}</span>
+                </button>
+              </li>
+            } @empty {
+              <li class="no-result">No students match "{{ searchQuery() }}"</li>
+            }
+          </ul>
+        }
+      </div>
+    </div>
+  </div>
+
+  @if (isLoading()) {
+    <div class="card">
+      <div class="loader-container">
+        <app-loader message="Loading fee details..."></app-loader>
+      </div>
+    </div>
+  } @else if (details(); as d) {
+    <div class="card">
+      <div class="card-body student-summary">
+        <div>
+          <h3 class="student-name">{{ d.name }}</h3>
+          <div class="meta">
+            <span>{{ d.className }}</span>
+            <span>Academic year {{ d.academicYear }}</span>
+            @if (d.fatherName) { <span>Father: {{ d.fatherName }}</span> }
+            @if (d.mobileNo) { <span>{{ d.mobileNo }}</span> }
+          </div>
+        </div>
+        <div class="totals">
+          <div class="total-box"><span class="stat-label">Total</span><strong>{{ d.totalAmount | inr }}</strong></div>
+          <div class="total-box paid"><span class="stat-label">Paid</span><strong>{{ d.totalPaid | inr }}</strong></div>
+          <div class="total-box due"><span class="stat-label">Balance</span><strong>{{ d.totalBalance | inr }}</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 class="card-title">Installments</h3>
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Installment</th>
+              <th>Due Date</th>
+              <th class="num">Amount</th>
+              <th class="num">Paid</th>
+              <th class="num">Balance</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (i of d.installments; track i.installmentId) {
+              <tr>
+                <td data-label="Installment" class="fw-medium">{{ i.name }}</td>
+                <td data-label="Due Date">{{ i.dueDate | date: 'dd MMM yyyy' }}</td>
+                <td data-label="Amount" class="num">{{ i.amount | inr }}</td>
+                <td data-label="Paid" class="num">{{ i.paid | inr }}</td>
+                <td data-label="Balance" class="num">{{ i.balance | inr }}</td>
+                <td data-label="Status">
+                  @if (i.balance <= 0) {
+                    <span class="badge badge-success">Paid</span>
+                  } @else if (i.overdue) {
+                    <span class="badge badge-danger">Overdue</span>
+                  } @else if (i.paid > 0) {
+                    <span class="badge badge-warning">Partial</span>
+                  } @else {
+                    <span class="badge">Pending</span>
+                  }
+                </td>
+                <td data-label="Action" class="actions">
+                  @if (i.balance > 0) {
+                    <button type="button" class="btn-primary btn-sm" (click)="openCollect(i)"
+                      [disabled]="collectingId() === i.installmentId">Collect</button>
+                  }
+                </td>
+              </tr>
+              @if (collectingId() === i.installmentId) {
+                <tr class="collect-row">
+                  <td colspan="7">
+                    <form class="collect-form" [formGroup]="collectForm" (ngSubmit)="collect(i)" novalidate>
+                      <div class="form-row">
+                        <div class="form-group">
+                          <label for="collect-amount">Amount (max {{ i.balance | inr }})</label>
+                          <input id="collect-amount" type="number" step="0.01" min="0.01" [max]="i.balance"
+                            class="form-input" formControlName="amount"
+                            [class.invalid]="submitted() && (collectForm.controls.amount.invalid || isOverBalance(i))">
+                          @if (submitted() && isOverBalance(i)) {
+                            <span class="field-error">Amount exceeds the balance.</span>
+                          } @else if (submitted() && collectForm.controls.amount.invalid) {
+                            <span class="field-error">Enter a valid amount.</span>
+                          }
+                        </div>
+                        <div class="form-group">
+                          <label for="collect-mode">Mode</label>
+                          <select id="collect-mode" class="form-input" formControlName="mode">
+                            @for (m of modes; track m) {
+                              <option [value]="m">{{ m }}</option>
+                            }
+                          </select>
+                        </div>
+                        <div class="form-group">
+                          <label for="collect-date">Paid on</label>
+                          <input id="collect-date" type="date" class="form-input" formControlName="paidOn"
+                            [class.invalid]="submitted() && collectForm.controls.paidOn.invalid">
+                        </div>
+                        <div class="form-group">
+                          <label for="collect-ref">Reference</label>
+                          <input id="collect-ref" type="text" class="form-input" formControlName="reference"
+                            placeholder="Txn / cheque no. (optional)" maxlength="100">
+                        </div>
+                      </div>
+                      <div class="collect-actions">
+                        <button type="button" class="btn-secondary" (click)="closeCollect()" [disabled]="isSaving()">Cancel</button>
+                        <button type="submit" class="btn-primary" [disabled]="isSaving()">
+                          {{ isSaving() ? 'Saving...' : 'Record Payment' }}
+                        </button>
+                      </div>
+                    </form>
+                  </td>
+                </tr>
+              }
+            } @empty {
+              <tr>
+                <td colspan="7" class="empty-state">No fee installments are configured for this student's class.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 class="card-title">Payment History</h3>
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Receipt No</th>
+              <th>Installment</th>
+              <th>Date</th>
+              <th>Mode</th>
+              <th>Reference</th>
+              <th class="num">Amount</th>
+              <th>Receipt</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (p of d.payments; track p.id) {
+              <tr>
+                <td data-label="Receipt No" class="fw-medium">{{ p.receiptNo }}</td>
+                <td data-label="Installment">{{ p.installmentName }}</td>
+                <td data-label="Date">{{ p.paidOn | date: 'dd MMM yyyy' }}</td>
+                <td data-label="Mode"><span class="badge">{{ p.mode }}</span></td>
+                <td data-label="Reference">{{ p.reference || '-' }}</td>
+                <td data-label="Amount" class="num">{{ p.amount | inr }}</td>
+                <td data-label="Receipt" class="actions">
+                  <a [routerLink]="['/fees/receipt', p.id]" class="btn-secondary btn-sm">View</a>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="7" class="empty-state">No payments recorded yet.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  } @else if (loadFailed()) {
+    <div class="alert alert-error">Could not load fee details for this student. Search and select the student again.</div>
+  } @else {
+    <div class="card">
+      <div class="empty-block">Search for a student above to view dues and collect fees.</div>
+    </div>
+  }
+</div>

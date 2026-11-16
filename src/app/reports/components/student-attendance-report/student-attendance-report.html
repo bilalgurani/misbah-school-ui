@@ -1,0 +1,174 @@
+<div class="report-container">
+  <header class="report-header no-print">
+    <div class="header-text">
+      <h1 class="title">Student Attendance Report</h1>
+      <p class="subtitle">Attendance summary for one student over a period</p>
+    </div>
+
+    <div class="toolbar">
+      <div class="field student-field">
+        <label for="student-search">Student</label>
+        <input
+          id="student-search"
+          type="text"
+          autocomplete="off"
+          [ngModel]="query()"
+          (ngModelChange)="onQueryChange($event)"
+          (focus)="listOpen.set(true)"
+          (blur)="closeList()"
+          [disabled]="studentsLoading()"
+          [placeholder]="studentsLoading() ? 'Loading students...' : 'Type name, roll no or class'"
+        />
+        @if (listOpen() && !studentsLoading()) {
+          <ul class="options" role="listbox">
+            @for (o of options(); track o.id) {
+              <li role="option" (mousedown)="select(o)">{{ o.label }}</li>
+            } @empty {
+              <li class="no-match">{{ studentsError() ? 'Students could not be loaded' : 'No matching students' }}</li>
+            }
+          </ul>
+        }
+      </div>
+      <div class="field">
+        <label for="s-from">From</label>
+        <input id="s-from" type="date" [ngModel]="from()" (ngModelChange)="from.set($event)" />
+      </div>
+      <div class="field">
+        <label for="s-to">To</label>
+        <input id="s-to" type="date" [ngModel]="to()" (ngModelChange)="to.set($event)" />
+      </div>
+      <button type="button" class="btn btn-primary" (click)="generate()" [disabled]="isLoading() || selectedId() === null">
+        Generate
+      </button>
+      <button type="button" class="btn btn-outline" (click)="exportCsv()" [disabled]="!report()">Export CSV</button>
+      <button type="button" class="btn btn-outline" (click)="print()" [disabled]="!report()">Print</button>
+    </div>
+  </header>
+
+  @if (studentsError() && !studentsLoading()) {
+    <div class="banner banner-error no-print">
+      <p>The student list could not be loaded.</p>
+      <button type="button" class="btn btn-outline" (click)="loadStudents()">Retry</button>
+    </div>
+  }
+
+  @if (isLoading()) {
+    <app-loader message="Loading student attendance..."></app-loader>
+  }
+
+  @if (hasError() && !isLoading()) {
+    <div class="banner banner-error no-print">
+      <p>Could not load the report. Please check your connection and try again.</p>
+    </div>
+  }
+
+  @if (!isLoading() && !hasError() && !report()) {
+    <p class="empty-state no-print">Search for a student and press Generate.</p>
+  }
+
+  @if (!isLoading() && report(); as r) {
+    <div class="print-heading">
+      <h2>Sana Misbah School</h2>
+      <p>Student Attendance Report</p>
+    </div>
+
+    <div class="student-meta">
+      <div>
+        <strong class="student-name">{{ r.name }}</strong>
+        <span>Roll No {{ r.rollNo }} &middot; {{ r.className }}</span>
+      </div>
+      <span>{{ toDate(r.from) | date: 'dd MMM yyyy' }} &ndash; {{ toDate(r.to) | date: 'dd MMM yyyy' }}</span>
+    </div>
+
+    @if (r.markedDays === 0) {
+      <div class="banner banner-warn">
+        <p>No attendance has been recorded for this student in the selected period.</p>
+      </div>
+    }
+
+    <section class="kpi-grid">
+      <div class="kpi-card" [class.danger]="isLow(r.attendancePct)">
+        <div class="kpi-title">Attendance</div>
+        <div class="kpi-value">
+          @if (r.attendancePct !== null && r.attendancePct !== undefined) { {{ r.attendancePct | number: '1.0-1' }}% } @else { &mdash; }
+        </div>
+        <div class="kpi-subtext">{{ r.daysAttendanceTaken }} of {{ r.workingDays }} working days recorded</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-title">Present</div>
+        <div class="kpi-value">{{ r.present }}</div>
+        <div class="kpi-subtext">Days</div>
+      </div>
+      <div class="kpi-card danger">
+        <div class="kpi-title">Absent</div>
+        <div class="kpi-value">{{ r.absent }}</div>
+        <div class="kpi-subtext">Days</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-title">Late</div>
+        <div class="kpi-value">{{ r.late }}</div>
+        <div class="kpi-subtext">Days</div>
+      </div>
+      <div class="kpi-card" [class.danger]="r.unmarkedWorkingDays > 0">
+        <div class="kpi-title">Unmarked days</div>
+        <div class="kpi-value">{{ r.unmarkedWorkingDays }}</div>
+        <div class="kpi-subtext">Working days with no entry</div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h3>Month-wise Attendance</h3>
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Month</th>
+              <th class="num">Working days</th>
+              <th class="num">Marked</th>
+              <th class="num">Present</th>
+              <th class="num">Absent</th>
+              <th class="num">Late</th>
+              <th>Attendance</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (m of r.months; track m.month) {
+              <tr [class.row-low]="isLow(m.attendancePct)">
+                <td data-label="Month" class="fw-medium">{{ monthDate(m.month) | date: 'MMM yyyy' }}</td>
+                <td data-label="Working days" class="num">{{ m.workingDays }}</td>
+                <td data-label="Marked" class="num">{{ m.markedDays }}</td>
+                <td data-label="Present" class="num">{{ m.present }}</td>
+                <td data-label="Absent" class="num">{{ m.absent }}</td>
+                <td data-label="Late" class="num">{{ m.late }}</td>
+                <td data-label="Attendance">
+                  @if (m.attendancePct !== null && m.attendancePct !== undefined) {
+                    <span class="bar"><span class="bar-fill" [class.low]="isLow(m.attendancePct)" [style.width.%]="m.attendancePct"></span></span>
+                    {{ m.attendancePct | number: '1.0-1' }}%
+                  } @else { &mdash; }
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="7" class="empty-state">No months in this period.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h3>Absent &amp; Late Dates ({{ r.absentDates.length }})</h3>
+      @if (r.absentDates.length > 0) {
+        <ul class="name-list">
+          @for (a of r.absentDates; track a.date) {
+            <li>
+              <span>{{ toDate(a.date) | date: 'EEE, dd MMM yyyy' }}</span>
+              <span class="badge" [class.badge-absent]="a.status === 'ABSENT'" [class.badge-late]="a.status === 'LATE'">{{ a.status }}</span>
+            </li>
+          }
+        </ul>
+      } @else {
+        <p class="empty-state">No absences or late arrivals in this period.</p>
+      }
+    </section>
+  }
+</div>

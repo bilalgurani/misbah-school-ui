@@ -1,0 +1,132 @@
+@use '../../../shared/styles/parts' as p;
+
+@include p.layout;
+@include p.buttons;
+@include p.table;
+@include p.alert;
+
+.step-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.hint {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--muted-foreground);
+}
+
+.text-muted {
+  color: var(--muted-foreground);
+}
+
+.sections-box {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--muted);
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  .box-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+  }
+}
+
+.section-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.section-chip {
+  display: inline-flex;
+  flex-direction: column;
+  padding: 0.35rem 0.7rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+
+  small {
+    color: var(--muted-foreground);
+    font-size: 0.7rem;
+  }
+}
+
+.upload-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+
+  .file-btn {
+    cursor: pointer;
+  }
+
+  .file-name {
+    font-size: 0.9rem;
+    word-break: break-all;
+  }
+}
+
+.counts,
+.actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.preview-scroll {
+  max-height: 520px;
+  overflow: auto;
+  border-top: 1px solid var(--border);
+}
+
+.preview-table {
+  th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+
+  th,
+  td {
+    padding: 0.6rem 0.75rem;
+    font-size: 0.85rem;
+  }
+
+  tr.row-error {
+    background: color-mix(in oklch, var(--destructive) 8%, transparent);
+  }
+
+  tr.row-imported {
+    background: color-mix(in oklch, var(--chart-3) 8%, transparent);
+  }
+
+  .cell-error {
+    outline: 2px solid color-mix(in oklch, var(--destructive) 55%, transparent);
+    outline-offset: -2px;
+  }
+
+  .status-cell {
+    min-width: 200px;
+  }
+
+  .error-text {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.75rem;
+    color: var(--destructive);
+    word-break: break-word;
+    text-align: left;
+  }
+}
