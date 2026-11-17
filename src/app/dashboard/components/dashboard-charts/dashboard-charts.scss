@@ -1,19 +1,21 @@
 .trends-card {
-  background: #ffffff;
-  border-radius: 12px;
+  background: var(--card);
+  color: var(--card-foreground);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   padding: 1.5rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   margin-top: 2rem;
 }
 
 .trends-header h3 {
   margin: 0;
   font-size: 1.125rem;
-  color: #1e293b;
+  color: var(--card-foreground);
 }
 
 .subtitle {
-  color: #64748b;
+  color: var(--muted-foreground);
   font-size: 0.875rem;
   margin-top: 0.25rem;
 }
@@ -23,7 +25,7 @@
   gap: 1.5rem;
   margin: 1rem 0 1.5rem 0;
   font-size: 0.8125rem;
-  color: #475569;
+  color: var(--muted-foreground);
 }
 
 .legend-item {
@@ -38,8 +40,8 @@
   border-radius: 50%;
 }
 
-.dot.student { background-color: #4f46e5; }
-.dot.teacher { background-color: #06b6d4; }
+.dot.student { background-color: var(--chart-1); }
+.dot.teacher { background-color: var(--chart-2); }
 
 .chart-container {
   display: flex;
@@ -47,7 +49,7 @@
   align-items: flex-end;
   height: 220px;
   padding-top: 30px;
-  border-bottom: 2px solid #e2e8f0;
+  border-bottom: 2px solid var(--border);
   gap: 1rem;
 }
 
@@ -77,11 +79,11 @@
 }
 
 .student-bar {
-  background-color: #4f46e5;
+  background-color: var(--chart-1);
 }
 
 .teacher-bar {
-  background-color: #06b6d4;
+  background-color: var(--chart-2);
 }
 
 .bar-tooltip {
@@ -90,7 +92,7 @@
   left: 50%;
   transform: translateX(-50%);
   font-size: 0.65rem;
-  color: #64748b;
+  color: var(--muted-foreground);
   white-space: nowrap;
   font-weight: 600;
 }
@@ -98,6 +100,13 @@
 .period-label {
   margin-top: 0.75rem;
   font-size: 0.8125rem;
-  color: #64748b;
+  color: var(--muted-foreground);
   font-weight: 500;
+}
+
+.empty-note {
+  margin: 1.5rem 0 0.5rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
 }

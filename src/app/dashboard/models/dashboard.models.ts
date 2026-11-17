@@ -16,3 +16,10 @@ export interface PendingClassDto {
   sectionName: string;
   totalStudents: number;
 }
+
+// period is "YYYY-MM"; a percentage is null when nothing was marked that month.
+export interface AttendanceTrend {
+  period: string;
+  studentAttendancePercentage: number | null;
+  teacherAttendancePercentage: number | null;
+}

@@ -1,6 +1,6 @@
 import { HttpClient } from "@angular/common/http";
 import { Observable } from "rxjs";
-import { DashboardStats } from "../models/dashboard.models";
+import { AttendanceTrend, DashboardStats } from "../models/dashboard.models";
 import { Injectable } from "@angular/core";
 import { environment } from "../../../environments/environment";
 
@@ -14,5 +14,9 @@ export class DashboardService {
 
   getDashboardStats(): Observable<DashboardStats> {
     return this.http.get<DashboardStats>(this.apiUrl);
+  }
+
+  getAttendanceTrend(months = 6): Observable<AttendanceTrend[]> {
+    return this.http.get<AttendanceTrend[]>(`${environment.apiUrl}/dashboard/attendance-trend`, { params: { months } });
   }
 }

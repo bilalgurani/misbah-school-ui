@@ -52,7 +52,7 @@
       <div class="kpi-card emerald">
         <div class="kpi-title">Today's Attendance Rate</div>
         <div class="kpi-value">{{ s.studentAttendancePercentage | number:'1.0-1' }}%</div>
-        <div class="kpi-subtext">Overall Student Presence</div>
+        <div class="kpi-subtext">Present today (of marked)</div>
       </div>
 
       <!-- Pending Attendance Clickable Card -->
@@ -72,6 +72,8 @@
         </div>
       </div>
     </div>
+
+    <app-dashboard-charts></app-dashboard-charts>
   }
 </div>
 

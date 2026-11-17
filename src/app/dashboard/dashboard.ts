@@ -4,12 +4,13 @@ import { RouterLink } from '@angular/router';
 import { LoaderComponent } from '../shared/component/loader.component';
 import { DashboardStats } from './models/dashboard.models';
 import { DashboardService } from './services/dashboard-api.service';
+import { DashboardCharts } from './components/dashboard-charts/dashboard-charts';
 import { ToastService } from '../shared/services/toast.service';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [LoaderComponent, RouterLink, DecimalPipe],
+  imports: [LoaderComponent, RouterLink, DecimalPipe, DashboardCharts],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss'
 })
