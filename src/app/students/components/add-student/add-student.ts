@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -6,6 +6,8 @@ import { StudentService } from '../../student.service';
 import { ToastService } from '../../../shared/services/toast.service';
 import { AttendanceApiService } from '../../../attendance/services/attendance-api.service';
 import { ClassSection } from '../../../attendance/models/attendance.models';
+import { ClassApiService } from '../../../classes/services/class-api.service';
+import { ClassLevel } from '../../../classes/models/class.models';
 
 @Component({
   imports: [CommonModule, ReactiveFormsModule, RouterModule],
@@ -20,9 +22,18 @@ export class AddStudent {
   private studentService = inject(StudentService);
   private toast = inject(ToastService);
   private attendanceApi = inject(AttendanceApiService);
+  private classApi = inject(ClassApiService);
 
   studentForm!: FormGroup;
   classSections = signal<ClassSection[]>([]);
+  classLevels = signal<ClassLevel[]>([]);
+  sectionsLoaded = signal<boolean>(false);
+
+  // A student must belong to a section, so classes without one can't be chosen yet.
+  classesWithoutSections = computed(() => {
+    const withSections = new Set(this.classSections().map(s => s.levelName));
+    return this.classLevels().filter(l => !withSections.has(l.name)).map(l => l.name);
+  });
   isSubmitting = signal<boolean>(false);
   isEditMode = signal<boolean>(false);
   studentId = signal<string | null>(null);
@@ -40,9 +51,14 @@ export class AddStudent {
 
   private loadClassSections(): void {
     this.attendanceApi.getClassSections().subscribe({
-      next: (sections) => this.classSections.set(sections),
+      next: (sections) => {
+        this.classSections.set(sections);
+        this.sectionsLoaded.set(true);
+      },
       error: (err) => this.toast.showError(err, 'Failed to load classes')
     });
+    // Only used for the hint below the dropdown, so a failure here is not worth a toast.
+    this.classApi.getLevels().subscribe({ next: (levels) => this.classLevels.set(levels) });
   }
 
   private initForm(): void {

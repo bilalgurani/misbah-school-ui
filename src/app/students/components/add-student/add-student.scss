@@ -135,6 +135,19 @@ $error-color: var(--destructive);
     font-weight: 500;
     margin-top: 0.15rem;
   }
+
+  .hint {
+    font-size: 0.775rem;
+    line-height: 1.4;
+    color: $text-light;
+    margin-top: 0.15rem;
+
+    a {
+      color: var(--primary);
+      font-weight: 600;
+      text-decoration: underline;
+    }
+  }
 }
 
 .form-actions {

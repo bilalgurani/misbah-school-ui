@@ -126,6 +126,11 @@
           @if (studentForm.get('classSectionId')?.touched && studentForm.get('classSectionId')?.invalid) {
             <span class="error">Please select a class</span>
           }
+          @if (sectionsLoaded() && classSections().length === 0) {
+            <span class="hint">No classes or sections exist yet. <a routerLink="/classes">Create them in Classes & Sections</a> before adding students.</span>
+          } @else if (classesWithoutSections().length > 0) {
+            <span class="hint">No section yet for {{ classesWithoutSections().join(', ') }}. <a routerLink="/classes">Add a section</a> to use {{ classesWithoutSections().length > 1 ? 'them' : 'it' }}.</span>
+          }
         </div>
 
         <div class="form-group" [class.has-error]="studentForm.get('rollNo')?.touched && studentForm.get('rollNo')?.invalid">
