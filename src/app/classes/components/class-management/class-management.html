@@ -28,7 +28,10 @@
           <tbody>
             @for (level of levels(); track level.id) {
               <tr>
-                <td data-label="Order"><span class="badge">{{ level.displayOrder }}</span></td>
+                <td data-label="Order">
+                  <span class="badge">{{ level.displayOrder }}</span>
+                  <span class="group-note">{{ level.displayOrder <= 3 ? 'Pre-Primary' : 'Primary' }}</span>
+                </td>
                 <td data-label="Class Name" class="fw-medium">{{ level.name }}</td>
                 <td data-label="Sections">{{ sectionCounts().get(level.id) ?? 0 }}</td>
                 <td data-label="Actions" class="actions">

@@ -165,6 +165,12 @@ $bg-alt: var(--muted);
     font-weight: 600;
   }
 
+  .group-note {
+    margin-left: 0.5rem;
+    font-size: 0.75rem;
+    color: $text-sub;
+  }
+
   .actions {
     display: flex;
     align-items: center;
