@@ -29,7 +29,7 @@
           class="form-input"
         >
           <option [ngValue]="null">-- Select Academic Year --</option>
-          @for (y of academicYears(); track y.id) {
+          @for (y of targetYears(); track y.id) {
             <option [ngValue]="y.id">{{ y.name }}</option>
           }
         </select>

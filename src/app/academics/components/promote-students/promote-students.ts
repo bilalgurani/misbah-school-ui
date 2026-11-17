@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, computed, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EnrollmentService } from '../../services/enrollment.service';
@@ -28,6 +28,13 @@ export class PromoteStudents implements OnInit {
   private toast = inject(ToastService);
 
   academicYears = signal<AcademicYear[]>([]);
+  // Students move forward in time, so only years after the current one are valid targets.
+  targetYears = computed(() => {
+    const current = this.academicYears().find(y => y.current);
+    return current
+      ? this.academicYears().filter(y => y.startDate > current.startDate)
+      : this.academicYears();
+  });
   classSections = signal<ClassSection[]>([]);
 
   sourceSectionId = signal<number | null>(null);
