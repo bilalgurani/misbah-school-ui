@@ -64,10 +64,6 @@ export class ExitStudentModal implements OnInit {
       academicYearId: this.form.academicYearId || Number(this.academicYearId) || 0,
     };
 
-    if (!payload.currentEnrollmentId || !payload.academicYearId) {
-      this.toast.show('Missing enrollment or academic year for this student.', 'error');
-      return;
-    }
     if (!payload.exitDate) {
       this.toast.show('Please choose an exit date.', 'error');
       return;
