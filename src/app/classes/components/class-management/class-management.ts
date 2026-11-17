@@ -1,6 +1,6 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { forkJoin } from 'rxjs';
+import { forkJoin, Observable } from 'rxjs';
 import { ClassApiService } from '../../services/class-api.service';
 import { ClassLevel, ClassSectionItem } from '../../models/class.models';
 import { ToastService } from '../../../shared/services/toast.service';
@@ -141,7 +141,7 @@ export class ClassManagement implements OnInit {
 
     const id = this.editingId();
     const request = { classLevelId: Number(classLevelId), division };
-    const call = id ? this.api.updateSection(id, request) : this.api.createSection(request);
+    const call: Observable<unknown> = id ? this.api.updateSection(id, request) : this.api.createSection(request);
 
     this.isSaving.set(true);
     call.subscribe({
