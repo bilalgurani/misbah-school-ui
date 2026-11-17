@@ -1,0 +1,154 @@
+<div class="directory-container">
+  <div class="page-header">
+    <h2>Classes & Sections</h2>
+    <div class="header-actions">
+      <button type="button" class="btn-secondary" [disabled]="levels().length === 0" (click)="openSectionForm()">+ Add Section</button>
+      <button type="button" class="btn-primary" (click)="openLevelForm()">+ Add Class</button>
+    </div>
+  </div>
+
+  @if (isLoading()) {
+    <div class="card">
+      <app-loader message="Loading classes..."></app-loader>
+    </div>
+  } @else {
+    <!-- CLASSES -->
+    <div class="card">
+      <div class="card-title">Classes</div>
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Order</th>
+              <th>Class Name</th>
+              <th>Sections</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (level of levels(); track level.id) {
+              <tr>
+                <td data-label="Order"><span class="badge">{{ level.displayOrder }}</span></td>
+                <td data-label="Class Name" class="fw-medium">{{ level.name }}</td>
+                <td data-label="Sections">{{ sectionCounts().get(level.id) ?? 0 }}</td>
+                <td data-label="Actions" class="actions">
+                  <button type="button" class="btn-secondary" (click)="openLevelForm(level)" [attr.aria-label]="'Edit ' + level.name">Edit</button>
+                  <button type="button" class="btn-danger" (click)="requestDeleteLevel(level)" [attr.aria-label]="'Delete ' + level.name">Delete</button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="4" class="empty-state">No classes yet. Click "+ Add Class" to create your first one (for example Nursery, LKG, 1, 2).</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SECTIONS -->
+    <div class="card">
+      <div class="card-title">Sections</div>
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Class</th>
+              <th>Section</th>
+              <th>Label Shown in App</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (section of sections(); track section.id) {
+              <tr>
+                <td data-label="Class" class="fw-medium">{{ section.levelName }}</td>
+                <td data-label="Section">{{ section.division }}</td>
+                <td data-label="Label Shown in App"><span class="badge">{{ section.displayName }}</span></td>
+                <td data-label="Actions" class="actions">
+                  <button type="button" class="btn-secondary" (click)="openSectionForm(section)" [attr.aria-label]="'Edit ' + section.displayName">Edit</button>
+                  <button type="button" class="btn-danger" (click)="requestDeleteSection(section)" [attr.aria-label]="'Delete ' + section.displayName">Delete</button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="4" class="empty-state">
+                  @if (levels().length === 0) {
+                    Create a class first, then add its sections.
+                  } @else {
+                    No sections yet. Click "+ Add Section" (for example A or B).
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+</div>
+
+@if (formMode(); as mode) {
+  <div class="modal-backdrop" (click)="closeForm()">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="class-modal-title" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 id="class-modal-title">
+          @if (mode === 'level') {
+            {{ editingId() ? 'Edit Class' : 'Add Class' }}
+          } @else {
+            {{ editingId() ? 'Edit Section' : 'Add Section' }}
+          }
+        </h3>
+        <button type="button" class="close-btn" (click)="closeForm()" aria-label="Close modal">&times;</button>
+      </div>
+
+      <form (ngSubmit)="saveForm()">
+        <div class="modal-body">
+          @if (mode === 'level') {
+            <div class="form-group">
+              <label for="level-name">Class Name <span class="required">*</span></label>
+              <input id="level-name" name="levelName" type="text" class="form-input" placeholder="e.g. Nursery, LKG, 1, 2"
+                     [(ngModel)]="levelForm.name" maxlength="50" autocomplete="off">
+            </div>
+            <div class="form-group">
+              <label for="level-order">Display Order <span class="required">*</span></label>
+              <input id="level-order" name="levelOrder" type="number" min="1" step="1" class="form-input"
+                     [(ngModel)]="levelForm.displayOrder">
+              <span class="hint">Controls the sort order everywhere. Classes with order 1 to 3 (Nursery, LKG, UKG) are counted as Pre-Primary on the dashboard; higher orders count as Primary.</span>
+            </div>
+          } @else {
+            <div class="form-group">
+              <label for="section-level">Class <span class="required">*</span></label>
+              <select id="section-level" name="sectionLevel" class="form-input" [(ngModel)]="sectionForm.classLevelId">
+                @for (level of levels(); track level.id) {
+                  <option [ngValue]="level.id">{{ level.name }}</option>
+                }
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="section-division">Section Name <span class="required">*</span></label>
+              <input id="section-division" name="sectionDivision" type="text" class="form-input" placeholder="e.g. A, B"
+                     [(ngModel)]="sectionForm.division" maxlength="20" autocomplete="off">
+            </div>
+          }
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" (click)="closeForm()">Cancel</button>
+          <button type="submit" class="btn-primary" [disabled]="isSaving()">{{ isSaving() ? 'Saving...' : 'Save' }}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+@if (deleteTarget(); as target) {
+  <app-confirm-dialog
+    [title]="target.kind === 'level' ? 'Delete Class' : 'Delete Section'"
+    [message]="'Are you sure you want to delete ' + target.label + '? This action cannot be undone.'"
+    confirmLabel="Delete"
+    [busy]="isDeleting()"
+    (confirmed)="confirmDelete()"
+    (cancelled)="cancelDelete()">
+  </app-confirm-dialog>
+}

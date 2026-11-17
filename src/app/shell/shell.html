@@ -71,6 +71,13 @@
         @if(authService.isAdmin()) {
           <div class="nav-section-title">ACADEMICS</div>
 
+          <a routerLink="/classes" routerLinkActive="active-link" class="nav-link" (click)="closeSidebar()">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3zM5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/>
+            </svg>
+            <span>Classes & Sections</span>
+          </a>
+
           <a routerLink="/academic-years" routerLinkActive="active-link" class="nav-link" (click)="closeSidebar()">
             <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
               <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
