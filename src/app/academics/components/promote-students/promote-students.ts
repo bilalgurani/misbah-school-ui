@@ -9,9 +9,10 @@ import { AttendanceApiService } from '../../../attendance/services/attendance-ap
 import { ClassSection } from '../../../attendance/models/attendance.models';
 import { ToastService } from '../../../shared/services/toast.service';
 
-interface StudentPromotionRow extends PromotionItemDto {
+interface StudentPromotionRow extends Omit<PromotionItemDto, 'targetClassSectionId'> {
   studentName: string;
   currentRollNo: string;
+  targetClassSectionId: number | null;
 }
 
 @Component({
@@ -74,7 +75,8 @@ export class PromoteStudents implements OnInit {
             currentEnrollmentId: e.id,
             studentName: studentName,
             currentRollNo: rollNumber,
-            targetClassSectionId: sectionId,
+            // Left empty so a promoted student can't silently stay in the same section.
+            targetClassSectionId: null,
             targetRollNo: rollNumber,
             outcome: 'PROMOTED'
           };
@@ -91,6 +93,15 @@ export class PromoteStudents implements OnInit {
     });
   }
 
+  onOutcomeChange(row: StudentPromotionRow): void {
+    const source = this.sourceSectionId();
+    if (row.outcome === 'DETAINED') {
+      row.targetClassSectionId = source;
+    } else if (row.targetClassSectionId === source) {
+      row.targetClassSectionId = null;
+    }
+  }
+
   submitPromotions(): void {
     const targetYr = Number(this.targetYearId());
     if (!targetYr || this.students().length === 0) {
@@ -101,6 +112,13 @@ export class PromoteStudents implements OnInit {
     const hasInvalidTarget = this.students().some(s => !s.targetClassSectionId);
     if (hasInvalidTarget) {
       this.toast.show('Please select a target class section for all students before submitting.', 'error');
+      return;
+    }
+
+    const source = this.sourceSectionId();
+    const stuckPromotions = this.students().filter(s => s.outcome === 'PROMOTED' && s.targetClassSectionId === source);
+    if (stuckPromotions.length > 0) {
+      this.toast.show(`${stuckPromotions.length} promoted student(s) still have the current section as target. Pick the next class, or mark them DETAINED.`, 'error');
       return;
     }
 

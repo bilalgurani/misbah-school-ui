@@ -66,7 +66,7 @@
                 <td data-label="Roll No" class="roll-cell">{{ s.currentRollNo }}</td>
                 <td data-label="Student Name" class="fw-medium name-cell">{{ s.studentName }}</td>
                 <td data-label="Outcome" class="input-cell">
-                  <select [(ngModel)]="s.outcome" class="form-input table-control">
+                  <select [(ngModel)]="s.outcome" (ngModelChange)="onOutcomeChange(s)" class="form-input table-control">
                     <option value="PROMOTED">PROMOTED</option>
                     <option value="DETAINED">DETAINED</option>
                   </select>
