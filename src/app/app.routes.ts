@@ -7,7 +7,6 @@ import { AddTeacher } from './teachers/components/add-teacher/add-teacher';
 import { StudentDirectory } from './students/components/student-directory/student-directory';
 import { TeacherDirectory } from './teachers/components/teacher-directory/teacher-directory';
 import { Dashboard } from './dashboard/dashboard';
-import { FinancialLedger } from './financial/financial-ledger/financial-ledger';
 import { Login } from './auth/login/login';
 import { ChangePassword } from './auth/change-password/change-password';
 import { AuthGuards } from './auth/auth.guard';
@@ -62,7 +61,7 @@ export const routes: Routes = [
       { path: 'teachers/add', component: AddTeacher, canActivate: [AuthGuards.roleGuard('ADMIN')] },
       { path: 'teachers/edit/:id', component: AddTeacher, canActivate: [AuthGuards.roleGuard('ADMIN')] },
 
-      { path: 'financials', component: FinancialLedger, canActivate: [AuthGuards.roleGuard('ADMIN')] },
+      { path: 'financials', loadComponent: () => import('./financial/financial-ledger/financial-ledger').then(m => m.FinancialLedger), canActivate: [AuthGuards.roleGuard('ADMIN')] },
       { path: 'reports/attendance', component: AttendanceReportComponent, canActivate: [AuthGuards.roleGuard('ADMIN')] },
       { path: 'reports/attendance/monthly', loadComponent: () => import('./reports/components/monthly-attendance-report/monthly-attendance-report').then(m => m.MonthlyAttendanceReport) },
       { path: 'reports/attendance/student', loadComponent: () => import('./reports/components/student-attendance-report/student-attendance-report').then(m => m.StudentAttendanceReport) },
@@ -76,6 +75,13 @@ export const routes: Routes = [
       { path: 'fees/receipt/:id', loadComponent: () => import('./fees/fee-receipt/fee-receipt').then(m => m.FeeReceipt), canActivate: [AuthGuards.roleGuard('ADMIN')] },
       { path: 'fees/dues', loadComponent: () => import('./fees/fee-dues/fee-dues').then(m => m.FeeDues), canActivate: [AuthGuards.roleGuard('ADMIN')] },
       { path: 'messages', loadComponent: () => import('./messaging/message-log/message-log').then(m => m.MessageLog), canActivate: [AuthGuards.roleGuard('ADMIN')] },
+
+      { path: 'admin/backup', loadComponent: () => import('./admin-tools/backup/backup').then(m => m.DatabaseBackup), canActivate: [AuthGuards.roleGuard('ADMIN')] },
+
+      { path: 'exams/setup', loadComponent: () => import('./exams/exam-setup/exam-setup').then(m => m.ExamSetup), canActivate: [AuthGuards.roleGuard('ADMIN')] },
+      { path: 'exams/marks', loadComponent: () => import('./exams/marks-entry/marks-entry').then(m => m.MarksEntry) },
+      { path: 'exams/results', loadComponent: () => import('./exams/exam-results/exam-results').then(m => m.ExamResults) },
+      { path: 'exams/report-card', loadComponent: () => import('./exams/report-card/report-card').then(m => m.ReportCard) },
 
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: '**', redirectTo: 'dashboard' }

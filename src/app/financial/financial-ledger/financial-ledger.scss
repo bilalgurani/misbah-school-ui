@@ -1,62 +1,187 @@
-.financial-container {
-  padding: 1.5rem;
-  max-width: 1200px;
-  margin: 0 auto;
+@use '../../shared/styles/parts' as p;
+
+@include p.layout;
+@include p.buttons;
+@include p.form;
+@include p.table;
+@include p.stats;
+@include p.pager;
+@include p.modal;
+
+.subtitle {
+  margin: 0.25rem 0 0;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
 }
 
-.page-header {
-  margin-bottom: 1.5rem;
-  .title { font-size: 1.5rem; font-weight: 700; color: #1e293b; margin: 0; }
-  .subtitle { color: #64748b; font-size: 0.875rem; margin-top: 0.25rem; }
+.muted,
+.period {
+  color: var(--muted-foreground);
+  font-size: 0.85rem;
 }
 
-.financial-kpi-grid {
+.period {
+  margin: 0 0 0.75rem;
+}
+
+.toolbar-card {
+  padding: 1rem;
+}
+
+.presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.875rem;
+}
+
+.filters {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+
+  @media (min-width: 640px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (min-width: 1000px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.filter-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.stat-grid {
+  @media (min-width: 900px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.split {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0 1.25rem;
+
+  @media (min-width: 900px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.bar-row {
+  margin-bottom: 0.75rem;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.bar-head {
+  display: flex;
+  justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 2rem;
+  font-size: 0.85rem;
+  margin-bottom: 0.25rem;
 }
 
-.kpi-card {
-  background: #ffffff;
-  padding: 1.25rem;
-  border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.04);
-  border-left: 4px solid #cbd5e1;
-  
-  &.green { border-left-color: #10b981; }
-  &.red { border-left-color: #ef4444; }
-  &.indigo { border-left-color: #4f46e5; }
-
-  .kpi-title { font-size: 0.8125rem; color: #64748b; font-weight: 600; text-transform: uppercase; }
-  .kpi-value { font-size: 1.5rem; font-weight: 700; color: #1e293b; margin-top: 0.5rem; }
+.bar-track,
+.mini-bar {
+  background: var(--muted);
+  border-radius: 999px;
+  overflow: hidden;
 }
 
-.table-card {
-  background: #ffffff;
-  border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.04);
-  padding: 1.25rem;
-  
-  .table-header h3 { margin: 0 0 1rem 0; font-size: 1.125rem; color: #1e293b; }
+.bar-track {
+  height: 10px;
+}
+
+.mini-bar {
+  height: 6px;
+  margin: 3px 0;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  min-width: 2px;
+
+  &.income {
+    background: var(--chart-3);
+  }
+
+  &.expense {
+    background: var(--destructive);
+  }
 }
 
 .data-table {
-  width: 100%;
-  border-collapse: collapse;
-  th, td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid #f1f5f9; font-size: 0.875rem; }
-  th { background: #f8fafc; color: #475569; font-weight: 600; }
+  .pos {
+    color: var(--chart-3);
+  }
+
+  .neg {
+    color: var(--destructive);
+  }
+
+  .nowrap {
+    white-space: nowrap;
+  }
+
+  .trend-col {
+    min-width: 140px;
+  }
+
+  .desc {
+    min-width: 200px;
+    word-break: break-word;
+  }
+
+  .void-note {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.8rem;
+    color: var(--destructive);
+  }
+
+  tr.voided {
+    color: var(--muted-foreground);
+
+    .text {
+      text-decoration: line-through;
+    }
+  }
 }
 
-.type-badge {
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  &.income { background: #d1fae5; color: #065f46; }
-  &.expenditure { background: #fee2e2; color: #991b1b; }
+.state-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 2.5rem 1rem;
+  color: var(--muted-foreground);
+
+  p {
+    margin: 0;
+  }
 }
 
-.fw-medium { font-weight: 500; }
-.text-success { color: #10b981; font-weight: 600; }
-.text-danger { color: #ef4444; font-weight: 600; }
+.modal-card.wide {
+  @media (min-width: 640px) {
+    max-width: 600px;
+  }
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+
+  @media (min-width: 640px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

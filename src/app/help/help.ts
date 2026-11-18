@@ -55,6 +55,51 @@ export class Help {
       ],
     },
     {
+      title: 'Enter exam marks',
+      steps: [
+        'Open Exams > Enter Marks.',
+        'Choose the exam, the class section and the subject.',
+        'Type each student\'s marks, or tick Absent. Marks above the maximum are rejected.',
+        'Press Save marks. You can come back and correct them later.',
+      ],
+    },
+    {
+      title: 'Print a report card',
+      steps: [
+        'Open Exams > Report Card and pick the student.',
+        'Check that all marks are entered. Exams with missing marks show "Marks pending".',
+        'Press Print. Ranks are shown only after every subject has marks for the class.',
+      ],
+    },
+    {
+      title: 'Set up an exam',
+      adminOnly: true,
+      steps: [
+        'Open Exams > Exam Setup and add your subjects once.',
+        'Create the exam for the academic year (for example "Unit Test 1").',
+        'For each class, choose its subjects with the maximum and pass marks. Use "Copy to other classes" to save time.',
+      ],
+    },
+    {
+      title: 'Record income and expenses',
+      adminOnly: true,
+      steps: [
+        'Open Finance > Financials and press Add entry.',
+        'Choose income or expense, the category, the amount and how it was paid.',
+        'Fee collections appear automatically, so don\'t enter them again.',
+        'A wrong entry can\'t be deleted. Void it with a reason and enter it again correctly.',
+      ],
+    },
+    {
+      title: 'Download a database backup',
+      adminOnly: true,
+      steps: [
+        'Open Administration > Database Backup and press Download full backup.',
+        'Save the file somewhere safe, for example a pen drive or cloud drive.',
+        'Do this at least weekly, and before every term or upgrade.',
+      ],
+    },
+    {
       title: 'Create a login for a new teacher',
       adminOnly: true,
       steps: [
