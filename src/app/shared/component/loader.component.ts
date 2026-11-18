@@ -26,6 +26,12 @@ import { Component, Input } from "@angular/core";
     </div>
   `,
   styles: [`
+    /* Host must be a full-width block, otherwise a flex parent shrinks it to zero width. */
+    :host {
+      display: block;
+      width: 100%;
+    }
+
     .skeleton-wrapper {
       display: flex;
       flex-direction: column;
