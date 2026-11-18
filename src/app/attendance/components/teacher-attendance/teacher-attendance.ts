@@ -3,9 +3,10 @@ import { AttendanceApiService } from '../../services/attendance-api.service';
 import { LocalTeacherUI, MarkTeacherAttendanceRequest } from '../../models/attendance.models';
 import { FormsModule } from '@angular/forms';
 import { ToastService } from '../../../shared/services/toast.service';
+import { LoaderComponent } from '../../../shared/component/loader.component';
 
 @Component({
-  imports: [FormsModule],
+  imports: [FormsModule, LoaderComponent],
   selector: 'app-teacher-attendance',
   styleUrl: './teacher-attendance.scss',
   templateUrl: './teacher-attendance.html',

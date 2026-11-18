@@ -6,9 +6,10 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TeacherService } from '../../teacher.service';
 import { ToastService } from '../../../shared/services/toast.service';
+import { LoaderComponent } from '../../../shared/component/loader.component';
 
 @Component({
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, LoaderComponent],
   selector: 'app-add-teacher',
   styleUrl: './add-teacher.scss',
   templateUrl: './add-teacher.html',
@@ -22,6 +23,7 @@ export class AddTeacher implements OnInit {
 
   teacherForm!: FormGroup;
   isSubmitting = signal<boolean>(false);
+  isLoadingData = signal<boolean>(false);
   isEditMode = signal<boolean>(false);
   teacherId = signal<string | null>(null);
 
@@ -50,9 +52,16 @@ export class AddTeacher implements OnInit {
   }
 
   private loadTeacherData(id: string): void {
+    this.isLoadingData.set(true);
     this.teacherService.getTeacherById(id).subscribe({
-      next: (teacher) => this.teacherForm.patchValue(teacher),
-      error: (err) => this.toast.showError(err, 'Failed to load teacher data.')
+      next: (teacher) => {
+        this.isLoadingData.set(false);
+        this.teacherForm.patchValue(teacher);
+      },
+      error: (err) => {
+        this.isLoadingData.set(false);
+        this.toast.showError(err, 'Failed to load teacher data.');
+      }
     });
   }
 

@@ -9,6 +9,9 @@
     <h2>@if (isEditMode()) { Edit Student Profile } @else { Admit New Student }</h2>
   </div>
 
+  @if (isLoadingData()) {
+    <app-loader message="Loading student..."></app-loader>
+  } @else {
   <div class="card">
     <form [formGroup]="studentForm" (ngSubmit)="onSubmit()" novalidate>
       
@@ -173,4 +176,5 @@
       </div>
     </form>
   </div>
+  }
 </div>

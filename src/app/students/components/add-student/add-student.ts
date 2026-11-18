@@ -8,9 +8,10 @@ import { AttendanceApiService } from '../../../attendance/services/attendance-ap
 import { ClassSection } from '../../../attendance/models/attendance.models';
 import { ClassApiService } from '../../../classes/services/class-api.service';
 import { ClassLevel } from '../../../classes/models/class.models';
+import { LoaderComponent } from '../../../shared/component/loader.component';
 
 @Component({
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, LoaderComponent],
   selector: 'app-add-student',
   styleUrl: './add-student.scss',
   templateUrl: './add-student.html',
@@ -35,6 +36,7 @@ export class AddStudent {
     return this.classLevels().filter(l => !withSections.has(l.name)).map(l => l.name);
   });
   isSubmitting = signal<boolean>(false);
+  isLoadingData = signal<boolean>(false);
   isEditMode = signal<boolean>(false);
   studentId = signal<string | null>(null);
 
@@ -83,8 +85,10 @@ export class AddStudent {
   }
 
   private loadStudentData(id: string): void {
+    this.isLoadingData.set(true);
     this.studentService.getStudentById(id).subscribe({
       next: (student) => {
+        this.isLoadingData.set(false);
         // Remove spaces and non-digit characters from numerical fields upon loading
         const sanitizedData = {
           ...student,
@@ -99,7 +103,10 @@ export class AddStudent {
           this.logInvalidControls();
         }
       },
-      error: (err) => this.toast.showError(err, 'Failed to load student data.')
+      error: (err) => {
+        this.isLoadingData.set(false);
+        this.toast.showError(err, 'Failed to load student data.');
+      }
     });
   }
 

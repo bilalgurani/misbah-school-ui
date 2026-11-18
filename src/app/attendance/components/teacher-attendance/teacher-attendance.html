@@ -81,6 +81,9 @@
 
       <!-- Rows / Mobile Cards -->
       <div class="roster-body">
+        @if (isLoading()) {
+          <app-loader message="Loading teachers..."></app-loader>
+        } @else {
         @for (teacher of filteredTeachers(); track teacher.id) {
           <div class="roster-row" [class.is-absent]="teacher.status === 'ABSENT'">
             <div class="col-roll">
@@ -118,6 +121,7 @@
               </div>
             </div>
           </div>
+        }
         }
       </div>
     </div>

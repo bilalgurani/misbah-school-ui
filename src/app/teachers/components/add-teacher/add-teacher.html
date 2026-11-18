@@ -9,6 +9,9 @@
     <h2>@if (isEditMode()) { Edit Teacher Profile } @else { Onboard New Teacher }</h2>
   </div>
 
+  @if (isLoadingData()) {
+    <app-loader message="Loading teacher..."></app-loader>
+  } @else {
   <div class="card">
     <form [formGroup]="teacherForm" (ngSubmit)="onSubmit()">
 
@@ -76,4 +79,5 @@
       </div>
     </form>
   </div>
+  }
 </div>
