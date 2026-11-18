@@ -1,0 +1,59 @@
+<div class="profile-page">
+  <header class="page-header">
+    <h2>My Profile</h2>
+    <p class="subtitle">Your account details and security.</p>
+  </header>
+
+  <section class="card identity">
+    <div class="avatar" aria-hidden="true">{{ initials() }}</div>
+    <div>
+      <div class="name">{{ authService.currentUser() }}</div>
+      <span class="badge">{{ roleLabel() }}</span>
+    </div>
+  </section>
+
+  <section class="card">
+    <h3>Account</h3>
+    <dl>
+      <dt>Username</dt>
+      <dd>{{ authService.currentUser() }}</dd>
+
+      <dt>Email</dt>
+      <dd>{{ authService.currentEmail() || 'Not set' }}</dd>
+
+      <dt>Role</dt>
+      <dd>{{ roleLabel() }}</dd>
+
+      @if (authService.isTeacher()) {
+        <dt>Teacher record</dt>
+        <dd>
+          @if (authService.currentTeacherId()) { Linked (ID {{ authService.currentTeacherId() }}) }
+          @else { Not linked. Ask the administrator to link your account. }
+        </dd>
+      }
+
+      @if (sessionEndsAt(); as ends) {
+        <dt>Current session</dt>
+        <dd>Stays active while you use the app. Expires at {{ ends.toLocaleTimeString() }} if idle.</dd>
+      }
+    </dl>
+  </section>
+
+  <section class="card">
+    <h3>What you can do</h3>
+    <ul>
+      @for (item of permissions(); track item) {
+        <li>{{ item }}</li>
+      }
+    </ul>
+  </section>
+
+  <section class="card actions">
+    <h3>Security</h3>
+    <p class="muted">Changing your password signs you out everywhere, including this device.</p>
+    <div class="buttons">
+      <a routerLink="/change-password" class="btn primary">Change password</a>
+      <button type="button" class="btn" (click)="logout()">Sign out</button>
+    </div>
+  </section>
+</div>

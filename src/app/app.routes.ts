@@ -37,6 +37,8 @@ export const routes: Routes = [
     children: [
       {path: 'register', component: Register, canActivate: [AuthGuards.roleGuard('ADMIN')]},
       { path: 'change-password', component: ChangePassword },
+      { path: 'profile', loadComponent: () => import('./profile/profile').then(m => m.Profile) },
+      { path: 'help', loadComponent: () => import('./help/help').then(m => m.Help) },
       { path: 'dashboard', component: Dashboard },
       { path: 'reset-password', component: UserManagement, canActivate: [AuthGuards.roleGuard('ADMIN')] },
       { path: 'admin', component: Dashboard, canActivate: [AuthGuards.roleGuard('ADMIN')] },

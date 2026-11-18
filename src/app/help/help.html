@@ -1,0 +1,51 @@
+<div class="help-page">
+  <header class="page-header">
+    <h2>Help &amp; Support</h2>
+    <p class="subtitle">Quick guides and answers to common questions.</p>
+  </header>
+
+  <section class="card">
+    <h3>How do I...</h3>
+    @for (guide of guides(); track guide.title) {
+      <details class="item">
+        <summary>{{ guide.title }}</summary>
+        <ol>
+          @for (step of guide.steps; track step) {
+            <li>{{ step }}</li>
+          }
+        </ol>
+      </details>
+    }
+  </section>
+
+  <section class="card">
+    <h3>Frequently asked questions</h3>
+    @for (faq of faqs(); track faq.question) {
+      <details class="item">
+        <summary>{{ faq.question }}</summary>
+        <p>{{ faq.answer }}</p>
+      </details>
+    }
+  </section>
+
+  <section class="card">
+    <h3>Need more help?</h3>
+    @if (hasContact) {
+      <ul class="contact">
+        @if (contact.email) {
+          <li><span>Email</span><a [href]="'mailto:' + contact.email">{{ contact.email }}</a></li>
+        }
+        @if (contact.phone) {
+          <li><span>Phone</span><a [href]="'tel:' + contact.phone">{{ contact.phone }}</a></li>
+        }
+        @if (contact.hours) {
+          <li><span>Hours</span>{{ contact.hours }}</li>
+        }
+      </ul>
+    } @else {
+      <p>Please contact your school administrator.</p>
+    }
+    <p class="muted">Tell us your username, the page you were on and what you saw on screen. A screenshot helps.</p>
+    <a routerLink="/profile" class="link">Go to My Profile</a>
+  </section>
+</div>
