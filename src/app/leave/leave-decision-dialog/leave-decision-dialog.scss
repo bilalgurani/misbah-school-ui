@@ -1,0 +1,27 @@
+@use '../../shared/styles/parts' as p;
+
+@include p.buttons;
+@include p.form;
+@include p.modal;
+
+.reason {
+  color: var(--muted-foreground);
+  font-style: italic;
+}
+
+.balance-line {
+  padding: 0.625rem 0.875rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--muted);
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}
+
+.modal-footer .btn-danger {
+  width: 100%;
+
+  @media (min-width: 520px) {
+    width: auto;
+  }
+}

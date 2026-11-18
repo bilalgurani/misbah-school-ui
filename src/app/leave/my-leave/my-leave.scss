@@ -1,0 +1,82 @@
+@use '../../shared/styles/parts' as p;
+
+@include p.layout;
+@include p.buttons;
+@include p.table;
+@include p.alert;
+@include p.pager;
+
+.year-note {
+  margin: 0 0 0.75rem;
+  font-size: 0.85rem;
+  color: var(--muted-foreground);
+}
+
+.balance-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 0.875rem;
+  margin-bottom: 1.25rem;
+}
+
+.balance-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.875rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.balance-type {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted-foreground);
+
+  small {
+    margin-left: 0.35rem;
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 500;
+  }
+}
+
+.balance-available {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--chart-3);
+}
+
+.balance-caption {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.balance-meta {
+  display: flex;
+  gap: 1rem;
+  margin: 0.5rem 0 0;
+  padding-top: 0.5rem;
+  border-top: 1px dashed var(--border);
+  font-size: 0.8rem;
+
+  dt {
+    color: var(--muted-foreground);
+  }
+
+  dd {
+    margin: 0;
+    font-weight: 600;
+  }
+}
+
+.alert .btn-secondary {
+  margin-left: 0.75rem;
+}
+
+.empty-block .btn-secondary {
+  margin-left: 0.5rem;
+}

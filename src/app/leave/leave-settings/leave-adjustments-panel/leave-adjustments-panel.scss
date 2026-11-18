@@ -1,0 +1,37 @@
+@use '../../../shared/styles/parts' as p;
+
+@include p.layout;
+@include p.buttons;
+@include p.form;
+@include p.toolbar;
+@include p.table;
+
+.adjust-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.help {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--muted-foreground);
+  line-height: 1.45;
+}
+
+.days {
+  flex: 0 1 160px;
+}
+
+.filter {
+  flex: 0 1 260px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.empty-block .btn-secondary {
+  margin-left: 0.5rem;
+}

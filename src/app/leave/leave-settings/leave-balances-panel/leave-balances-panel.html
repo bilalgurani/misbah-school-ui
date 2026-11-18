@@ -1,0 +1,51 @@
+<div class="card">
+  <div class="panel-head">
+    <h3 class="card-title">Balances @if (data(); as d) { <small>{{ d.academicYear }}</small> }</h3>
+    <button type="button" class="btn-secondary btn-sm" (click)="exportCsv()" [disabled]="isLoading() || !data()">Export CSV</button>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loader-container">
+      <app-loader message="Loading balances..."></app-loader>
+    </div>
+  } @else if (loadFailed()) {
+    <div class="empty-block">
+      Could not load balances.
+      <button type="button" class="btn-secondary btn-sm" (click)="load()">Retry</button>
+    </div>
+  } @else if (data(); as d) {
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Teacher</th>
+            @for (type of d.types; track type.id) {
+              <th class="num">{{ type.name }}</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (teacher of d.teachers; track teacher.teacherId) {
+            <tr>
+              <td data-label="Teacher" class="fw-medium">{{ teacher.teacherName }}</td>
+              @for (type of d.types; track type.id) {
+                <td [attr.data-label]="type.name" class="num">
+                  @if (cell(teacher, type.id); as c) {
+                    <span class="avail">{{ type.unlimited ? 'No limit' : c.available }}</span>
+                    <small class="used">used {{ c.used }}@if (c.pending > 0) {, pending {{ c.pending }}}</small>
+                  } @else {
+                    <span class="text-muted">-</span>
+                  }
+                </td>
+              }
+            </tr>
+          } @empty {
+            <tr>
+              <td [attr.colspan]="d.types.length + 1" class="empty-state">No teachers found.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

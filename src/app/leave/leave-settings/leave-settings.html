@@ -1,0 +1,25 @@
+<div class="page-container">
+  <div class="page-header">
+    <h2>Leave Settings</h2>
+    <div class="form-group year-picker">
+      <label for="leave-year">Academic year</label>
+      <select id="leave-year" class="form-input" [ngModel]="yearId()" (ngModelChange)="onYearChange($event)">
+        @for (year of academicYears(); track year.id) {
+          <option [ngValue]="year.id">{{ year.name }}{{ year.current ? ' (current)' : '' }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  <app-leave-types-panel [types]="leaveTypes()" [loading]="typesLoading()" (changed)="onTypesChanged()"></app-leave-types-panel>
+
+  <app-leave-balances-panel [yearId]="yearId()" [refresh]="refreshKey()"></app-leave-balances-panel>
+
+  <app-leave-adjustments-panel
+    [types]="leaveTypes()"
+    [teachers]="teachers()"
+    [yearId]="yearId()"
+    [refresh]="refreshKey()"
+    (changed)="onAdjusted()">
+  </app-leave-adjustments-panel>
+</div>

@@ -1,0 +1,44 @@
+@use '../../../shared/styles/parts' as p;
+
+@include p.layout;
+@include p.buttons;
+@include p.table;
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1rem 0;
+
+  .card-title {
+    padding: 0;
+
+    small {
+      margin-left: 0.5rem;
+      color: var(--muted-foreground);
+      font-weight: 500;
+    }
+  }
+}
+
+.avail {
+  font-weight: 600;
+}
+
+.used {
+  display: block;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+}
+
+@media (max-width: 639px) {
+  .used {
+    display: inline;
+    margin-left: 0.5rem;
+  }
+}
+
+.empty-block .btn-secondary {
+  margin-left: 0.5rem;
+}

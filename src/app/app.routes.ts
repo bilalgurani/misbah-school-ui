@@ -78,6 +78,10 @@ export const routes: Routes = [
 
       { path: 'admin/backup', loadComponent: () => import('./admin-tools/backup/backup').then(m => m.DatabaseBackup), canActivate: [AuthGuards.roleGuard('ADMIN')] },
 
+      { path: 'leave/my', loadComponent: () => import('./leave/my-leave/my-leave').then(m => m.MyLeave) },
+      { path: 'leave/requests', loadComponent: () => import('./leave/leave-approvals/leave-approvals').then(m => m.LeaveApprovals), canActivate: [AuthGuards.roleGuard('ADMIN')] },
+      { path: 'leave/settings', loadComponent: () => import('./leave/leave-settings/leave-settings').then(m => m.LeaveSettings), canActivate: [AuthGuards.roleGuard('ADMIN')] },
+
       { path: 'exams/setup', loadComponent: () => import('./exams/exam-setup/exam-setup').then(m => m.ExamSetup), canActivate: [AuthGuards.roleGuard('ADMIN')] },
       { path: 'exams/marks', loadComponent: () => import('./exams/marks-entry/marks-entry').then(m => m.MarksEntry) },
       { path: 'exams/results', loadComponent: () => import('./exams/exam-results/exam-results').then(m => m.ExamResults) },

@@ -4,6 +4,7 @@ import { LocalTeacherUI, MarkTeacherAttendanceRequest } from '../../models/atten
 import { FormsModule } from '@angular/forms';
 import { ToastService } from '../../../shared/services/toast.service';
 import { LoaderComponent } from '../../../shared/component/loader.component';
+import { LeaveService, OnLeaveEntry } from '../../../leave/leave.service';
 
 @Component({
   imports: [FormsModule, LoaderComponent],
@@ -15,8 +16,11 @@ export class TeacherAttendance {
   private api = inject(AttendanceApiService);
 
   private toast = inject(ToastService);
+  private leaveService = inject(LeaveService);
 
   selectedDate = signal<string>(new Date().toISOString().split('T')[0]);
+
+  onLeave = signal<Map<number, OnLeaveEntry>>(new Map());
 
   teachers = signal<LocalTeacherUI[]>([]);
   searchQuery = signal<string>('');
@@ -50,6 +54,7 @@ export class TeacherAttendance {
     if (!date) return;
 
     this.isLoading.set(true);
+    this.loadOnLeave(date);
 
     // 1. Try loading existing teacher attendance for this date
     // Note: You will need to create this method in your AttendanceApiService
@@ -72,6 +77,18 @@ export class TeacherAttendance {
       error: () => {
         this.loadDefaultRoster();
       }
+    });
+  }
+
+  private loadOnLeave(date: string) {
+    this.onLeave.set(new Map());
+    this.leaveService.getOnLeave(date, date).subscribe({
+      next: (entries) => {
+        if (date === this.selectedDate()) {
+          this.onLeave.set(new Map(entries.map(e => [e.teacherId, e])));
+        }
+      },
+      error: () => undefined,
     });
   }
 

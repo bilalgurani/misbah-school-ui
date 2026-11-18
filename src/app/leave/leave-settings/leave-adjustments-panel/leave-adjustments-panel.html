@@ -1,0 +1,114 @@
+<div class="card">
+  <h3 class="card-title">Adjustments</h3>
+  <form class="card-body adjust-form" [formGroup]="form" (ngSubmit)="save()" novalidate>
+    <p class="help">
+      Use adjustments for carry-forward from last year, comp-off, or corrections. Enter positive days to add to a
+      teacher's balance and negative days to deduct. The adjustment applies to the selected academic year.
+    </p>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="adj-teacher">Teacher</label>
+        <select id="adj-teacher" class="form-input" formControlName="teacherId"
+          [class.invalid]="submitted() && form.controls.teacherId.invalid">
+          <option [ngValue]="null">Select a teacher</option>
+          @for (t of teachers(); track t.id) {
+            <option [ngValue]="t.id">{{ t.name }}</option>
+          }
+        </select>
+        @if (submitted() && form.controls.teacherId.invalid) {
+          <span class="field-error">Choose a teacher.</span>
+        }
+      </div>
+      <div class="form-group">
+        <label for="adj-type">Leave type</label>
+        <select id="adj-type" class="form-input" formControlName="leaveTypeId"
+          [class.invalid]="submitted() && form.controls.leaveTypeId.invalid">
+          <option [ngValue]="null">Select a leave type</option>
+          @for (t of adjustableTypes(); track t.id) {
+            <option [ngValue]="t.id">{{ t.name }}</option>
+          }
+        </select>
+        @if (submitted() && form.controls.leaveTypeId.invalid) {
+          <span class="field-error">Choose a leave type.</span>
+        }
+      </div>
+      <div class="form-group days">
+        <label for="adj-days">Days (+/-)</label>
+        <input id="adj-days" type="number" step="0.5" class="form-input" formControlName="days" placeholder="e.g. 2 or -1"
+          [class.invalid]="submitted() && form.controls.days.invalid">
+        @if (submitted() && form.controls.days.invalid) {
+          <span class="field-error">Enter a number other than 0.</span>
+        }
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="adj-reason">Reason</label>
+      <input id="adj-reason" type="text" maxlength="300" class="form-input" formControlName="reason"
+        placeholder="e.g. Carry-forward from 2025-26" [class.invalid]="submitted() && form.controls.reason.invalid">
+      @if (submitted() && form.controls.reason.invalid) {
+        <span class="field-error">Please give a reason.</span>
+      }
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn-primary" [disabled]="isSaving()">
+        {{ isSaving() ? 'Saving...' : 'Add adjustment' }}
+      </button>
+    </div>
+  </form>
+
+  <div class="toolbar">
+    <div class="form-group filter">
+      <label for="adj-filter">Show adjustments for</label>
+      <select id="adj-filter" class="form-input" [ngModel]="filterTeacherId()" (ngModelChange)="onFilterTeacher($event)">
+        <option [ngValue]="null">All teachers</option>
+        @for (t of teachers(); track t.id) {
+          <option [ngValue]="t.id">{{ t.name }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loader-container">
+      <app-loader message="Loading adjustments..."></app-loader>
+    </div>
+  } @else if (loadFailed()) {
+    <div class="empty-block">
+      Could not load adjustments.
+      <button type="button" class="btn-secondary btn-sm" (click)="load()">Retry</button>
+    </div>
+  } @else {
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Teacher</th>
+            <th>Leave type</th>
+            <th class="num">Days</th>
+            <th>Reason</th>
+            <th>By</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (a of adjustments(); track a.id) {
+            <tr>
+              <td data-label="Date">{{ a.createdAt | date: 'dd MMM yyyy' }}</td>
+              <td data-label="Teacher" class="fw-medium">{{ a.teacherName }}</td>
+              <td data-label="Leave type">{{ a.leaveType }}</td>
+              <td data-label="Days" class="num">
+                <span class="badge" [class.badge-success]="a.days > 0" [class.badge-danger]="a.days < 0">{{ a.days > 0 ? '+' : '' }}{{ a.days }}</span>
+              </td>
+              <td data-label="Reason">{{ a.reason }}</td>
+              <td data-label="By">{{ a.createdBy || '-' }}</td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="empty-state">No adjustments for this selection.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

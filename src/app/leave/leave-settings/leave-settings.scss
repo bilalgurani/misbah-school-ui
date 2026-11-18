@@ -1,0 +1,9 @@
+﻿@use '../../shared/styles/parts' as p;
+
+@include p.layout;
+@include p.form;
+
+.year-picker {
+  flex: 0 0 auto;
+  min-width: 220px;
+}

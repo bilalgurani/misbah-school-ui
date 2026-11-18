@@ -1,0 +1,156 @@
+<div class="page-container">
+  <div class="page-header">
+    <h2>Leave Requests</h2>
+    <div class="header-actions">
+      <button type="button" class="btn-secondary" (click)="refreshAll()" [disabled]="isLoading()">Refresh</button>
+      <button type="button" class="btn-primary" (click)="showRecord.set(!showRecord())" [attr.aria-expanded]="showRecord()">
+        {{ showRecord() ? 'Close' : 'Record leave for a teacher' }}
+      </button>
+    </div>
+  </div>
+
+  @if (onLeaveLoaded()) {
+    <div class="on-leave" role="status">
+      <span class="on-leave-title">On leave today</span>
+      @for (e of onLeave(); track e.requestId) {
+        <span class="chip">{{ e.teacherName }} ({{ e.leaveType }}){{ e.halfDay ? ' - half day' : '' }}</span>
+      } @empty {
+        <span class="text-muted">Nobody is on approved leave today.</span>
+      }
+    </div>
+  }
+
+  @if (showRecord()) {
+    <app-leave-apply-form title="Record leave for a teacher" [teachers]="teachers()" (saved)="onRecorded()"></app-leave-apply-form>
+  }
+
+  <div class="card">
+    <div class="tabs" role="tablist">
+      @for (t of tabs; track t.value) {
+        <button type="button" role="tab" class="tab" [class.active]="tab() === t.value"
+          [attr.aria-selected]="tab() === t.value" (click)="selectTab(t.value)">
+          {{ t.label }}
+          @if (t.value === 'PENDING' && pendingCount() > 0) {
+            <span class="count">{{ pendingCount() }}</span>
+          }
+        </button>
+      }
+    </div>
+
+    <div class="toolbar">
+      <div class="form-group filter">
+        <label for="leave-filter-teacher">Teacher</label>
+        <select id="leave-filter-teacher" class="form-input" [ngModel]="teacherId()" (ngModelChange)="onTeacherChange($event)">
+          <option [ngValue]="null">All teachers</option>
+          @for (t of teachers(); track t.id) {
+            <option [ngValue]="t.id">{{ t.name }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-group filter">
+        <label for="leave-filter-from">From</label>
+        <input id="leave-filter-from" type="date" class="form-input" [ngModel]="fromDate()"
+          (ngModelChange)="fromDate.set($event); onFilterChange()">
+      </div>
+      <div class="form-group filter">
+        <label for="leave-filter-to">To</label>
+        <input id="leave-filter-to" type="date" class="form-input" [ngModel]="toDate()"
+          (ngModelChange)="toDate.set($event); onFilterChange()">
+      </div>
+      @if (hasFilters()) {
+        <button type="button" class="btn-secondary" (click)="clearFilters()">Clear filters</button>
+      }
+    </div>
+
+    @if (isLoading()) {
+      <div class="loader-container">
+        <app-loader message="Loading leave requests..."></app-loader>
+      </div>
+    } @else if (loadFailed()) {
+      <div class="empty-block">
+        Could not load leave requests.
+        <button type="button" class="btn-secondary btn-sm" (click)="load()">Retry</button>
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Teacher</th>
+              <th>Type</th>
+              <th>Dates</th>
+              <th class="num">Days</th>
+              <th>Reason</th>
+              <th>Status</th>
+              <th>Applied on</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (r of requests(); track r.id) {
+              <tr>
+                <td data-label="Teacher" class="fw-medium">{{ r.teacherName }}</td>
+                <td data-label="Type">{{ r.leaveType }}</td>
+                <td data-label="Dates">
+                  {{ r.fromDate | date: 'dd MMM yyyy' }}
+                  @if (r.toDate !== r.fromDate) { &ndash; {{ r.toDate | date: 'dd MMM yyyy' }} }
+                  @if (r.halfDay) { <small class="text-muted">(half day)</small> }
+                </td>
+                <td data-label="Days" class="num">{{ r.days }}</td>
+                <td data-label="Reason">{{ r.reason || '-' }}</td>
+                <td data-label="Status">
+                  <span [class]="statusClass(r.status)">{{ statusLabels[r.status] }}</span>
+                  @if (r.decisionNote) { <small class="note">{{ r.decisionNote }}</small> }
+                </td>
+                <td data-label="Applied on">{{ r.createdAt | date: 'dd MMM yyyy' }}</td>
+                <td data-label="Action" class="actions">
+                  @if (r.status === 'PENDING') {
+                    <button type="button" class="btn-primary btn-sm" (click)="openDecision(r, 'approve')"
+                      [attr.aria-label]="'Approve leave for ' + r.teacherName">Approve</button>
+                    <button type="button" class="btn-secondary btn-sm" (click)="openDecision(r, 'reject')"
+                      [attr.aria-label]="'Reject leave for ' + r.teacherName">Reject</button>
+                  }
+                  @if (canCancel(r)) {
+                    <button type="button" class="btn-danger btn-sm" (click)="requestCancel(r)"
+                      [attr.aria-label]="'Cancel leave for ' + r.teacherName">Cancel</button>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="8" class="empty-state">No leave requests found.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      @if (total() > 0) {
+        <div class="pager">
+          <span>Showing {{ rangeStart() }}-{{ rangeEnd() }} of {{ total() }}</span>
+          <div class="pager-buttons">
+            <button type="button" class="btn-secondary btn-sm" (click)="goTo(page() - 1)" [disabled]="page() === 0">Previous</button>
+            <span>Page {{ page() + 1 }} / {{ totalPages() }}</span>
+            <button type="button" class="btn-secondary btn-sm" (click)="goTo(page() + 1)" [disabled]="page() + 1 >= totalPages()">Next</button>
+          </div>
+        </div>
+      }
+    }
+  </div>
+</div>
+
+@if (decision(); as d) {
+  <app-leave-decision-dialog [request]="d.request" [mode]="d.mode" (decided)="onDecided()" (closed)="closeDecision()">
+  </app-leave-decision-dialog>
+}
+
+@if (requestToCancel(); as target) {
+  <app-confirm-dialog
+    title="Cancel Leave"
+    [message]="'Cancel ' + target.teacherName + '\'s ' + target.leaveType + ' (' + dayLabel(target.days) + ' from ' + target.fromDate + ')?'"
+    confirmLabel="Cancel leave"
+    [busy]="isCancelling()"
+    (confirmed)="confirmCancel()"
+    (cancelled)="dismissCancel()">
+  </app-confirm-dialog>
+}

@@ -176,7 +176,9 @@
             <ul class="name-list">
               @for (t of r.staff.absentees; track t.teacherId) {
                 <li>
-                  <span>{{ t.name }} <small>({{ t.employeeId }})</small></span>
+                  <span>{{ t.name }} <small>({{ t.employeeId }})</small>
+                    @if (t.leaveType) { <small style="display:block;font-weight:600;color:var(--chart-4)">On approved leave: {{ t.leaveType }}</small> }
+                  </span>
                   <span class="badge" [class.badge-absent]="t.status === 'ABSENT'" [class.badge-late]="t.status === 'LATE'">{{ t.status }}</span>
                 </li>
               }

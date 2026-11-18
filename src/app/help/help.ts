@@ -55,6 +55,25 @@ export class Help {
       ],
     },
     {
+      title: 'Apply for leave',
+      steps: [
+        'Open Leave > My Leave and check your balances.',
+        'Choose the leave type and the dates. Sundays and school holidays are not counted.',
+        'For one day you can tick Half day, which counts as 0.5 day.',
+        'Press Apply. The administrator approves or rejects it, and you can cancel a pending request.',
+      ],
+    },
+    {
+      title: 'Approve or reject leave',
+      adminOnly: true,
+      steps: [
+        'Open Leave > Leave Requests. Pending requests are shown first.',
+        'Press Approve (a note is optional) or Reject (a reason is required).',
+        'Use "Record leave for a teacher" when someone was absent without applying.',
+        'Leave > Leave Settings holds the leave types, yearly days and balances. Use an adjustment for carry-forward or corrections.',
+      ],
+    },
+    {
       title: 'Enter exam marks',
       steps: [
         'Open Exams > Enter Marks.',

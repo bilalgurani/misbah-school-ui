@@ -1,0 +1,85 @@
+<div class="card">
+  <h3 class="card-title">Leave types</h3>
+  <form class="card-body types-form" [formGroup]="form" (ngSubmit)="save()" novalidate>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="type-name">Name</label>
+        <input id="type-name" type="text" class="form-input" formControlName="name" placeholder="e.g. Casual Leave"
+          [class.invalid]="submitted() && form.controls.name.invalid">
+        @if (submitted() && form.controls.name.invalid) {
+          <span class="field-error">Name is required.</span>
+        }
+      </div>
+      <div class="form-group">
+        <label for="type-days">Days per year</label>
+        <input id="type-days" type="number" min="0" step="0.5" class="form-input" formControlName="daysPerYear"
+          [class.invalid]="submitted() && form.controls.daysPerYear.invalid">
+        @if (submitted() && form.controls.daysPerYear.invalid) {
+          <span class="field-error">Enter 0 or more days.</span>
+        }
+      </div>
+      <label class="check-row">
+        <input type="checkbox" formControlName="paid">
+        <span>Paid</span>
+      </label>
+      <label class="check-row">
+        <input type="checkbox" formControlName="unlimited" (change)="onUnlimitedChange()">
+        <span>No limit</span>
+      </label>
+      @if (editingId() !== null) {
+        <label class="check-row">
+          <input type="checkbox" formControlName="active">
+          <span>Active</span>
+        </label>
+      }
+    </div>
+    <div class="form-actions">
+      @if (editingId() !== null) {
+        <button type="button" class="btn-secondary" [disabled]="isSaving()" (click)="cancelEdit()">Cancel</button>
+      }
+      <button type="submit" class="btn-primary" [disabled]="isSaving()">
+        {{ isSaving() ? 'Saving...' : (editingId() !== null ? 'Update leave type' : 'Add leave type') }}
+      </button>
+    </div>
+  </form>
+
+  @if (loading()) {
+    <div class="loader-container">
+      <app-loader message="Loading leave types..."></app-loader>
+    </div>
+  } @else {
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th class="num">Days / year</th>
+            <th>Paid</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (t of types(); track t.id) {
+            <tr>
+              <td data-label="Name" class="fw-medium">{{ t.name }}</td>
+              <td data-label="Days / year" class="num">{{ limitLabel(t.daysPerYear, t.unlimited) }}</td>
+              <td data-label="Paid">{{ t.paid ? 'Paid' : 'Unpaid' }}</td>
+              <td data-label="Status">
+                <span class="badge" [class.badge-success]="t.active">{{ t.active ? 'Active' : 'Inactive' }}</span>
+              </td>
+              <td data-label="Action" class="actions">
+                <button type="button" class="btn-secondary btn-sm" (click)="edit(t)"
+                  [attr.aria-label]="'Edit ' + t.name">Edit</button>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="5" class="empty-state">No leave types yet. Add the first one above.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

@@ -1,0 +1,90 @@
+<div class="card">
+  <h3 class="card-title">{{ title() }}</h3>
+  <form class="card-body leave-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    @if (teachers() !== null) {
+      <div class="form-group">
+        <label for="leave-teacher">Teacher</label>
+        <select id="leave-teacher" class="form-input" formControlName="teacherId"
+          [class.invalid]="submitted() && !form.controls.teacherId.value">
+          <option [ngValue]="null">Select a teacher</option>
+          @for (t of teachers(); track t.id) {
+            <option [ngValue]="t.id">{{ t.name }}</option>
+          }
+        </select>
+        @if (submitted() && !form.controls.teacherId.value) {
+          <span class="field-error">Choose a teacher.</span>
+        }
+      </div>
+    }
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="leave-type">Leave type</label>
+        <select id="leave-type" class="form-input" formControlName="leaveTypeId"
+          [class.invalid]="submitted() && form.controls.leaveTypeId.invalid">
+          <option [ngValue]="null">{{ typesLoading() ? 'Loading...' : 'Select a leave type' }}</option>
+          @for (t of leaveTypes(); track t.id) {
+            <option [ngValue]="t.id">{{ t.name }}{{ t.paid ? '' : ' (unpaid)' }}</option>
+          }
+        </select>
+        @if (submitted() && form.controls.leaveTypeId.invalid) {
+          <span class="field-error">Choose a leave type.</span>
+        }
+      </div>
+      <div class="form-group">
+        <label for="leave-from">From</label>
+        <input id="leave-from" type="date" class="form-input" formControlName="fromDate"
+          [class.invalid]="submitted() && form.controls.fromDate.invalid">
+        @if (submitted() && form.controls.fromDate.invalid) {
+          <span class="field-error">Start date is required.</span>
+        }
+      </div>
+      <div class="form-group">
+        <label for="leave-to">To</label>
+        <input id="leave-to" type="date" class="form-input" formControlName="toDate"
+          [class.invalid]="submitted() && form.controls.toDate.invalid">
+        @if (submitted() && form.controls.toDate.invalid) {
+          <span class="field-error">End date is required.</span>
+        }
+      </div>
+      <label class="check-row half-day" [title]="canHalfDay() ? '' : 'Half day is only available for a single date'">
+        <input type="checkbox" formControlName="halfDay">
+        <span>Half day</span>
+      </label>
+    </div>
+
+    <div class="form-group">
+      <label for="leave-reason">Reason</label>
+      <textarea id="leave-reason" rows="2" maxlength="500" class="form-input" formControlName="reason"
+        placeholder="Reason for leave" [class.invalid]="submitted() && form.controls.reason.invalid"></textarea>
+      @if (submitted() && form.controls.reason.invalid) {
+        <span class="field-error">Please give a reason.</span>
+      }
+    </div>
+
+    @if (previewLoading()) {
+      <p class="preview-note" role="status">Checking dates...</p>
+    } @else if (previewError(); as message) {
+      <p class="preview-note error" role="alert">{{ message }}</p>
+    } @else if (preview(); as p) {
+      <div class="preview-note ok" role="status">
+        <strong>This will use {{ dayLabel(p.days) }}</strong>
+        @if (p.skipped.length > 0) {
+          <small>
+            Skipped:
+            @for (s of p.skipped; track s.date) {
+              {{ s.date | date: 'EEE d MMM' }} ({{ s.reason }}){{ $last ? '' : ', ' }}
+            }
+          </small>
+        }
+      </div>
+    }
+
+    <div class="form-actions">
+      <button type="submit" class="btn-primary"
+        [disabled]="isSaving() || previewLoading() || !!previewError() || !preview()">
+        {{ isSaving() ? 'Submitting...' : (teachers() !== null ? 'Record leave' : 'Submit request') }}
+      </button>
+    </div>
+  </form>
+</div>

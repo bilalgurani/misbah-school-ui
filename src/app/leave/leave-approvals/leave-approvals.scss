@@ -1,0 +1,97 @@
+@use '../../shared/styles/parts' as p;
+
+@include p.layout;
+@include p.buttons;
+@include p.form;
+@include p.toolbar;
+@include p.table;
+@include p.pager;
+
+.filter {
+  flex: 0 1 200px;
+}
+
+.on-leave {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  font-size: 0.9rem;
+
+  .on-leave-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+  }
+
+  .text-muted {
+    color: var(--muted-foreground);
+  }
+}
+
+.chip {
+  padding: 0.25rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.tabs {
+  display: flex;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--border);
+}
+
+.tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 44px;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--muted-foreground);
+  font: inherit;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--foreground);
+  }
+
+  &.active {
+    color: var(--foreground);
+    border-bottom-color: var(--primary);
+  }
+
+  .count {
+    min-width: 1.25rem;
+    padding: 0.05rem 0.4rem;
+    border-radius: 999px;
+    background: var(--destructive);
+    color: #fff;
+    font-size: 0.7rem;
+    text-align: center;
+  }
+}
+
+.note {
+  display: block;
+  margin-top: 0.25rem;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+}
+
+.empty-block .btn-secondary {
+  margin-left: 0.5rem;
+}

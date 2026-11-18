@@ -1,0 +1,128 @@
+<div class="page-container">
+  <div class="page-header">
+    <h2>My Leave</h2>
+  </div>
+
+  @if (!linked()) {
+    <div class="alert alert-warning" role="alert">
+      Your account is not linked to a teacher record, so leave cannot be applied for or shown here.
+      Please ask the school administrator to link your account.
+    </div>
+  } @else {
+    @if (balanceLoading()) {
+      <div class="loader-container">
+        <app-loader variant="cards" message="Loading leave balance..."></app-loader>
+      </div>
+    } @else if (balance(); as b) {
+      <p class="year-note">Academic year {{ b.academicYear }}</p>
+      <div class="balance-grid">
+        @for (item of b.balances; track item.leaveTypeId) {
+          <div class="balance-card">
+            <span class="balance-type">
+              {{ item.leaveType }}
+              @if (!item.paid) { <small>unpaid</small> }
+            </span>
+            <span class="balance-available">
+              {{ limitLabel(item.available, item.unlimited) }}
+            </span>
+            <span class="balance-caption">{{ item.unlimited ? 'available' : 'days available' }}</span>
+            <dl class="balance-meta">
+              @if (!item.unlimited) {
+                <div><dt>Entitled</dt><dd>{{ item.entitled }}</dd></div>
+              }
+              <div><dt>Used</dt><dd>{{ item.used }}</dd></div>
+              <div><dt>Pending</dt><dd>{{ item.pending }}</dd></div>
+            </dl>
+          </div>
+        } @empty {
+          <div class="empty-block">No leave types are available yet.</div>
+        }
+      </div>
+    } @else if (balanceFailed()) {
+      <div class="alert alert-error" role="alert">
+        Could not load your leave balance.
+        <button type="button" class="btn-secondary btn-sm" (click)="loadBalance()">Retry</button>
+      </div>
+    }
+
+    <app-leave-apply-form (saved)="onSaved()"></app-leave-apply-form>
+
+    <div class="card">
+      <h3 class="card-title">My leave requests</h3>
+      @if (historyLoading()) {
+        <div class="loader-container">
+          <app-loader message="Loading requests..."></app-loader>
+        </div>
+      } @else if (historyFailed()) {
+        <div class="empty-block">
+          Could not load your leave requests.
+          <button type="button" class="btn-secondary btn-sm" (click)="loadHistory()">Retry</button>
+        </div>
+      } @else {
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Dates</th>
+                <th class="num">Days</th>
+                <th>Status</th>
+                <th>Reason</th>
+                <th>Admin note</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (r of requests(); track r.id) {
+                <tr>
+                  <td data-label="Type" class="fw-medium">{{ r.leaveType }}</td>
+                  <td data-label="Dates">
+                    {{ r.fromDate | date: 'dd MMM yyyy' }}
+                    @if (r.toDate !== r.fromDate) { &ndash; {{ r.toDate | date: 'dd MMM yyyy' }} }
+                    @if (r.halfDay) { <small class="text-muted">(half day)</small> }
+                  </td>
+                  <td data-label="Days" class="num">{{ r.days }}</td>
+                  <td data-label="Status"><span [class]="statusClass(r.status)">{{ statusLabels[r.status] }}</span></td>
+                  <td data-label="Reason">{{ r.reason || '-' }}</td>
+                  <td data-label="Admin note">{{ r.decisionNote || '-' }}</td>
+                  <td data-label="Action" class="actions">
+                    @if (canCancel(r)) {
+                      <button type="button" class="btn-danger btn-sm" (click)="requestCancel(r)"
+                        [attr.aria-label]="'Cancel ' + r.leaveType + ' request'">Cancel</button>
+                    }
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="7" class="empty-state">You have not applied for any leave yet.</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        @if (total() > 0) {
+          <div class="pager">
+            <span>Showing {{ rangeStart() }}-{{ rangeEnd() }} of {{ total() }}</span>
+            <div class="pager-buttons">
+              <button type="button" class="btn-secondary btn-sm" (click)="goTo(page() - 1)" [disabled]="page() === 0">Previous</button>
+              <span>Page {{ page() + 1 }} / {{ totalPages() }}</span>
+              <button type="button" class="btn-secondary btn-sm" (click)="goTo(page() + 1)" [disabled]="page() + 1 >= totalPages()">Next</button>
+            </div>
+          </div>
+        }
+      }
+    </div>
+  }
+</div>
+
+@if (requestToCancel(); as target) {
+  <app-confirm-dialog
+    title="Cancel Leave Request"
+    [message]="'Cancel your ' + target.leaveType + ' request (' + dayLabel(target.days) + ' from ' + target.fromDate + ')?'"
+    confirmLabel="Cancel request"
+    [busy]="isCancelling()"
+    (confirmed)="confirmCancel()"
+    (cancelled)="dismissCancel()">
+  </app-confirm-dialog>
+}

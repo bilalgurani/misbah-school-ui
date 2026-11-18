@@ -1,4 +1,5 @@
 import { TeacherAttendanceRecordDto } from '../../attendance/models/attendance.models';
+import { OnLeaveEntry } from '../../leave/leave.service';
 import {
   AbsenteeRow,
   AttendanceReport,
@@ -24,6 +25,7 @@ export function buildAttendanceReport(
   sections: SectionAttendanceData[],
   teacherRecords: TeacherAttendanceRecordDto[] | null,
   totalTeachers: number,
+  onLeave: OnLeaveEntry[] = [],
 ): AttendanceReport {
   const genderByStudent = new Map<number, string>();
   sections.forEach(s => s.roster.forEach(st => genderByStudent.set(st.id, normalize(st.gender))));
@@ -126,13 +128,14 @@ export function buildAttendanceReport(
       .filter(c => (c.attendancePct ?? 100) < LOW_ATTENDANCE_THRESHOLD)
       .reverse(),
     absentees,
-    staff: buildStaffReport(teacherRecords, totalTeachers),
+    staff: buildStaffReport(teacherRecords, totalTeachers, onLeave),
   };
 }
 
 function buildStaffReport(
   records: TeacherAttendanceRecordDto[] | null,
   totalTeachers: number,
+  onLeave: OnLeaveEntry[],
 ): StaffReport {
   if (records === null) {
     return { available: false, totalTeachers, marked: false, present: 0, late: 0, absent: 0, attendancePct: null, absentees: [] };
@@ -141,6 +144,8 @@ function buildStaffReport(
   const present = records.filter(r => normalize(r.status) === 'PRESENT').length;
   const late = records.filter(r => normalize(r.status) === 'LATE').length;
   const absent = records.length - present - late;
+
+  const leaveByTeacher = new Map(onLeave.map(l => [l.teacherId, l.leaveType]));
 
   return {
     available: true,
@@ -157,6 +162,7 @@ function buildStaffReport(
         name: r.teacherName,
         employeeId: r.employeeId,
         status: normalize(r.status) === 'LATE' ? 'LATE' : 'ABSENT',
+        leaveType: leaveByTeacher.get(r.teacherId) ?? null,
       })),
   };
 }

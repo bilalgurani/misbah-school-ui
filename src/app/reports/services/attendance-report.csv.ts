@@ -54,8 +54,10 @@ export function attendanceReportToCsv(r: AttendanceReport): string {
     line('Late', r.staff.late),
     line('Absent', r.staff.absent),
     line('Attendance %', fixed(r.staff.attendancePct)),
-    line('Employee ID', 'Name', 'Status'),
-    ...r.staff.absentees.map(t => line(t.employeeId, t.name, t.status)),
+    line('Employee ID', 'Name', 'Status', 'Note'),
+    ...r.staff.absentees.map(t =>
+      line(t.employeeId, t.name, t.status, t.leaveType ? `On leave (${t.leaveType})` : ''),
+    ),
   ];
   return rows.join('\r\n');
 }

@@ -42,6 +42,8 @@ export interface TeacherAbsenteeRow {
   name: string;
   employeeId: string;
   status: string;
+  // Set when the teacher is on approved leave that day (from the leave module).
+  leaveType?: string | null;
 }
 
 export interface StaffReport {

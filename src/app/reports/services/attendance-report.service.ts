@@ -3,6 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, catchError, forkJoin, from, map, mergeMap, of, switchMap, throwError, toArray } from 'rxjs';
 import { AttendanceApiService } from '../../attendance/services/attendance-api.service';
 import { ClassSection } from '../../attendance/models/attendance.models';
+import { LeaveService, OnLeaveEntry } from '../../leave/leave.service';
 import { AttendanceReport, SectionAttendanceData } from '../models/attendance-report.model';
 import { buildAttendanceReport } from './attendance-report.builder';
 
@@ -11,6 +12,7 @@ const MAX_PARALLEL_SECTION_REQUESTS = 5;
 @Injectable({ providedIn: 'root' })
 export class AttendanceReportService {
   private api = inject(AttendanceApiService);
+  private leaveService = inject(LeaveService);
 
   getDailyReport(date: string): Observable<AttendanceReport> {
     return this.api.getClassSections().pipe(
@@ -19,10 +21,11 @@ export class AttendanceReportService {
           sections: this.loadSections(sections, date),
           teacherRecords: this.api.getTeacherAttendance(date).pipe(catchError(() => of(null))),
           teachers: this.api.getAllTeachers().pipe(catchError(() => of([]))),
+          onLeave: this.leaveService.getOnLeave(date, date).pipe(catchError(() => of([] as OnLeaveEntry[]))),
         }),
       ),
-      map(({ sections, teacherRecords, teachers }) =>
-        buildAttendanceReport(date, sections, teacherRecords, teachers.length),
+      map(({ sections, teacherRecords, teachers, onLeave }) =>
+        buildAttendanceReport(date, sections, teacherRecords, teachers.length, onLeave),
       ),
     );
   }
