@@ -11,6 +11,7 @@ export interface NotificationConfig {
   enabled: boolean;
   smsConfigured: boolean;
   whatsappConfigured: boolean;
+  schoolName: string;
 }
 
 export interface NotificationResult {

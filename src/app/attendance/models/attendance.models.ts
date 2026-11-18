@@ -6,6 +6,8 @@ export interface ClassSection {
 }
 
 export interface StudentSummaryDto {
+    mobileNo?: string | null;
+    enrollmentStatus?: string;
     id: number;
     name: string;
     rollNo: number;

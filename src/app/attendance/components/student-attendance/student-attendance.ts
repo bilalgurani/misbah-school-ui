@@ -33,6 +33,8 @@ export class StudentAttendance implements OnInit {
 // Derived counts
   presentCount = computed(() => this.students().filter(s => s.status === 'PRESENT').length);
   absentCount = computed(() => this.students().filter(s => s.status === 'ABSENT').length);
+  absentees = computed(() =>
+    this.students().filter(s => s.status === 'ABSENT').map(s => ({ id: s.id, name: s.name })));
 
   // Get the display name of the selected section for the empty state message
 selectedSectionName = computed(() => {

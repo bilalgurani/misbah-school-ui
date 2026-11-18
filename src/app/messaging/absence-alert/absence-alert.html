@@ -4,30 +4,65 @@
 
 @if (isOpen()) {
   <div class="modal-backdrop" (click)="close()">
-    <div class="modal-card" role="alertdialog" aria-modal="true" aria-labelledby="absence-title" (click)="$event.stopPropagation()">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="absence-title" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h3 id="absence-title">Notify Parents</h3>
         <button type="button" class="close-btn" (click)="close()" aria-label="Close dialog">&times;</button>
       </div>
       <div class="modal-body">
-        <p>Send an absence alert to the parents of <strong>{{ absentCount() }}</strong> absent student(s)?</p>
-        <label class="check-row">
-          <input type="checkbox" [ngModel]="sendSms()" (ngModelChange)="sendSms.set($event)">
-          <span>SMS</span>
-        </label>
-        <label class="check-row">
-          <input type="checkbox" [ngModel]="sendWhatsapp()" (ngModelChange)="sendWhatsapp.set($event)">
-          <span>WhatsApp</span>
-        </label>
-        @if (!sendSms() && !sendWhatsapp()) {
-          <span class="hint-error">Choose at least one channel.</span>
+        <p class="intro">
+          Tap WhatsApp or SMS next to a student. Your own app opens with the parent's number and the message already
+          filled in; just press send.
+        </p>
+
+        <ul class="contact-list">
+          @for (row of rows(); track row.id) {
+            <li class="contact-row">
+              <span class="contact-name">{{ row.name }}</span>
+              @if (row.hasPhone) {
+                <span class="contact-actions">
+                  <a class="link-btn whatsapp" [href]="row.whatsapp" target="_blank" rel="noopener noreferrer"
+                     [class.done]="wasOpened(row.id, 'wa')" (click)="markOpened(row.id, 'wa')">
+                    {{ wasOpened(row.id, 'wa') ? 'WhatsApp opened' : 'WhatsApp' }}
+                  </a>
+                  <a class="link-btn" [href]="row.sms" [class.done]="wasOpened(row.id, 'sms')"
+                     (click)="markOpened(row.id, 'sms')">
+                    {{ wasOpened(row.id, 'sms') ? 'SMS opened' : 'SMS' }}
+                  </a>
+                </span>
+              } @else {
+                <span class="no-phone">{{ contactsLoading() ? 'Loading...' : 'No valid mobile number' }}</span>
+              }
+            </li>
+          }
+        </ul>
+
+        <p class="hint">SMS buttons work on phones. On a computer, use WhatsApp.</p>
+
+        @if (autoSendAvailable()) {
+          <div class="auto-send">
+            <p>Or send automatically to the parents of <strong>{{ absentCount() }}</strong> absent student(s):</p>
+            <label class="check-row">
+              <input type="checkbox" [ngModel]="sendSms()" (ngModelChange)="sendSms.set($event)">
+              <span>SMS</span>
+            </label>
+            <label class="check-row">
+              <input type="checkbox" [ngModel]="sendWhatsapp()" (ngModelChange)="sendWhatsapp.set($event)">
+              <span>WhatsApp</span>
+            </label>
+            @if (!sendSms() && !sendWhatsapp()) {
+              <span class="hint-error">Choose at least one channel.</span>
+            }
+          </div>
         }
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn-secondary" [disabled]="isSending()" (click)="close()">Cancel</button>
-        <button type="button" class="btn-primary" [disabled]="isSending() || (!sendSms() && !sendWhatsapp())" (click)="send()">
-          {{ isSending() ? 'Sending...' : 'Send Alerts' }}
-        </button>
+        <button type="button" class="btn-secondary" [disabled]="isSending()" (click)="close()">Close</button>
+        @if (autoSendAvailable()) {
+          <button type="button" class="btn-primary" [disabled]="isSending() || (!sendSms() && !sendWhatsapp())" (click)="send()">
+            {{ isSending() ? 'Sending...' : 'Send Automatically' }}
+          </button>
+        }
       </div>
     </div>
   </div>

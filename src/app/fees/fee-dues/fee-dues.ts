@@ -1,6 +1,7 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { RouterLink } from '@angular/router';
 import { FeeDueRow, FeeService, FeeSummary } from '../fee.service';
 import { MessageChannel, MessagingService, NotificationConfig, NotificationResult } from '../../messaging/messaging.service';
@@ -11,6 +12,7 @@ import { LoaderComponent } from '../../shared/component/loader.component';
 import { InrPipe } from '../utils/inr.pipe';
 import { downloadCsv, toCsv } from '../../shared/utils/csv.util';
 import { todayIso } from '../../shared/utils/date.util';
+import { feeText, normalizePhone, smsLink, whatsappLink } from '../../messaging/utils/parent-message.util';
 
 @Component({
   imports: [FormsModule, RouterLink, DatePipe, InrPipe, LoaderComponent],
@@ -23,6 +25,7 @@ export class FeeDues implements OnInit {
   private messaging = inject(MessagingService);
   private attendanceApi = inject(AttendanceApiService);
   private toast = inject(ToastService);
+  private sanitizer = inject(DomSanitizer);
 
   summary = signal<FeeSummary | null>(null);
   config = signal<NotificationConfig | null>(null);
@@ -49,6 +52,29 @@ export class FeeDues implements OnInit {
       (d.fatherName ?? '').toLowerCase().includes(query) ||
       (d.mobileNo ?? '').includes(query) ||
       String(d.rollNo ?? '').toLowerCase().includes(query));
+  });
+
+  // Automatic sending needs a paid provider, so it only appears when the server has it switched on.
+  autoSendAvailable = computed(() => {
+    const c = this.config();
+    return !!c && c.enabled && (c.smsConfigured || c.whatsappConfigured);
+  });
+
+  // Free click-to-send links that open the user's own WhatsApp / SMS app with the message filled in.
+  quickLinks = computed(() => {
+    const school = this.config()?.schoolName || 'School';
+    const links = new Map<number, { whatsapp: SafeUrl; sms: SafeUrl }>();
+    for (const d of this.dues()) {
+      const phone = normalizePhone(d.mobileNo);
+      if (!phone) continue;
+      const text = feeText(d.name, d.balance, d.oldestDueDate, school);
+      // The phone is digits only and the text is URL-encoded, so these links are safe to trust.
+      links.set(d.studentId, {
+        whatsapp: this.sanitizer.bypassSecurityTrustUrl(whatsappLink(phone, text)),
+        sms: this.sanitizer.bypassSecurityTrustUrl(smsLink(phone, text)),
+      });
+    }
+    return links;
   });
 
   selectedVisible = computed(() => {

@@ -3,16 +3,18 @@
     <h2>Fee Dues</h2>
     <div class="header-actions">
       <button type="button" class="btn-secondary" (click)="exportCsv()" [disabled]="isLoading()">Export CSV</button>
-      <button type="button" class="btn-primary" (click)="openReminder()" [disabled]="selectedVisible().length === 0">
-        Send reminder ({{ selectedVisible().length }})
-      </button>
+      @if (autoSendAvailable()) {
+        <button type="button" class="btn-primary" (click)="openReminder()" [disabled]="selectedVisible().length === 0">
+          Send reminder ({{ selectedVisible().length }})
+        </button>
+      }
     </div>
   </div>
 
   @if (config(); as cfg) {
     @if (!cfg.enabled) {
       <div class="alert alert-warning" role="alert">
-        Messaging is not enabled on the server. Reminders will be recorded as skipped and no SMS or WhatsApp will be sent.
+        Automatic sending is off. Use the WhatsApp or SMS buttons on each row to send the reminder from your own phone.
       </div>
     }
   }
@@ -120,6 +122,12 @@
                 <td data-label="Oldest Due">{{ d.oldestDueDate ? (d.oldestDueDate | date: 'dd MMM yyyy') : '-' }}</td>
                 <td data-label="Action" class="actions">
                   <a [routerLink]="['/fees/collect']" [queryParams]="{ studentId: d.studentId }" class="btn-secondary btn-sm">Collect</a>
+                  @if (quickLinks().get(d.studentId); as link) {
+                    <a class="btn-secondary btn-sm" [href]="link.whatsapp" target="_blank" rel="noopener noreferrer"
+                       [attr.aria-label]="'WhatsApp reminder to the parent of ' + d.name">WhatsApp</a>
+                    <a class="btn-secondary btn-sm" [href]="link.sms"
+                       [attr.aria-label]="'SMS reminder to the parent of ' + d.name">SMS</a>
+                  }
                 </td>
               </tr>
             } @empty {
