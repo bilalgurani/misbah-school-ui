@@ -11,7 +11,7 @@
 
   <section class="card summary-card">
     @if (summaryLoading()) {
-      <app-loader message="Calculating working days..."></app-loader>
+      <app-loader message="Calculating working days..." variant="cards"></app-loader>
     } @else if (summaryError() || !summary()) {
       <div class="state-box">
         <p>The working days summary is not available right now.</p>

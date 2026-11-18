@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { environment } from '../../environments/environment';
 import { AuthService } from '../auth/auth.service';
 import { ToastService } from '../shared/services/toast.service';
+import { LoaderComponent } from '../shared/component/loader.component';
 
 export interface ManagedUser {
   id: number;
@@ -16,7 +17,7 @@ export interface ManagedUser {
 }
 
 @Component({
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, LoaderComponent],
   selector: 'app-user-management',
   styleUrl: './user-management.scss',
   templateUrl: './user-management.html',

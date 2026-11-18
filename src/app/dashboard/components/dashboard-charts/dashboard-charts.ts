@@ -3,9 +3,10 @@ import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { AttendanceTrend } from '../../models/dashboard.models';
 import { DashboardService } from '../../services/dashboard-api.service';
 import { ToastService } from '../../../shared/services/toast.service';
+import { LoaderComponent } from '../../../shared/component/loader.component';
 
 @Component({
-  imports: [DecimalPipe],
+  imports: [DecimalPipe, LoaderComponent],
   selector: 'app-dashboard-charts',
   styleUrl: './dashboard-charts.scss',
   templateUrl: './dashboard-charts.html',

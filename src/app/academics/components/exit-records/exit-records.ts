@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { StudentExitRecord } from '../../models/student-exit.model';
 import { StudentExitService } from '../../services/student-exit.service';
 import { ToastService } from '../../../shared/services/toast.service';
+import { LoaderComponent } from '../../../shared/component/loader.component';
 
 @Component({
   selector: 'app-exit-records',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, LoaderComponent],
   styleUrl: './exit-records.scss',
   templateUrl: './exit-records.html',
 })

@@ -52,7 +52,7 @@
         <tbody>
           @if (isLoadingStudents()) {
             <tr>
-              <td colspan="5" class="empty-state text-center py-4">Loading active students...</td>
+              <td colspan="5" class="empty-state text-center py-4"><app-loader message="Loading active students..."></app-loader></td>
             </tr>
           } @else if (students().length === 0) {
             <tr>

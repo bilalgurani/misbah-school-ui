@@ -4,10 +4,11 @@ import { AttendanceApiService } from "../../services/attendance-api.service";
 import { ClassSection, LocalStudentUI, MarkAttendanceRequest } from "../../models/attendance.models";
 import { ToastService } from "../../../shared/services/toast.service";
 import { ActivatedRoute } from "@angular/router";
+import { LoaderComponent } from "../../../shared/component/loader.component";
 import { AbsenceAlert } from "../../../messaging/absence-alert/absence-alert";
 
 @Component({
-  imports: [FormsModule, AbsenceAlert],
+  imports: [FormsModule, AbsenceAlert, LoaderComponent],
   selector: 'app-student-attendance',
   styleUrl: './student-attendance.scss',
   templateUrl: './student-attendance.html',

@@ -37,7 +37,7 @@
         <tbody>
           @if (isLoading()) {
             <tr>
-              <td colspan="9" class="empty-state">Loading exit records...</td>
+              <td colspan="9" class="empty-state"><app-loader message="Loading exit records..."></app-loader></td>
             </tr>
           } @else if (filteredRecords().length === 0) {
             <tr>

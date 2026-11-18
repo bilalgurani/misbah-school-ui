@@ -10,7 +10,7 @@
   </div>
 
   @if (isLoading()) {
-    <p class="empty-note">Loading trend...</p>
+    <app-loader message="Loading trend..."></app-loader>
   } @else if (!hasAnyData()) {
     <p class="empty-note">No attendance has been marked in the last 6 months.</p>
   } @else {

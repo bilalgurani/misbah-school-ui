@@ -8,6 +8,7 @@ import { PromotionItemDto } from '../../models/enrollment.model';
 import { AttendanceApiService } from '../../../attendance/services/attendance-api.service';
 import { ClassSection } from '../../../attendance/models/attendance.models';
 import { ToastService } from '../../../shared/services/toast.service';
+import { LoaderComponent } from '../../../shared/component/loader.component';
 
 interface StudentPromotionRow extends Omit<PromotionItemDto, 'targetClassSectionId'> {
   studentName: string;
@@ -16,7 +17,7 @@ interface StudentPromotionRow extends Omit<PromotionItemDto, 'targetClassSection
 }
 
 @Component({
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, LoaderComponent],
   selector: 'app-promote-students',
   styleUrls: ['./promote-students.scss', '../../shared/academic-shared.scss'],
   templateUrl: './promote-students.html',

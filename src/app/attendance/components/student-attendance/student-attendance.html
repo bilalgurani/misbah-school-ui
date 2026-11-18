@@ -64,7 +64,7 @@
 
   <div class="roster-container">
     @if (isLoading()) {
-      <div class="empty-state">Loading students...</div>
+      <app-loader message="Loading students..."></app-loader>
     } @else if (students().length === 0) {
       <div class="empty-state">
         <p>No students found in Class {{ selectedSectionName() }}</p>

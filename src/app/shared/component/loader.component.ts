@@ -1,86 +1,105 @@
-import { CommonModule } from "@angular/common";
 import { Component, Input } from "@angular/core";
 
+// Shimmering placeholder shown while data loads; `variant` picks a table-like or card-grid shape.
 @Component({
   selector: 'app-loader',
   standalone: true,
-  imports: [CommonModule],
   template: `
-    <div class="loader-container" [class.overlay]="overlay">
-      <div class="spinner-box">
-        <div class="circle-border">
-          <div class="circle-core"></div>
+    <div class="skeleton" [class.overlay]="overlay" role="status" aria-live="polite" aria-busy="true">
+      <span class="sr-only">{{ message }}</span>
+
+      @if (variant === 'cards') {
+        <div class="sk-cards">
+          @for (i of items; track i) {
+            <div class="sk-block sk-card"></div>
+          }
         </div>
-        <p *ngIf="message" class="loader-text">{{ message }}</p>
-      </div>
+      } @else {
+        <div class="sk-block sk-head"></div>
+        @for (i of items; track i) {
+          <div class="sk-row">
+            <div class="sk-block sk-cell sk-short"></div>
+            <div class="sk-block sk-cell sk-long"></div>
+            <div class="sk-block sk-cell sk-medium"></div>
+            <div class="sk-block sk-cell sk-medium"></div>
+          </div>
+        }
+      }
     </div>
   `,
   styles: [`
-    .loader-container {
+    .skeleton {
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem;
+      gap: 0.75rem;
+      padding: 1rem;
       width: 100%;
-    }
-    
-    .spinner-box {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      box-sizing: border-box;
     }
 
-    .loader-container.overlay {
+    .skeleton.overlay {
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      inset: 0;
       background: color-mix(in oklch, var(--card, #ffffff) 80%, transparent);
       backdrop-filter: blur(4px);
       z-index: 50;
       border-radius: var(--radius, 12px);
     }
 
-    .circle-border {
-      width: 54px;
-      height: 54px;
-      padding: 3px;
+    .sk-block {
+      background: linear-gradient(90deg, var(--muted, #f1f5f9) 25%, var(--accent, #e2e8f0) 50%, var(--muted, #f1f5f9) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: var(--radius, 8px);
+    }
+
+    .sk-head { height: 2.25rem; }
+
+    .sk-row {
       display: flex;
-      justify-content: center;
+      gap: 1rem;
       align-items: center;
-      border-radius: 50%;
-      /* Exception: Explicit green theme applied to spinner gradient */
-      background: linear-gradient(0deg, color-mix(in oklch, var(--chart-3, #16a34a) 15%, transparent) 33%, var(--chart-3, #16a34a) 100%);
-      animation: spin 0.8s linear infinite;
     }
 
-    .circle-core {
-      width: 100%;
-      height: 100%;
-      background-color: var(--card, #ffffff);
-      border-radius: 50%;
+    .sk-cell { height: 1.1rem; }
+    .sk-short { flex: 0 0 4rem; }
+    .sk-long { flex: 2; }
+    .sk-medium { flex: 1; }
+
+    .sk-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
     }
 
-    .loader-text {
-      margin-top: 1rem;
-      font-size: 0.875rem;
-      font-weight: 600;
-      /* Exception: Explicit green color applied to loading text */
-      color: var(--chart-3, #16a34a);
-      letter-spacing: 0.025em;
+    .sk-card { height: 6rem; }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
     }
 
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .sk-block { animation: none; }
     }
   `]
 })
-
 export class LoaderComponent {
-  @Input() message: string = 'Loading dashboard stats...';
+  @Input() message: string = 'Loading...';
   @Input() overlay: boolean = false;
+  @Input() variant: 'table' | 'cards' = 'table';
+  @Input() rows: number = 5;
+
+  get items(): number[] {
+    return Array.from({ length: this.variant === 'cards' ? 4 : this.rows }, (_, i) => i);
+  }
 }
