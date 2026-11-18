@@ -1,0 +1,91 @@
+@use '../../shared/styles/parts' as p;
+
+@include p.layout;
+@include p.buttons;
+@include p.alert;
+
+.subtitle {
+  margin: 0.25rem 0 0;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
+.muted {
+  color: var(--muted-foreground);
+  font-size: 0.85rem;
+}
+
+.action-box {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+
+  @media (min-width: 760px) {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  p {
+    margin: 0 0 0.35rem;
+  }
+
+  .btn-primary {
+    gap: 0.5rem;
+    min-width: 220px;
+  }
+}
+
+.spinner {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid color-mix(in oklch, var(--primary-foreground) 35%, transparent);
+  border-top-color: var(--primary-foreground);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 2s;
+  }
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0 1.25rem;
+
+  @media (min-width: 900px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .card-body {
+    font-size: 0.9rem;
+    line-height: 1.5;
+
+    p {
+      margin: 0 0 0.5rem;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 1.25rem;
+    }
+  }
+}
+
+.code {
+  margin: 0 0 0.75rem;
+  padding: 0.75rem 1rem;
+  background: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 0.85rem;
+  overflow-x: auto;
+}

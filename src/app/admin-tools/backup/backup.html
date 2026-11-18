@@ -1,0 +1,71 @@
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <h2>Database Backup</h2>
+      <p class="subtitle">Download a complete copy of the school database</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body action-box">
+      <div>
+        <button type="button" class="btn-primary" (click)="download()" [disabled]="running()" [attr.aria-busy]="running()">
+          @if (running()) { <span class="spinner" aria-hidden="true"></span> Preparing backup... } @else { Download full backup }
+        </button>
+        @if (running()) {
+          <p class="muted">This can take a minute for a large database. Please keep this page open.</p>
+        }
+      </div>
+      <div class="status">
+        @if (lastBackupAt(); as at) {
+          <p>Last backup downloaded: <strong>{{ at | date: 'dd MMM yyyy, hh:mm a' }}</strong></p>
+        } @else {
+          <p>Last backup downloaded: <strong>never on this browser</strong></p>
+        }
+        @if (lastFile(); as f) {
+          <p>File: <strong>{{ f.name }}</strong> ({{ f.size }})</p>
+        }
+        <p class="muted">This time is stored only in this browser, so it will not show backups taken from another computer.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert alert-warning" role="alert">
+    <strong>Restoring does not replace anything automatically.</strong>
+    The backup must be run on an empty database. Never run it on the live school database.
+  </div>
+
+  <div class="info-grid">
+    <div class="card">
+      <h3 class="card-title">What is in the file</h3>
+      <div class="card-body">
+        <p>Every table and all data: students, teachers, attendance, fees, ledger, settings, and also user accounts with their password hashes.</p>
+        <p><strong>Keep the file private.</strong> Anyone who has it can read all school records.</p>
+      </div>
+    </div>
+    <div class="card">
+      <h3 class="card-title">How often</h3>
+      <div class="card-body">
+        <ul>
+          <li>Before the start of each term</li>
+          <li>Before any software upgrade</li>
+          <li>At least once a week</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card">
+      <h3 class="card-title">Where to keep it</h3>
+      <div class="card-body">
+        <p>Do not keep it only on this computer. Copy it to a pen drive or a cloud drive as well, so a computer failure does not lose both the database and its backup.</p>
+      </div>
+    </div>
+    <div class="card">
+      <h3 class="card-title">How to restore</h3>
+      <div class="card-body">
+        <p>Create an empty PostgreSQL database, then run:</p>
+        <pre class="code">psql -d &lt;database&gt; -f &lt;backup-file&gt;.sql</pre>
+        <p>Or open the file in pgAdmin or DBeaver and run it.</p>
+      </div>
+    </div>
+  </div>
+</div>
