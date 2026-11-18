@@ -10,12 +10,13 @@ import { ClassSection } from '../../attendance/models/attendance.models';
 import { ToastService } from '../../shared/services/toast.service';
 import { LoaderComponent } from '../../shared/component/loader.component';
 import { InrPipe } from '../utils/inr.pipe';
+import { FeeDuesCharts } from './fee-dues-charts';
 import { downloadCsv, toCsv } from '../../shared/utils/csv.util';
 import { todayIso } from '../../shared/utils/date.util';
 import { feeText, normalizePhone, smsLink, whatsappLink } from '../../messaging/utils/parent-message.util';
 
 @Component({
-  imports: [FormsModule, RouterLink, DatePipe, InrPipe, LoaderComponent],
+  imports: [FormsModule, RouterLink, DatePipe, InrPipe, LoaderComponent, FeeDuesCharts],
   selector: 'app-fee-dues',
   styleUrl: './fee-dues.scss',
   templateUrl: './fee-dues.html',

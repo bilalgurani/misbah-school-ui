@@ -23,3 +23,22 @@ export interface AttendanceTrend {
   studentAttendancePercentage: number | null;
   teacherAttendancePercentage: number | null;
 }
+
+// percentage is null while the class has not been marked.
+export interface ClassAttendance {
+  classSectionId: number;
+  className: string;
+  total: number;
+  present: number;
+  late: number;
+  absent: number;
+  marked: boolean;
+  percentage: number | null;
+}
+
+export interface ClassAttendanceDay {
+  date: string;
+  working: boolean;
+  closureReason: string | null;
+  classes: ClassAttendance[];
+}

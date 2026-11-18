@@ -1,0 +1,20 @@
+<div class="chart-grid">
+  <app-chart-card
+    title="Collected per month"
+    type="bar"
+    [data]="trendData()"
+    [options]="trendOptions"
+    [height]="classHeight()"
+    [empty]="trend().length === 0"
+    [emptyMessage]="trendLoading() ? 'Loading chart...' : 'No collections recorded this academic year yet.'"
+    label="Bar chart of fees collected per month" />
+  <app-chart-card
+    title="Outstanding by class"
+    type="bar"
+    [data]="classData()"
+    [options]="classOptions"
+    [height]="classHeight()"
+    [empty]="classRows().length === 0"
+    [emptyMessage]="loading() ? 'Loading chart...' : 'No outstanding dues.'"
+    label="Stacked horizontal bar chart of outstanding fees by class, split into overdue and not yet due" />
+</div>

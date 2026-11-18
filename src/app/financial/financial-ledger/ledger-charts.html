@@ -1,0 +1,18 @@
+<div class="chart-grid">
+  <app-chart-card
+    title="Income vs expenses by month"
+    type="bar"
+    [data]="monthlyData()"
+    [options]="monthlyOptions"
+    [empty]="monthly().length === 0"
+    emptyMessage="No monthly data for this period."
+    label="Bar chart of income and expenses by month with a net balance line" />
+  <app-chart-card
+    title="Expenses by category"
+    type="doughnut"
+    [data]="expenseData()"
+    [options]="expenseOptions"
+    [empty]="expenses().length === 0"
+    emptyMessage="No expenses in this period."
+    label="Doughnut chart of expenses by category" />
+</div>

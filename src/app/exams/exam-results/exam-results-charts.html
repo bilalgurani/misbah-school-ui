@@ -1,0 +1,23 @@
+<details class="charts no-print" (toggle)="onToggle($event)">
+  <summary>Charts</summary>
+  @if (open()) {
+    <div class="chart-grid">
+      <app-chart-card
+        title="Grade distribution"
+        type="bar"
+        [data]="gradeData()"
+        [options]="gradeOptions"
+        [empty]="gradeCounts().length === 0"
+        emptyMessage="No graded results yet."
+        label="Bar chart of the number of students per grade" />
+      <app-chart-card
+        title="Average % per subject"
+        type="bar"
+        [data]="subjectData()"
+        [options]="subjectOptions"
+        [empty]="subjectAverages().length === 0"
+        emptyMessage="No marks entered yet."
+        label="Bar chart of the class average percentage for each subject" />
+    </div>
+  }
+</details>

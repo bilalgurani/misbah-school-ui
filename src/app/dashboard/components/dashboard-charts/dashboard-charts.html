@@ -1,47 +1,53 @@
-<div class="trends-card">
-  <div class="trends-header">
-    <h3>Monthly Attendance Trends</h3>
+<div class="charts-grid">
+  <section class="chart-card wide">
+    <h3>Monthly attendance trend</h3>
     <p class="subtitle">Student and teacher presence over the last 6 months</p>
-  </div>
+    @if (trendLoading()) {
+      <app-loader message="Loading trend..."></app-loader>
+    } @else if (!hasTrendData()) {
+      <p class="empty-note">No attendance has been marked in the last 6 months.</p>
+    } @else {
+      <app-chart type="line" [data]="trendData()" [options]="trendOptions" [height]="280"
+        label="Line chart of monthly student and teacher attendance percentage"></app-chart>
+    }
+  </section>
 
-  <div class="legend">
-    <span class="legend-item"><span class="dot student"></span> Students (%)</span>
-    <span class="legend-item"><span class="dot teacher"></span> Teachers (%)</span>
-  </div>
-
-  @if (isLoading()) {
-    <app-loader message="Loading trend..."></app-loader>
-  } @else if (!hasAnyData()) {
-    <p class="empty-note">No attendance has been marked in the last 6 months.</p>
-  } @else {
-    <div class="chart-container">
-      @for (trend of trends(); track trend.period) {
-        <div class="chart-column">
-          <div class="bars-wrapper">
-            <!-- Student Bar -->
-            <div
-              class="bar student-bar"
-              [style.height.%]="trend.studentAttendancePercentage ?? 0"
-              [title]="'Students: ' + (trend.studentAttendancePercentage === null ? 'no data' : (trend.studentAttendancePercentage | number:'1.0-1') + '%')"
-            >
-              @if (trend.studentAttendancePercentage !== null) {
-                <span class="bar-tooltip">{{ trend.studentAttendancePercentage | number:'1.0-1' }}%</span>
-              }
-            </div>
-            <!-- Teacher Bar -->
-            <div
-              class="bar teacher-bar"
-              [style.height.%]="trend.teacherAttendancePercentage ?? 0"
-              [title]="'Teachers: ' + (trend.teacherAttendancePercentage === null ? 'no data' : (trend.teacherAttendancePercentage | number:'1.0-1') + '%')"
-            >
-              @if (trend.teacherAttendancePercentage !== null) {
-                <span class="bar-tooltip">{{ trend.teacherAttendancePercentage | number:'1.0-1' }}%</span>
-              }
-            </div>
-          </div>
-          <span class="period-label">{{ trend.label }}</span>
-        </div>
+  <section class="chart-card wide">
+    <h3>Today's attendance by class</h3>
+    @if (todayLoading()) {
+      <app-loader message="Loading classes..."></app-loader>
+    } @else if (today(); as day) {
+      @if (!day.working) {
+        <p class="empty-note">School is closed today ({{ day.closureReason }}).</p>
+      } @else if (markedClasses().length === 0) {
+        <p class="empty-note">No class has marked attendance yet today.</p>
+      } @else {
+        <p class="subtitle">Share of students present or late, for classes marked so far</p>
+        <app-chart type="bar" [data]="classData()" [options]="classOptions" [height]="classHeight()"
+          label="Bar chart of today's attendance percentage for each class"></app-chart>
       }
-    </div>
-  }
+      @if (day.working && pendingClasses().length > 0) {
+        <p class="pending-note">
+          <strong>Not marked yet ({{ pendingClasses().length }}):</strong>
+          @for (c of pendingClasses(); track c.classSectionId; let last = $last) {
+            {{ c.className }}{{ last ? '' : ',' }}
+          }
+        </p>
+      }
+    } @else {
+      <p class="empty-note">Today's class data isn't available right now.</p>
+    }
+  </section>
+
+  <section class="chart-card">
+    <h3>Students by gender</h3>
+    <app-chart type="doughnut" [data]="genderData()" [options]="doughnutOptions" [height]="220"
+      label="Doughnut chart of boys and girls"></app-chart>
+  </section>
+
+  <section class="chart-card">
+    <h3>Students by level</h3>
+    <app-chart type="doughnut" [data]="levelData()" [options]="doughnutOptions" [height]="220"
+      label="Doughnut chart of pre-primary and primary students"></app-chart>
+  </section>
 </div>

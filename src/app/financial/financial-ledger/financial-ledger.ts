@@ -5,6 +5,7 @@ import { RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AcademicYearService } from '../../academics/services/academic-year.service';
 import { InrPipe } from '../../fees/utils/inr.pipe';
+import { LedgerCharts } from './ledger-charts';
 import { LoaderComponent } from '../../shared/component/loader.component';
 import { ToastService } from '../../shared/services/toast.service';
 import { downloadCsv, toCsv } from '../../shared/utils/csv.util';
@@ -37,7 +38,7 @@ interface Bar {
 }
 
 @Component({
-  imports: [FormsModule, ReactiveFormsModule, RouterLink, DatePipe, InrPipe, LoaderComponent],
+  imports: [FormsModule, ReactiveFormsModule, RouterLink, DatePipe, InrPipe, LoaderComponent, LedgerCharts],
   selector: 'app-financial-ledger',
   styleUrl: './financial-ledger.scss',
   templateUrl: './financial-ledger.html',
@@ -102,16 +103,6 @@ export class FinancialLedger implements OnInit, OnDestroy {
 
   expenseBars = computed(() => this.bars('EXPENSE'));
   incomeBars = computed(() => this.bars('INCOME'));
-
-  months = computed(() => {
-    const rows = this.summary()?.monthly ?? [];
-    const max = Math.max(0, ...rows.map(m => Math.max(m.income, m.expense)));
-    return rows.map(m => ({
-      ...m,
-      incomePct: max > 0 ? (m.income / max) * 100 : 0,
-      expensePct: max > 0 ? (m.expense / max) * 100 : 0,
-    }));
-  });
 
   ngOnInit(): void {
     this.ledger.getCategories().subscribe({

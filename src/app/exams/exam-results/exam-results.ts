@@ -7,11 +7,12 @@ import { AcademicYear } from '../../academics/models/academic-year.model';
 import { ToastService } from '../../shared/services/toast.service';
 import { LoaderComponent } from '../../shared/component/loader.component';
 import { downloadCsv, toCsv } from '../../shared/utils/csv.util';
+import { ExamResultsCharts } from './exam-results-charts';
 
 type SortMode = 'roll' | 'rank';
 
 @Component({
-  imports: [FormsModule, DecimalPipe, LoaderComponent],
+  imports: [FormsModule, DecimalPipe, LoaderComponent, ExamResultsCharts],
   selector: 'app-exam-results',
   styleUrl: './exam-results.scss',
   templateUrl: './exam-results.html',

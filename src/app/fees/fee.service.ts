@@ -112,6 +112,11 @@ export interface FeeSummary {
   collectedThisMonth: number;
 }
 
+export interface CollectionTrendPoint {
+  month: string;
+  collected: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class FeeService {
   private http = inject(HttpClient);
@@ -156,5 +161,9 @@ export class FeeService {
 
   getSummary(): Observable<FeeSummary> {
     return this.http.get<FeeSummary>(`${this.baseUrl}/summary`);
+  }
+
+  getCollectionTrend(): Observable<CollectionTrendPoint[]> {
+    return this.http.get<CollectionTrendPoint[]>(`${this.baseUrl}/collection-trend`);
   }
 }

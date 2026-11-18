@@ -1,12 +1,15 @@
-import { DecimalPipe } from '@angular/common';
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
-import { AttendanceTrend } from '../../models/dashboard.models';
+import { Component, computed, inject, input, OnInit, signal } from '@angular/core';
+import type { ChartConfiguration } from 'chart.js';
+import { AttendanceTrend, ClassAttendanceDay, DashboardStats } from '../../models/dashboard.models';
 import { DashboardService } from '../../services/dashboard-api.service';
 import { ToastService } from '../../../shared/services/toast.service';
 import { LoaderComponent } from '../../../shared/component/loader.component';
+import { CHART_COLORS, ChartComponent } from '../../../shared/component/chart.component';
+
+type ChartOptions = ChartConfiguration['options'];
 
 @Component({
-  imports: [DecimalPipe, LoaderComponent],
+  imports: [LoaderComponent, ChartComponent],
   selector: 'app-dashboard-charts',
   styleUrl: './dashboard-charts.scss',
   templateUrl: './dashboard-charts.html',
@@ -15,27 +18,92 @@ export class DashboardCharts implements OnInit {
   private dashboardService = inject(DashboardService);
   private toast = inject(ToastService);
 
-  private raw = signal<AttendanceTrend[]>([]);
-  isLoading = signal<boolean>(true);
+  stats = input.required<DashboardStats>();
 
-  trends = computed(() =>
-    this.raw().map(t => ({ ...t, label: this.formatPeriod(t.period) }))
-  );
+  private trendRaw = signal<AttendanceTrend[]>([]);
+  trendLoading = signal(true);
+  today = signal<ClassAttendanceDay | null>(null);
+  todayLoading = signal(true);
 
-  hasAnyData = computed(() =>
-    this.raw().some(t => t.studentAttendancePercentage !== null || t.teacherAttendancePercentage !== null)
-  );
+  trendOptions: ChartOptions = {
+    scales: { y: { min: 0, max: 100, ticks: { callback: (value) => `${value}%` } } },
+    plugins: { legend: { position: 'bottom' } },
+  };
+
+  hasTrendData = computed(() =>
+    this.trendRaw().some(t => t.studentAttendancePercentage !== null || t.teacherAttendancePercentage !== null));
+
+  trendData = computed<ChartConfiguration['data']>(() => ({
+    labels: this.trendRaw().map(t => this.formatPeriod(t.period)),
+    datasets: [
+      {
+        label: 'Students (%)',
+        data: this.trendRaw().map(t => t.studentAttendancePercentage),
+        borderColor: CHART_COLORS.blue,
+        backgroundColor: CHART_COLORS.blue,
+        tension: 0.3,
+      },
+      {
+        label: 'Teachers (%)',
+        data: this.trendRaw().map(t => t.teacherAttendancePercentage),
+        borderColor: CHART_COLORS.green,
+        backgroundColor: CHART_COLORS.green,
+        tension: 0.3,
+      },
+    ],
+  }));
+
+  markedClasses = computed(() => (this.today()?.classes ?? []).filter(c => c.marked));
+  pendingClasses = computed(() => (this.today()?.classes ?? []).filter(c => !c.marked));
+
+  classOptions: ChartOptions = {
+    indexAxis: 'y',
+    scales: { x: { min: 0, max: 100, ticks: { callback: (value) => `${value}%` } } },
+    plugins: { legend: { display: false } },
+  };
+
+  classHeight = computed(() => Math.max(180, this.markedClasses().length * 28 + 40));
+
+  classData = computed<ChartConfiguration['data']>(() => ({
+    labels: this.markedClasses().map(c => c.className),
+    datasets: [{
+      label: 'Present (%)',
+      data: this.markedClasses().map(c => c.percentage),
+      backgroundColor: this.markedClasses().map(c =>
+        (c.percentage ?? 0) >= 90 ? CHART_COLORS.green : (c.percentage ?? 0) >= 75 ? CHART_COLORS.amber : CHART_COLORS.red),
+    }],
+  }));
+
+  genderData = computed<ChartConfiguration['data']>(() => ({
+    labels: ['Boys', 'Girls'],
+    datasets: [{ data: [this.stats().totalBoys, this.stats().totalGirls], backgroundColor: [CHART_COLORS.blue, CHART_COLORS.pink] }],
+  }));
+
+  levelData = computed<ChartConfiguration['data']>(() => ({
+    labels: ['Pre-primary', 'Primary'],
+    datasets: [{ data: [this.stats().prePrimaryStudents, this.stats().primaryStudents], backgroundColor: [CHART_COLORS.teal, CHART_COLORS.amber] }],
+  }));
+
+  doughnutOptions: ChartOptions = { plugins: { legend: { position: 'bottom' } } };
 
   ngOnInit(): void {
     this.dashboardService.getAttendanceTrend(6).subscribe({
       next: (data) => {
-        this.raw.set(data);
-        this.isLoading.set(false);
+        this.trendRaw.set(data);
+        this.trendLoading.set(false);
       },
       error: (err) => {
-        this.isLoading.set(false);
+        this.trendLoading.set(false);
         this.toast.showError(err, 'Failed to load the attendance trend.');
       }
+    });
+
+    this.dashboardService.getClassAttendance().subscribe({
+      next: (data) => {
+        this.today.set(data);
+        this.todayLoading.set(false);
+      },
+      error: () => this.todayLoading.set(false),
     });
   }
 
