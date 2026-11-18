@@ -34,6 +34,7 @@ export class ExamResults implements OnInit {
   isLoading = signal<boolean>(false);
   errorMessage = signal<string | null>(null);
   sortMode = signal<SortMode>('roll');
+  view = signal<'table' | 'charts'>('table');
 
   students = computed(() => {
     const list = [...(this.sheet()?.students ?? [])];
@@ -186,6 +187,12 @@ export class ExamResults implements OnInit {
   }
 
   print(): void {
+    // Only the table is printable, so make sure it is on screen first.
+    if (this.view() === 'charts') {
+      this.view.set('table');
+      setTimeout(() => window.print(), 100);
+      return;
+    }
     window.print();
   }
 }

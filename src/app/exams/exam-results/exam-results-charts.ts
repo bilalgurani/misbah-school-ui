@@ -1,4 +1,4 @@
-import { Component, computed, input, signal } from '@angular/core';
+import { Component, computed, input } from '@angular/core';
 import type { ChartConfiguration } from 'chart.js';
 import { CHART_COLORS, CHART_PALETTE } from '../../shared/component/chart.component';
 import { ChartCardComponent } from '../../shared/component/chart-card.component';
@@ -12,7 +12,6 @@ import { ExamResultSheet } from '../exam.service';
 })
 export class ExamResultsCharts {
   sheet = input.required<ExamResultSheet>();
-  open = signal<boolean>(false);
 
   gradeCounts = computed(() => {
     const ranked = [...this.sheet().students]
@@ -75,8 +74,4 @@ export class ExamResultsCharts {
     plugins: { legend: { display: false } },
     scales: { y: { min: 0, max: 100, title: { display: true, text: 'Average %' } } },
   };
-
-  onToggle(event: Event): void {
-    this.open.set((event.target as HTMLDetailsElement).open);
-  }
 }

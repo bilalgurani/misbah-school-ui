@@ -1,15 +1,3 @@
-.charts {
-  margin-bottom: 1.25rem;
-
-  summary {
-    cursor: pointer;
-    font-weight: 700;
-    min-height: 44px;
-    display: flex;
-    align-items: center;
-  }
-}
-
 .chart-grid {
   display: grid;
   grid-template-columns: 1fr;

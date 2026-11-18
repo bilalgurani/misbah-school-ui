@@ -36,6 +36,7 @@
           }
         </select>
       </div>
+      @if (view() === 'table') {
       <div class="form-group filter sort-group">
         <span class="sort-label">Sort by</span>
         <div class="segmented" role="group" aria-label="Sort order">
@@ -45,6 +46,7 @@
             (click)="sortMode.set('rank')">Rank</button>
         </div>
       </div>
+      }
     </div>
     @if (!isLoadingMeta() && exams().length === 0) {
       <div class="empty-block">No exams found for this academic year.</div>
@@ -74,8 +76,14 @@
       </div>
     </div>
 
-    <app-exam-results-charts [sheet]="data" />
+    <div class="tabs no-print" role="tablist" aria-label="Results view">
+      <button type="button" role="tab" class="tab" [class.active]="view() === 'table'"
+        [attr.aria-selected]="view() === 'table'" (click)="view.set('table')">Table</button>
+      <button type="button" role="tab" class="tab" [class.active]="view() === 'charts'"
+        [attr.aria-selected]="view() === 'charts'" (click)="view.set('charts')">Charts</button>
+    </div>
 
+    @if (view() === 'table') {
     <div class="card results-card">
       <div class="table-responsive">
         <table class="data-table results-table">
@@ -126,6 +134,9 @@
         </table>
       </div>
     </div>
+    } @else {
+      <app-exam-results-charts [sheet]="data" />
+    }
   } @else {
     <div class="card no-print"><div class="empty-block">Select an exam and class to view results.</div></div>
   }
