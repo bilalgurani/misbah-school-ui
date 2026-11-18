@@ -1,0 +1,363 @@
+<div class="page-container">
+  <div class="page-header">
+    <h2>Exam Setup</h2>
+  </div>
+
+  <section class="card" aria-labelledby="subjects-title">
+    <h3 class="card-title" id="subjects-title">1. Subjects</h3>
+    <div class="card-body section-body">
+      <form class="inline-form" (ngSubmit)="addSubject()">
+        <div class="form-group grow">
+          <label for="subject-name">New Subject</label>
+          <input id="subject-name" name="subjectName" type="text" class="form-input" maxlength="100"
+            placeholder="e.g. Mathematics" [ngModel]="newSubjectName()" (ngModelChange)="newSubjectName.set($event)">
+        </div>
+        <button type="submit" class="btn-primary" [disabled]="isAddingSubject() || !newSubjectName().trim()">
+          {{ isAddingSubject() ? 'Adding...' : 'Add Subject' }}
+        </button>
+      </form>
+
+      @if (subjectsLoading()) {
+        <div class="loader-container"><app-loader message="Loading subjects..." [rows]="1"></app-loader></div>
+      } @else {
+        <div class="chips">
+          @for (s of subjects(); track s.id) {
+            <span class="chip">
+              {{ s.name }}
+              <button type="button" class="chip-remove" (click)="requestDeleteSubject(s)"
+                [attr.aria-label]="'Delete subject ' + s.name">&times;</button>
+            </span>
+          } @empty {
+            <span class="text-muted">No subjects yet. Add your first subject above.</span>
+          }
+        </div>
+      }
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="exams-title">
+    <h3 class="card-title" id="exams-title">2. Exams</h3>
+    <form class="card-body section-body" [formGroup]="examForm" (ngSubmit)="createExam()" novalidate>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="exam-year">Academic Year</label>
+          <select id="exam-year" class="form-input" [ngModel]="yearId()" [ngModelOptions]="{standalone: true}"
+            (ngModelChange)="onYearChange($event)">
+            <option [ngValue]="null">Current year</option>
+            @for (year of academicYears(); track year.id) {
+              <option [ngValue]="year.id">{{ year.name }}{{ year.current ? ' (current)' : '' }}</option>
+            }
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="exam-name">Exam Name</label>
+          <input id="exam-name" type="text" class="form-input" formControlName="name" placeholder="e.g. Mid Term"
+            [class.invalid]="examSubmitted() && examForm.controls.name.invalid">
+          @if (examSubmitted() && examForm.controls.name.invalid) {
+            <span class="field-error">Exam name is required.</span>
+          }
+        </div>
+        <div class="form-group">
+          <label for="exam-type">Type</label>
+          <select id="exam-type" class="form-input" formControlName="examType">
+            <option value="MAIN">Main exam (Term, Annual)</option>
+            <option value="IA">Internal Assessment (IA)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="exam-start">Start Date (optional)</label>
+          <input id="exam-start" type="date" class="form-input" formControlName="startDate">
+        </div>
+        <div class="form-group">
+          <label for="exam-end">End Date (optional)</label>
+          <input id="exam-end" type="date" class="form-input" formControlName="endDate"
+            [class.invalid]="examSubmitted() && dateRangeInvalid()">
+          @if (examSubmitted() && dateRangeInvalid()) {
+            <span class="field-error">End date cannot be before start date.</span>
+          }
+        </div>
+        <button type="submit" class="btn-primary" [disabled]="isCreatingExam()">
+          {{ isCreatingExam() ? 'Creating...' : examForm.controls.examType.value === 'IA' ? 'Create IA Test' : 'Create Exam' }}
+        </button>
+      </div>
+    </form>
+
+    @if (examsLoading()) {
+      <div class="loader-container"><app-loader message="Loading exams..." [rows]="1"></app-loader></div>
+    } @else {
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Exam</th>
+              <th>Type</th>
+              <th>Academic Year</th>
+              <th>Start</th>
+              <th>End</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (e of exams(); track e.id) {
+              <tr>
+                <td data-label="Exam" class="fw-medium">{{ e.name }}</td>
+                <td data-label="Type">
+                  @if (e.examType === 'IA') {
+                    <span class="badge badge-info">IA</span>
+                  } @else {
+                    <span class="badge">Main</span>
+                    @if (linkedCount(e) > 0) {
+                      <span class="text-muted linked">{{ linkedCount(e) }} IA test(s)</span>
+                    }
+                  }
+                </td>
+                <td data-label="Academic Year">{{ e.academicYear }}</td>
+                <td data-label="Start">{{ e.startDate ? (e.startDate | date: 'dd MMM yyyy') : '-' }}</td>
+                <td data-label="End">{{ e.endDate ? (e.endDate | date: 'dd MMM yyyy') : '-' }}</td>
+                <td data-label="Actions" class="actions">
+                  @if (e.examType !== 'IA') {
+                    <button type="button" class="btn-secondary btn-sm" (click)="openIaPanel(e.id)"
+                      [attr.aria-label]="'Choose IA tests for ' + e.name">IA tests</button>
+                  }
+                  <button type="button" class="btn-danger btn-sm" (click)="requestDeleteExam(e)"
+                    [attr.aria-label]="'Delete exam ' + e.name">Delete</button>
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="6" class="empty-state">No exams for this academic year yet.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      @if (iaPanelExam(); as target) {
+        <div class="ia-panel">
+          <div class="ia-head">
+            <h4>IA tests counted in {{ target.name }}</h4>
+            <button type="button" class="btn-secondary btn-sm" (click)="openIaPanel(null)">Close</button>
+          </div>
+          <p class="text-muted">
+            IA marks are calculated automatically from the selected IA tests and added to each subject's IA weight
+            (set in the exam papers below). Teachers only enter marks in the IA tests and the written paper.
+          </p>
+          <div class="levels-grid">
+            @for (ia of iaExams(); track ia.id) {
+              <label class="check-row level-chip" [class.selected]="isIaSelected(ia.id)">
+                <input type="checkbox" [checked]="isIaSelected(ia.id)" (change)="toggleIaExam(ia.id)">
+                <span>{{ ia.name }}</span>
+              </label>
+            } @empty {
+              <span class="text-muted">No IA tests in this academic year yet. Create one above with type Internal Assessment (IA).</span>
+            }
+          </div>
+          <div class="ia-actions">
+            <div class="form-group ia-agg">
+              <label for="ia-agg">How IA tests are combined</label>
+              <select id="ia-agg" class="form-input" [ngModel]="iaAggregation()" (ngModelChange)="iaAggregation.set($event)">
+                <option value="AVERAGE">Average of IA tests</option>
+                <option value="BEST">Best IA test</option>
+              </select>
+            </div>
+            <button type="button" class="btn-primary" (click)="saveIaLinks()" [disabled]="isSavingLinks()">
+              {{ isSavingLinks() ? 'Saving...' : 'Save IA tests' }}
+            </button>
+          </div>
+        </div>
+      }
+    }
+  </section>
+
+  <section class="card" aria-labelledby="papers-title">
+    <h3 class="card-title" id="papers-title">3. Exam Papers</h3>
+    <div class="toolbar">
+      <div class="form-group filter">
+        <label for="paper-exam">Exam</label>
+        <select id="paper-exam" class="form-input" [ngModel]="paperExamId()" (ngModelChange)="onPaperExamChange($event)">
+          <option [ngValue]="null">Select exam</option>
+          @for (e of exams(); track e.id) {
+            <option [ngValue]="e.id">{{ e.name }} ({{ e.examType === 'IA' ? 'IA' : 'Main' }})</option>
+          }
+        </select>
+      </div>
+      <div class="form-group filter">
+        <label for="paper-level">Class Level</label>
+        <select id="paper-level" class="form-input" [ngModel]="paperLevelId()" (ngModelChange)="onPaperLevelChange($event)">
+          <option [ngValue]="null">Select class level</option>
+          @for (l of classLevels(); track l.id) {
+            <option [ngValue]="l.id">{{ l.name }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    @if (paperExamId() === null || paperLevelId() === null) {
+      <div class="empty-block">Choose an exam and a class level to configure its subjects.</div>
+    } @else if (paperLoading()) {
+      <div class="loader-container"><app-loader message="Loading exam subjects..." [rows]="1"></app-loader></div>
+    } @else {
+      <div class="table-responsive">
+        <table class="data-table paper-table">
+          <thead>
+            <tr>
+              <th>Subject</th>
+              <th class="num">{{ paperIsMain() ? 'Written Max' : 'Max Marks' }}</th>
+              @if (paperIsMain()) {
+                <th class="num">IA Weight</th>
+                <th class="num">Total</th>
+              }
+              <th class="num">Pass Marks</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of rows(); track row.uid; let i = $index) {
+              <tr>
+                <td data-label="Subject">
+                  <select class="form-input" [ngModel]="row.subjectId" (ngModelChange)="onSubjectChange(row.uid, $event)"
+                    [attr.aria-label]="'Subject for row ' + (i + 1)"
+                    [class.invalid]="paperSubmitted() && rowErrors().has(row.uid)">
+                    <option [ngValue]="null">Select subject</option>
+                    @for (s of subjects(); track s.id) {
+                      <option [ngValue]="s.id" [disabled]="isSubjectTaken(row.uid, s.id)">{{ s.name }}</option>
+                    }
+                  </select>
+                  @if (paperSubmitted() && rowErrors().get(row.uid); as msg) {
+                    <span class="field-error">{{ msg }}</span>
+                  }
+                </td>
+                <td [attr.data-label]="paperIsMain() ? 'Written Max' : 'Max Marks'" class="num">
+                  <input type="number" min="1" step="any" class="form-input mark-input" [ngModel]="row.maxMarks"
+                    (ngModelChange)="onNumberChange(row.uid, 'maxMarks', $event)"
+                    [attr.aria-label]="'Max marks for row ' + (i + 1)">
+                </td>
+                @if (paperIsMain()) {
+                  <td data-label="IA Weight" class="num">
+                    <input type="number" min="0" step="any" class="form-input mark-input" [ngModel]="row.iaMaxMarks"
+                      (ngModelChange)="onNumberChange(row.uid, 'iaMaxMarks', $event)"
+                      [attr.aria-label]="'IA weight for row ' + (i + 1)">
+                  </td>
+                  <td data-label="Total" class="num fw-medium">{{ rowTotal(row) ?? '-' }}</td>
+                }
+                <td data-label="Pass Marks" class="num">
+                  <input type="number" min="0" step="any" class="form-input mark-input" [ngModel]="row.passMarks"
+                    (ngModelChange)="onNumberChange(row.uid, 'passMarks', $event)"
+                    [attr.aria-label]="'Pass marks for row ' + (i + 1)">
+                </td>
+                <td data-label="Actions" class="actions">
+                  <button type="button" class="btn-secondary btn-sm" (click)="removeRow(row.uid)"
+                    [attr.aria-label]="'Remove row ' + (i + 1)">Remove</button>
+                </td>
+              </tr>
+            } @empty {
+              <tr><td [attr.colspan]="paperIsMain() ? 6 : 4" class="empty-state">No subjects configured for this class level. Add a row to begin.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      @if (paperIsMain()) {
+        <p class="paper-help text-muted">
+          Written Max is what teachers enter in this exam. IA Weight is the part of the subject total filled in automatically
+          from the linked IA tests. Pass marks apply to the combined total.
+        </p>
+      }
+
+      <div class="paper-actions">
+        <button type="button" class="btn-secondary" (click)="addRow()" [disabled]="subjects().length === 0">Add Subject</button>
+        <button type="button" class="btn-secondary" (click)="toggleImport()">Copy papers from another exam</button>
+        @if (subjects().length === 0) {
+          <span class="text-muted">Add subjects in section 1 first.</span>
+        }
+        <span class="spacer"></span>
+        @if (paperDirty()) { <span class="dirty">Unsaved changes</span> }
+        <button type="button" class="btn-secondary" (click)="toggleCopy()" [disabled]="rows().length === 0">
+          Copy to other classes
+        </button>
+        <button type="button" class="btn-primary" (click)="savePaper()" [disabled]="isSavingPaper() || rows().length === 0">
+          {{ isSavingPaper() ? 'Saving...' : 'Save' }}
+        </button>
+      </div>
+
+      @if (importOpen()) {
+        <div class="copy-panel">
+          <div class="import-row">
+            <div class="form-group">
+              <label for="import-exam">Source exam</label>
+              <select id="import-exam" class="form-input" [ngModel]="importExamId()" (ngModelChange)="onImportExamChange($event)">
+                <option [ngValue]="null">Select exam</option>
+                @for (e of exams(); track e.id) {
+                  <option [ngValue]="e.id">{{ e.name }} ({{ e.examType === 'IA' ? 'IA' : 'Main' }})</option>
+                }
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="import-level">Source class level</label>
+              <select id="import-level" class="form-input" [ngModel]="importLevelId()" (ngModelChange)="onImportLevelChange($event)">
+                <option [ngValue]="null">Select class level</option>
+                @for (l of classLevels(); track l.id) {
+                  <option [ngValue]="l.id">{{ l.name }}</option>
+                }
+              </select>
+            </div>
+            <button type="button" class="btn-primary" (click)="importPaper()"
+              [disabled]="isImporting() || importExamId() === null || importLevelId() === null">
+              {{ isImporting() ? 'Loading...' : 'Load into table' }}
+            </button>
+          </div>
+          <p class="text-muted note">The subjects replace the table above. Nothing is saved until you click Save.</p>
+        </div>
+      }
+
+      @if (copyOpen()) {
+        <div class="copy-panel">
+          <div class="levels-header">
+            <span class="levels-title">Copy this table to</span>
+            @if (otherLevels().length > 0) {
+              <label class="check-row">
+                <input type="checkbox" [checked]="copyLevelIds().length === otherLevels().length" (change)="toggleAllCopyLevels()">
+                <span>Select all</span>
+              </label>
+            }
+          </div>
+          <div class="levels-grid">
+            @for (l of otherLevels(); track l.id) {
+              <label class="check-row level-chip" [class.selected]="isCopyLevelSelected(l.id)">
+                <input type="checkbox" [checked]="isCopyLevelSelected(l.id)" (change)="toggleCopyLevel(l.id)">
+                <span>{{ l.name }}</span>
+              </label>
+            } @empty {
+              <span class="text-muted">No other class levels available.</span>
+            }
+          </div>
+          <p class="text-muted note">This replaces the existing subjects of the selected class levels for this exam.</p>
+          <div class="paper-actions">
+            <button type="button" class="btn-primary" (click)="copyToLevels()"
+              [disabled]="isCopying() || copyLevelIds().length === 0">
+              {{ isCopying() ? 'Copying...' : 'Copy to ' + copyLevelIds().length + ' class(es)' }}
+            </button>
+          </div>
+          @if (copyOutcomes().length > 0) {
+            <ul class="outcomes">
+              @for (o of copyOutcomes(); track o.levelName) {
+                <li [class.failed]="o.error">
+                  <strong>{{ o.levelName }}</strong>: {{ o.error ?? 'Saved' }}
+                </li>
+              }
+            </ul>
+          }
+        </div>
+      }
+    }
+  </section>
+</div>
+
+@if (deleteTarget(); as target) {
+  <app-confirm-dialog
+    [title]="target.kind === 'subject' ? 'Delete Subject' : 'Delete Exam'"
+    [message]="deleteMessage(target)"
+    confirmLabel="Delete"
+    [busy]="isDeleting()"
+    (confirmed)="confirmDelete()"
+    (cancelled)="cancelDelete()">
+  </app-confirm-dialog>
+}

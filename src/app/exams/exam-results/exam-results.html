@@ -1,0 +1,130 @@
+<div class="page-container">
+  <div class="page-header no-print">
+    <h2>Exam Results</h2>
+    <div class="header-actions">
+      <button type="button" class="btn-secondary" (click)="exportCsv()" [disabled]="!sheet() || students().length === 0">Export CSV</button>
+      <button type="button" class="btn-primary" (click)="print()" [disabled]="!sheet()">Print</button>
+    </div>
+  </div>
+
+  <div class="card no-print">
+    <div class="toolbar">
+      <div class="form-group filter">
+        <label for="er-year">Academic Year</label>
+        <select id="er-year" class="form-input" [ngModel]="yearId()" (ngModelChange)="onYearChange($event)">
+          <option [ngValue]="null">Current year</option>
+          @for (year of academicYears(); track year.id) {
+            <option [ngValue]="year.id">{{ year.name }}{{ year.current ? ' (current)' : '' }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-group filter">
+        <label for="er-exam">Exam</label>
+        <select id="er-exam" class="form-input" [ngModel]="examId()" (ngModelChange)="onExamChange($event)" [disabled]="isLoadingMeta()">
+          <option [ngValue]="null">Select exam</option>
+          @for (e of exams(); track e.id) {
+            <option [ngValue]="e.id">{{ e.name }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-group filter">
+        <label for="er-section">Class / Section</label>
+        <select id="er-section" class="form-input" [ngModel]="sectionId()" (ngModelChange)="onSectionChange($event)">
+          <option [ngValue]="null">Select class</option>
+          @for (s of sections(); track s.id) {
+            <option [ngValue]="s.id">{{ s.displayName }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-group filter sort-group">
+        <span class="sort-label">Sort by</span>
+        <div class="segmented" role="group" aria-label="Sort order">
+          <button type="button" [class.active]="sortMode() === 'roll'" [attr.aria-pressed]="sortMode() === 'roll'"
+            (click)="sortMode.set('roll')">Roll No</button>
+          <button type="button" [class.active]="sortMode() === 'rank'" [attr.aria-pressed]="sortMode() === 'rank'"
+            (click)="sortMode.set('rank')">Rank</button>
+        </div>
+      </div>
+    </div>
+    @if (!isLoadingMeta() && exams().length === 0) {
+      <div class="empty-block">No exams found for this academic year.</div>
+    }
+  </div>
+
+  @if (isLoading()) {
+    <div class="card no-print">
+      <div class="loader-container"><app-loader message="Loading results..."></app-loader></div>
+    </div>
+  } @else if (errorMessage(); as message) {
+    <div class="alert alert-error no-print" role="alert">{{ message }}</div>
+  } @else if (sheet(); as data) {
+    <div class="print-title">
+      <h1>{{ data.examName }} - Results</h1>
+      <p>{{ data.className }}</p>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card"><span class="stat-label">Students</span><span class="stat-value">{{ summary().total }}</span></div>
+      <div class="stat-card success"><span class="stat-label">Passed</span><span class="stat-value">{{ summary().passed }}</span></div>
+      <div class="stat-card danger"><span class="stat-label">Failed</span><span class="stat-value">{{ summary().failed }}</span></div>
+      <div class="stat-card"><span class="stat-label">Incomplete</span><span class="stat-value">{{ summary().incomplete }}</span></div>
+      <div class="stat-card">
+        <span class="stat-label">Class average</span>
+        <span class="stat-value">{{ summary().average === null ? '-' : (summary().average | number: '1.0-2') + '%' }}</span>
+      </div>
+    </div>
+
+    <div class="card results-card">
+      <div class="table-responsive">
+        <table class="data-table results-table">
+          <thead>
+            <tr>
+              <th class="num">Rank</th>
+              <th>Roll</th>
+              <th>Name</th>
+              @for (sub of data.subjects; track sub.subjectId) {
+                <th class="num">{{ sub.name }}<span class="sub-max">/{{ sub.maxMarks }}</span></th>
+              }
+              <th class="num">Total</th>
+              <th class="num">%</th>
+              <th>Grade</th>
+              <th>Result</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (st of students(); track st.studentId) {
+              <tr>
+                <td data-label="Rank" class="num">{{ st.result === 'INCOMPLETE' || st.rank === null ? '-' : st.rank }}</td>
+                <td data-label="Roll">{{ st.rollNo ?? '-' }}</td>
+                <td data-label="Name" class="fw-medium">{{ st.name }}</td>
+                @for (sub of data.subjects; track sub.subjectId; let i = $index) {
+                  @let score = scoreAt(st, i, sub.subjectId);
+                  <td [attr.data-label]="sub.name" class="num" [class.fail]="isFail(score, sub.passMarks)">
+                    @if (!score || (score.marks === null && !score.absent)) {
+                      <span class="text-muted" [attr.title]="pendingTitle(score, sub.iaMax)">-</span>
+                    } @else if (score.absent) {
+                      <span class="absent">AB</span>
+                    } @else {
+                      {{ score.marks }}/{{ sub.maxMarks }}
+                      @if (sub.iaMax > 0) {
+                        <small class="breakdown">IA {{ score.iaMarks ?? '-' }} + {{ score.writtenMarks ?? '-' }}</small>
+                      }
+                    }
+                  </td>
+                }
+                <td data-label="Total" class="num">{{ st.totalMarks }}/{{ st.totalMax }}</td>
+                <td data-label="%" class="num">{{ st.percentage === null ? '-' : (st.percentage | number: '1.0-2') }}</td>
+                <td data-label="Grade">{{ st.grade || '-' }}</td>
+                <td data-label="Result"><span [class]="'badge ' + resultClass(st.result)">{{ st.result }}</span></td>
+              </tr>
+            } @empty {
+              <tr><td [attr.colspan]="data.subjects.length + 7" class="empty-state">No students found in this class.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  } @else {
+    <div class="card no-print"><div class="empty-block">Select an exam and class to view results.</div></div>
+  }
+</div>

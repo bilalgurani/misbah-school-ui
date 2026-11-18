@@ -1,0 +1,132 @@
+@use '../../shared/styles/parts' as p;
+
+@include p.layout;
+@include p.buttons;
+@include p.form;
+@include p.toolbar;
+@include p.table;
+@include p.alert;
+
+.filter {
+  flex: 1 1 200px;
+  min-width: 0;
+}
+
+.sheet-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  border-bottom: 1px solid var(--border);
+
+  @media (min-width: 640px) {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .sheet-title {
+    margin: 0 0 0.25rem;
+    font-size: 1.1rem;
+
+    .badge {
+      margin-left: 0.5rem;
+      vertical-align: middle;
+    }
+  }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+    font-size: 0.875rem;
+    color: var(--muted-foreground);
+  }
+
+  .ia-note {
+    margin: 0.5rem 0 0;
+    font-size: 0.8rem;
+    color: var(--muted-foreground);
+  }
+
+  .status {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .progress {
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius);
+    background: var(--muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+
+    &.complete {
+      background: color-mix(in oklch, var(--chart-3) 15%, transparent);
+      color: var(--chart-3);
+    }
+  }
+
+  .dirty {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--chart-4);
+  }
+}
+
+.marks-table {
+  .absent-col {
+    width: 140px;
+  }
+
+  .mark-input {
+    width: 120px;
+    min-height: 44px;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--background);
+    color: var(--foreground);
+    font: inherit;
+    text-align: right;
+    box-sizing: border-box;
+
+    &:focus {
+      outline: none;
+      border-color: var(--ring);
+      box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 20%, transparent);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    &.below-pass {
+      color: var(--destructive);
+      font-weight: 700;
+      border-color: var(--destructive);
+      background: color-mix(in oklch, var(--destructive) 8%, var(--background));
+    }
+
+    &.invalid {
+      border-color: var(--destructive);
+    }
+  }
+
+  .field-error {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.75rem;
+    color: var(--destructive);
+  }
+}
+
+.sheet-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 1rem;
+  border-top: 1px solid var(--border);
+}

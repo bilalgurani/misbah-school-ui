@@ -1,0 +1,145 @@
+@use '../../shared/styles/parts' as p;
+
+@include p.layout;
+@include p.buttons;
+@include p.form;
+@include p.toolbar;
+@include p.table;
+@include p.alert;
+@include p.stats;
+
+.filter {
+  flex: 1 1 200px;
+  min-width: 0;
+}
+
+.sort-group {
+  flex: 0 0 auto;
+
+  .sort-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--muted-foreground);
+    text-transform: uppercase;
+  }
+}
+
+.segmented {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+
+  button {
+    min-height: 44px;
+    padding: 0.5rem 1rem;
+    border: none;
+    background: var(--background);
+    color: var(--foreground);
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:hover {
+      background: var(--accent);
+    }
+
+    &.active {
+      background: var(--primary);
+      color: var(--primary-foreground);
+    }
+  }
+}
+
+.print-title {
+  display: none;
+  text-align: center;
+  margin-bottom: 1rem;
+
+  h1 {
+    margin: 0;
+    font-size: 1.3rem;
+  }
+
+  p {
+    margin: 0.25rem 0 0;
+    font-weight: 600;
+  }
+}
+
+.results-table {
+  .sub-max {
+    font-weight: 400;
+    opacity: 0.7;
+  }
+
+  td.fail {
+    color: var(--destructive);
+    font-weight: 700;
+  }
+
+  .breakdown {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 400;
+    color: var(--muted-foreground);
+  }
+
+  .absent {
+    font-weight: 700;
+  }
+}
+
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 10mm;
+  }
+
+  ::ng-deep .content,
+  ::ng-deep main {
+    margin: 0 !important;
+    padding: 0 !important;
+    display: block !important;
+  }
+
+  ::ng-deep app-toast {
+    display: none !important;
+  }
+
+  .page-container {
+    padding: 0;
+    max-width: none;
+  }
+
+  .print-title {
+    display: block;
+  }
+
+  .card {
+    border: none;
+    box-shadow: none;
+  }
+
+  .stat-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+
+  .data-table {
+    font-size: 0.75rem;
+
+    th,
+    td {
+      padding: 0.3rem 0.4rem;
+    }
+
+    tbody tr {
+      break-inside: avoid;
+    }
+
+    thead {
+      display: table-header-group;
+    }
+  }
+}

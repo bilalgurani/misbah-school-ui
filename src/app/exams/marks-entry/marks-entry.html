@@ -1,0 +1,171 @@
+<div class="page-container">
+  <div class="page-header">
+    <h2>Marks Entry</h2>
+  </div>
+
+  <div class="card">
+    <div class="toolbar">
+      <div class="form-group filter">
+        <label for="me-year">Academic Year</label>
+        <select id="me-year" class="form-input" [ngModel]="yearId()" (ngModelChange)="onYearChange($event)" [disabled]="locked()">
+          <option [ngValue]="null">Current year</option>
+          @for (year of academicYears(); track year.id) {
+            <option [ngValue]="year.id">{{ year.name }}{{ year.current ? ' (current)' : '' }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-group filter">
+        <label for="me-exam">Exam</label>
+        <select id="me-exam" class="form-input" [ngModel]="examId()" (ngModelChange)="onExamChange($event)"
+          [disabled]="locked() || isLoadingMeta()">
+          <option [ngValue]="null">Select exam</option>
+          @if (iaExams().length > 0) {
+            <optgroup label="IA tests">
+              @for (e of iaExams(); track e.id) {
+                <option [ngValue]="e.id">{{ e.name }}</option>
+              }
+            </optgroup>
+          }
+          @if (mainExams().length > 0) {
+            <optgroup label="Main exams">
+              @for (e of mainExams(); track e.id) {
+                <option [ngValue]="e.id">{{ e.name }}</option>
+              }
+            </optgroup>
+          }
+        </select>
+      </div>
+      <div class="form-group filter">
+        <label for="me-section">Class / Section</label>
+        <select id="me-section" class="form-input" [ngModel]="sectionId()" (ngModelChange)="onSectionChange($event)"
+          [disabled]="locked()">
+          <option [ngValue]="null">Select class</option>
+          @for (s of sections(); track s.id) {
+            <option [ngValue]="s.id">{{ s.displayName }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-group filter">
+        <label for="me-subject">Subject</label>
+        <select id="me-subject" class="form-input" [ngModel]="subjectId()" (ngModelChange)="onSubjectChange($event)"
+          [disabled]="locked() || isLoadingSubjects() || subjectOptions().length === 0">
+          <option [ngValue]="null">Select subject</option>
+          @for (s of subjectOptions(); track s.subjectId) {
+            <option [ngValue]="s.subjectId">{{ s.name }}</option>
+          }
+        </select>
+      </div>
+    </div>
+    @if (!isLoadingMeta() && exams().length === 0) {
+      <div class="empty-block">No exams found for this academic year. Create one in Exam Setup.</div>
+    }
+  </div>
+
+  @if (isLoadingSubjects() || isLoadingSheet()) {
+    <div class="card">
+      <div class="loader-container">
+        <app-loader [message]="isLoadingSheet() ? 'Loading students...' : 'Loading subjects...'"></app-loader>
+      </div>
+    </div>
+  } @else if (sheetError(); as message) {
+    <div class="alert alert-error" role="alert">{{ message }}</div>
+  } @else if (sheet(); as s) {
+    <div class="card">
+      <div class="card-body sheet-summary">
+        <div>
+          <h3 class="sheet-title">
+            {{ s.subjectName }} &middot; {{ s.className }}
+            @if (selectedExam(); as exam) {
+              <span class="badge" [class.badge-info]="exam.examType === 'IA'">{{ exam.examType === 'IA' ? 'IA' : 'Main' }}</span>
+            }
+          </h3>
+          <div class="meta">
+            <span>{{ iaNote() ? 'Written max marks' : 'Max marks' }}: <strong>{{ s.maxMarks }}</strong></span>
+            <span>Pass marks: <strong>{{ s.passMarks }}</strong></span>
+          </div>
+          @if (iaNote(); as note) {
+            <p class="ia-note">
+              @if (note.names) {
+                IA marks ({{ note.weight }}) are calculated automatically from: {{ note.names }}.
+              } @else {
+                IA marks ({{ note.weight }}) are calculated automatically from linked IA tests; none are linked yet.
+              }
+            </p>
+          }
+        </div>
+        <div class="status">
+          <span class="progress" [class.complete]="total() > 0 && entered() === total()">
+            {{ entered() }} of {{ total() }} entered
+          </span>
+          @if (dirty()) {
+            <span class="dirty">Unsaved changes</span>
+          }
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="data-table marks-table">
+          <thead>
+            <tr>
+              <th>Roll No</th>
+              <th>Student</th>
+              <th class="num">Marks (out of {{ s.maxMarks }})</th>
+              <th class="absent-col">Absent</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of rows(); track row.studentId; let i = $index) {
+              <tr>
+                <td data-label="Roll No">{{ row.rollNo ?? '-' }}</td>
+                <td data-label="Student" class="fw-medium">{{ row.name }}</td>
+                <td data-label="Marks" class="num">
+                  <input type="number" class="mark-input" min="0" [attr.max]="s.maxMarks" step="any" inputmode="decimal"
+                    [ngModel]="row.absent ? null : row.marks" (ngModelChange)="onMarksChange(row.studentId, $event)"
+                    (keydown.enter)="focusNext($event)" [disabled]="row.absent || isSaving()"
+                    [class.below-pass]="isBelowPass(row)" [class.invalid]="rowError(row)"
+                    [attr.aria-label]="'Marks for ' + row.name" [attr.aria-invalid]="rowError(row) ? 'true' : null">
+                  @if (rowError(row); as err) {
+                    <span class="field-error">{{ err }}</span>
+                  }
+                </td>
+                <td data-label="Absent" class="absent-col">
+                  <label class="check-row">
+                    <input type="checkbox" [checked]="row.absent" (change)="onAbsentChange(row.studentId, $any($event.target).checked)"
+                      [disabled]="isSaving()" [attr.aria-label]="'Mark ' + row.name + ' absent'">
+                    <span>Absent</span>
+                  </label>
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="4" class="empty-state">No students found in this class.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="sheet-footer">
+        @if (dirty()) {
+          <button type="button" class="btn-secondary" (click)="requestDiscard()" [disabled]="isSaving()">Discard changes</button>
+        }
+        <button id="save-marks" type="button" class="btn-primary" (click)="save()"
+          [disabled]="isSaving() || !dirty() || rows().length === 0">
+          {{ isSaving() ? 'Saving...' : 'Save marks' }}
+        </button>
+      </div>
+    </div>
+  } @else if (sectionId() !== null && examId() !== null && subjectOptions().length === 0) {
+    <div class="alert alert-warning">No subjects are configured for this exam and class yet. An admin can add them in Exam Setup.</div>
+  } @else {
+    <div class="card"><div class="empty-block">Select an exam, class and subject to enter marks.</div></div>
+  }
+</div>
+
+@if (confirmDiscard()) {
+  <app-confirm-dialog
+    title="Discard changes"
+    message="Discard all unsaved marks and restore the last saved values?"
+    confirmLabel="Discard"
+    (confirmed)="discard()"
+    (cancelled)="cancelDiscard()">
+  </app-confirm-dialog>
+}
