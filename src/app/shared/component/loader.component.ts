@@ -1,43 +1,41 @@
 import { Component, Input } from "@angular/core";
 
-// Shimmering placeholder shown while data loads; `variant` picks a table-like or card-grid shape.
+// Same shimmer skeleton as the student history page: a banner block followed by card blocks.
+// `variant="cards"` renders only a row of card blocks (used for KPI tiles).
 @Component({
   selector: 'app-loader',
   standalone: true,
   template: `
-    <div class="skeleton" [class.overlay]="overlay" role="status" aria-live="polite" aria-busy="true">
+    <div class="skeleton-wrapper" [class.overlay]="overlay" role="status" aria-live="polite" aria-busy="true">
       <span class="sr-only">{{ message }}</span>
 
       @if (variant === 'cards') {
-        <div class="sk-cards">
+        <div class="skeleton-grid">
           @for (i of items; track i) {
-            <div class="sk-block sk-card"></div>
+            <div class="skeleton-card"></div>
           }
         </div>
       } @else {
-        <div class="sk-block sk-head"></div>
-        @for (i of items; track i) {
-          <div class="sk-row">
-            <div class="sk-block sk-cell sk-short"></div>
-            <div class="sk-block sk-cell sk-long"></div>
-            <div class="sk-block sk-cell sk-medium"></div>
-            <div class="sk-block sk-cell sk-medium"></div>
-          </div>
-        }
+        <div class="skeleton-banner"></div>
+        <div class="skeleton-timeline">
+          @for (i of items; track i) {
+            <div class="skeleton-card"></div>
+          }
+        </div>
       }
     </div>
   `,
   styles: [`
-    .skeleton {
+    .skeleton-wrapper {
       display: flex;
       flex-direction: column;
-      gap: 0.75rem;
+      gap: 1.5rem;
       padding: 1rem;
       width: 100%;
       box-sizing: border-box;
     }
 
-    .skeleton.overlay {
+    .skeleton-wrapper.overlay {
       position: absolute;
       inset: 0;
       background: color-mix(in oklch, var(--card, #ffffff) 80%, transparent);
@@ -46,33 +44,37 @@ import { Component, Input } from "@angular/core";
       border-radius: var(--radius, 12px);
     }
 
-    .sk-block {
-      background: linear-gradient(90deg, var(--muted, #f1f5f9) 25%, var(--accent, #e2e8f0) 50%, var(--muted, #f1f5f9) 75%);
+    .skeleton-banner,
+    .skeleton-card {
+      background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
       background-size: 200% 100%;
       animation: shimmer 1.5s infinite;
-      border-radius: var(--radius, 8px);
+      border-radius: 12px;
     }
 
-    .sk-head { height: 2.25rem; }
+    :host-context(.dark) .skeleton-banner,
+    :host-context(.dark) .skeleton-card {
+      background: linear-gradient(90deg,
+        var(--muted) 25%,
+        color-mix(in oklch, var(--muted) 78%, white) 50%,
+        var(--muted) 75%);
+      background-size: 200% 100%;
+    }
 
-    .sk-row {
+    .skeleton-banner { height: 160px; }
+    .skeleton-card { height: 100px; }
+
+    .skeleton-timeline {
       display: flex;
+      flex-direction: column;
       gap: 1rem;
-      align-items: center;
     }
 
-    .sk-cell { height: 1.1rem; }
-    .sk-short { flex: 0 0 4rem; }
-    .sk-long { flex: 2; }
-    .sk-medium { flex: 1; }
-
-    .sk-cards {
+    .skeleton-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 1rem;
     }
-
-    .sk-card { height: 6rem; }
 
     .sr-only {
       position: absolute;
@@ -89,15 +91,16 @@ import { Component, Input } from "@angular/core";
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .sk-block { animation: none; }
+      .skeleton-banner,
+      .skeleton-card { animation: none; }
     }
   `]
 })
 export class LoaderComponent {
   @Input() message: string = 'Loading...';
   @Input() overlay: boolean = false;
-  @Input() variant: 'table' | 'cards' = 'table';
-  @Input() rows: number = 5;
+  @Input() variant: 'default' | 'cards' = 'default';
+  @Input() rows: number = 2;
 
   get items(): number[] {
     return Array.from({ length: this.variant === 'cards' ? 4 : this.rows }, (_, i) => i);
