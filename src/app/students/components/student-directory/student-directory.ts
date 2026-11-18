@@ -60,6 +60,37 @@ export class StudentDirectory {
   studentToDelete = signal<any | null>(null);
   isDeleting = signal<boolean>(false);
 
+  studentToReadmit = signal<any | null>(null);
+  isReadmitting = signal<boolean>(false);
+
+  requestReadmit(student: any): void {
+    this.closeViewModal();
+    this.studentToReadmit.set(student);
+  }
+
+  cancelReadmit(): void {
+    this.studentToReadmit.set(null);
+    this.isReadmitting.set(false);
+  }
+
+  readmitStudent(): void {
+    const target = this.studentToReadmit();
+    if (!target) return;
+
+    this.isReadmitting.set(true);
+    this.studentService.readmitStudent(target.id).subscribe({
+      next: () => {
+        this.toast.show(`${target.name} has been re-admitted.`);
+        this.cancelReadmit();
+        this.loadStudents();
+      },
+      error: (err) => {
+        this.isReadmitting.set(false);
+        this.toast.showError(err, 'Failed to re-admit the student.');
+      }
+    });
+  }
+
   openExitModal(student: FullStudentDto): void {
     const targetStudent = this.selectedStudent() || student;
 

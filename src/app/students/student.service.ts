@@ -35,4 +35,8 @@ export class StudentService {
   deleteStudent(id: string | number): Observable<any> {
     return this.http.delete<any>(`${this.apiUrl}/${id}`);
   }
+
+  readmitStudent(id: string | number): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/${id}/readmit`, {});
+  }
 }

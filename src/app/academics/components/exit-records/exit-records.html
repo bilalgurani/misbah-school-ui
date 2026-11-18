@@ -50,6 +50,9 @@
               <tr>
                 <td data-label="Student Name" class="fw-medium">
                   {{ record.studentName || 'Student #' + record.studentId }}
+                  @if (record.studentStatus === 'ACTIVE') {
+                    <span class="badge badge-active">Re-admitted</span>
+                  }
                 </td>
                 <td data-label="Academic Year">
                   {{ record.academicYearName || 'N/A' }}

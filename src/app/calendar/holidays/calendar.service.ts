@@ -38,8 +38,12 @@ export class CalendarService {
   private http = inject(HttpClient);
   private apiUrl = `${environment.apiUrl}/holidays`;
 
-  getSummary(): Observable<WorkingDaysSummary> {
-    return this.http.get<WorkingDaysSummary>(`${this.apiUrl}/summary`);
+  getSummary(academicYearId?: number): Observable<WorkingDaysSummary> {
+    let params = new HttpParams();
+    if (academicYearId) {
+      params = params.set('academicYearId', academicYearId);
+    }
+    return this.http.get<WorkingDaysSummary>(`${this.apiUrl}/summary`, { params });
   }
 
   getHolidays(from: string, to: string): Observable<Holiday[]> {

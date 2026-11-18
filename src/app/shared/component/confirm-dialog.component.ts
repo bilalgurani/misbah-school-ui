@@ -16,7 +16,7 @@ import { Component, input, output } from '@angular/core';
         </div>
         <div class="modal-footer">
           <button type="button" class="btn-secondary" [disabled]="busy()" (click)="cancelled.emit()">Cancel</button>
-          <button type="button" class="btn-danger" [disabled]="busy()" (click)="confirmed.emit()">
+          <button type="button" [class]="tone() === 'danger' ? 'btn-danger' : 'btn-primary'" [disabled]="busy()" (click)="confirmed.emit()">
             {{ busy() ? 'Please wait...' : confirmLabel() }}
           </button>
         </div>
@@ -127,7 +127,8 @@ import { Component, input, output } from '@angular/core';
       }
 
       .btn-secondary,
-      .btn-danger {
+      .btn-danger,
+      .btn-primary {
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -178,6 +179,16 @@ import { Component, input, output } from '@angular/core';
           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
         }
       }
+
+      .btn-primary {
+        background: var(--primary);
+        color: var(--primary-foreground);
+
+        &:hover:not(:disabled) {
+          background-color: color-mix(in oklch, var(--primary) 88%, var(--primary-foreground));
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+        }
+      }
     }
   `
 })
@@ -185,6 +196,7 @@ export class ConfirmDialogComponent {
   title = input('Confirm');
   message = input.required<string>();
   confirmLabel = input('Delete');
+  tone = input<'danger' | 'primary'>('danger');
   busy = input(false);
 
   confirmed = output<void>();

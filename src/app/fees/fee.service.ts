@@ -101,6 +101,7 @@ export interface FeeDueRow {
   balance: number;
   overdueAmount: number;
   oldestDueDate: string | null;
+  studentStatus: string | null;
 }
 
 export interface FeeSummary {

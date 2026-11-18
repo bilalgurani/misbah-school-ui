@@ -94,7 +94,12 @@
                     [attr.aria-label]="'Select ' + d.name">
                 </td>
                 <td data-label="Roll No"><span class="badge">{{ d.rollNo ?? '-' }}</span></td>
-                <td data-label="Student" class="fw-medium">{{ d.name }}</td>
+                <td data-label="Student" class="fw-medium">
+                  {{ d.name }}
+                  @if (d.studentStatus && d.studentStatus !== 'ACTIVE') {
+                    <span class="status-tag" title="This student has left the school">{{ d.studentStatus === 'LEFT' ? 'Exited' : d.studentStatus }}</span>
+                  }
+                </td>
                 <td data-label="Class">{{ d.className }}</td>
                 <td data-label="Parent">
                   {{ d.fatherName || '-' }}

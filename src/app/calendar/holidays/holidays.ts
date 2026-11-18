@@ -60,10 +60,10 @@ export class Holidays implements OnInit {
     this.loadSummary(true);
   }
 
-  loadSummary(initial = false): void {
+  loadSummary(initial = false, academicYearId?: number): void {
     this.summaryLoading.set(true);
     this.summaryError.set(false);
-    this.calendar.getSummary().subscribe({
+    this.calendar.getSummary(academicYearId).subscribe({
       next: summary => {
         this.summary.set(summary);
         this.summaryLoading.set(false);
@@ -103,6 +103,7 @@ export class Holidays implements OnInit {
     if (!year) return;
     this.from.set(year.startDate);
     this.to.set(year.endDate);
+    this.loadSummary(false, year.id);
     this.loadHolidays();
   }
 
@@ -166,7 +167,17 @@ export class Holidays implements OnInit {
       next: () => {
         this.isSaving.set(false);
         this.closeModal();
-        this.toast.show('Holiday added successfully.');
+
+        // A holiday outside the dates on screen would otherwise look like it was never saved.
+        const outsideRange = date < this.from() || date > this.to();
+        if (outsideRange) {
+          if (!this.from() || date < this.from()) this.from.set(date);
+          if (!this.to() || date > this.to()) this.to.set(date);
+          this.syncSelectedYear();
+          this.toast.show('Holiday added. The date range was widened to show it.');
+        } else {
+          this.toast.show('Holiday added successfully.');
+        }
         this.loadHolidays();
         this.refreshSummary();
       },
@@ -206,7 +217,8 @@ export class Holidays implements OnInit {
   }
 
   private refreshSummary(): void {
-    this.calendar.getSummary().subscribe({
+    const yearId = this.selectedYearId();
+    this.calendar.getSummary(yearId === '' ? undefined : Number(yearId)).subscribe({
       next: summary => this.summary.set(summary),
       error: () => undefined,
     });

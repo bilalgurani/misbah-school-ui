@@ -182,11 +182,26 @@
           <!-- INTEGRATION 2: Trigger Exit Record Modal for Active Students -->
           @if (t.enrollmentStatus === 'ACTIVE') {
             <button type="button" class="btn-danger" (click)="openExitModal(t)">Record Exit / Issue TC</button>
+          } @else {
+            <button type="button" class="btn-primary" (click)="requestReadmit(t)">Re-admit Student</button>
           }
         }
       </div>
     </div>
   </div>
+}
+
+<!-- Re-admit confirmation -->
+@if (studentToReadmit(); as target) {
+  <app-confirm-dialog
+    title="Re-admit Student"
+    [message]="'Re-admit ' + target.name + ' to their previous class and roll number in the current academic year? The earlier exit record is kept as history.'"
+    confirmLabel="Re-admit"
+    tone="primary"
+    [busy]="isReadmitting()"
+    (confirmed)="readmitStudent()"
+    (cancelled)="cancelReadmit()">
+  </app-confirm-dialog>
 }
 
 <!-- Delete confirmation -->

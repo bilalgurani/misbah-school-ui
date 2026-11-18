@@ -17,5 +17,6 @@ export interface StudentExitRecord extends StudentExitRequestDto {
   academicYearName?: string;
   recordedByUserId?: number;
   recordedByUserName?: string;
+  studentStatus?: string;
   createdAt?: string;
 }
