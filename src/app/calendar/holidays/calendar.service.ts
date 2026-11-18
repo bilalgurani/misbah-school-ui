@@ -23,6 +23,7 @@ export interface WorkingDaysSummary {
   academicYear: string;
   startDate: string;
   endDate: string;
+  trackingStartDate: string;
   totalDays: number;
   weeklyOffDays: number;
   holidays: number;

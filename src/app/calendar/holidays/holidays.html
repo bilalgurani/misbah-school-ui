@@ -42,7 +42,7 @@
         <div class="kpi-card">
           <div class="kpi-title">Elapsed so far</div>
           <div class="kpi-value">{{ s.workingDaysElapsed }}</div>
-          <div class="kpi-subtext">Working days to date</div>
+          <div class="kpi-subtext">Working days since tracking began</div>
         </div>
         <div class="kpi-card">
           <div class="kpi-title">Attendance taken</div>
@@ -57,7 +57,8 @@
       </div>
 
       <p class="explain">
-        School was scheduled to run <strong>{{ s.workingDaysElapsed }}</strong> days so far; attendance was taken on
+        Counting from <strong>{{ toDate(s.trackingStartDate) | date: 'dd MMM yyyy' }}</strong> (when attendance tracking started).
+        School was scheduled to run <strong>{{ s.workingDaysElapsed }}</strong> days since then; attendance was taken on
         <strong>{{ s.daysAttendanceTaken }}</strong>;
         @if (s.daysAttendanceMissing > 0) {
           <strong>{{ s.daysAttendanceMissing }}</strong> working {{ s.daysAttendanceMissing === 1 ? 'day has' : 'days have' }} no attendance:
