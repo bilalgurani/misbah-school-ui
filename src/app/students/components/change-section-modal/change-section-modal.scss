@@ -1,0 +1,34 @@
+@use '../../../shared/styles/parts' as p;
+
+@include p.form;
+@include p.buttons;
+
+.who,
+.muted {
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+}
+
+.muted {
+  color: var(--muted-foreground);
+}
+
+.hint {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.full-note {
+  margin: -0.25rem 0 1rem;
+  padding: 0.625rem 0.875rem;
+  border-radius: var(--radius);
+  border: 1px solid color-mix(in oklch, var(--absent) 45%, transparent);
+  background: color-mix(in oklch, var(--absent) 10%, var(--card));
+  font-size: 0.85rem;
+  line-height: 1.5;
+
+  a {
+    color: inherit;
+    font-weight: 600;
+  }
+}

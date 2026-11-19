@@ -11,6 +11,32 @@
     </button>
   </header>
 
+  @if (yearSummary(); as y) {
+    <section class="year-strip" aria-label="School year">
+      <div class="year-item">
+        <span class="year-label">Academic year</span>
+        <strong>{{ y.academicYear }}</strong>
+      </div>
+      <div class="year-item">
+        <span class="year-label">School year</span>
+        <strong>{{ y.startDate | date: 'dd MMM yyyy' }} to {{ y.endDate | date: 'dd MMM yyyy' }}</strong>
+      </div>
+      <div class="year-item">
+        <span class="year-label">Attendance started</span>
+        <strong>{{ y.trackingStartDate | date: 'dd MMM yyyy' }}</strong>
+      </div>
+      <div class="year-item">
+        <span class="year-label">Working days so far</span>
+        <strong>{{ y.workingDaysElapsed }} <span class="year-sub">(attendance taken on {{ y.daysAttendanceTaken }})</span></strong>
+      </div>
+      @if (y.daysAttendanceMissing > 0) {
+        <a routerLink="/calendar/holidays" class="year-warn">
+          {{ y.daysAttendanceMissing }} working {{ y.daysAttendanceMissing === 1 ? 'day has' : 'days have' }} no attendance. See which
+        </a>
+      }
+    </section>
+  }
+
   <!-- Native Control Flow for Loader -->
   @if (isLoading()) {
     <app-loader message="Fetching latest metrics..." variant="cards"></app-loader>

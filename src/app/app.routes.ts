@@ -52,6 +52,7 @@ export const routes: Routes = [
       
 
       { path: 'students', component: StudentDirectory },
+      { path: 'students/move', loadComponent: () => import('./students/components/move-students/move-students').then(m => m.MoveStudents) },
       { path: 'student-attendance', component: StudentAttendance },
       { path: 'students/add', component: AddStudent, canActivate: [AuthGuards.roleGuard('ADMIN')] },
       { path: 'students/edit/:id', component: AddStudent, canActivate: [AuthGuards.roleGuard('ADMIN')] },

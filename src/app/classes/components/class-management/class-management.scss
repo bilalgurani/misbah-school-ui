@@ -404,3 +404,8 @@ $bg-alt: var(--muted);
     }
   }
 }
+
+.muted {
+  color: $text-sub;
+  font-size: 0.85rem;
+}

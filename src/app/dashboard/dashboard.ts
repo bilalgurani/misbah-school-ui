@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { DecimalPipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { LoaderComponent } from '../shared/component/loader.component';
 import { DashboardStats } from './models/dashboard.models';
@@ -7,6 +7,7 @@ import { DashboardService } from './services/dashboard-api.service';
 import { DashboardCharts } from './components/dashboard-charts/dashboard-charts';
 import { ToastService } from '../shared/services/toast.service';
 import { AuthService } from '../auth/auth.service';
+import { CalendarService, WorkingDaysSummary } from '../calendar/holidays/calendar.service';
 
 function greetingFor(hour: number): string {
   if (hour < 12) return 'Good morning';
@@ -17,7 +18,7 @@ function greetingFor(hour: number): string {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [LoaderComponent, RouterLink, DecimalPipe, DashboardCharts],
+  imports: [LoaderComponent, RouterLink, DecimalPipe, DatePipe, DashboardCharts],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss'
 })
@@ -27,8 +28,11 @@ export class Dashboard implements OnInit {
   isLoading = signal<boolean>(true);
   hasError = signal<boolean>(false);
   isPendingModalOpen = signal<boolean>(false);
+  // Optional extra: if it can't be loaded the dashboard simply shows no strip.
+  yearSummary = signal<WorkingDaysSummary | null>(null);
 
   private dashboardService = inject(DashboardService);
+  private calendarService = inject(CalendarService);
   private toast = inject(ToastService);
   protected auth = inject(AuthService);
 
@@ -36,6 +40,10 @@ export class Dashboard implements OnInit {
 
   ngOnInit(): void {
     this.fetchDashboardStats();
+    this.calendarService.getSummary().subscribe({
+      next: summary => this.yearSummary.set(summary),
+      error: () => this.yearSummary.set(null),
+    });
   }
 
   fetchDashboardStats(): void {

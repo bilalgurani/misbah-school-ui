@@ -26,3 +26,9 @@ export interface PromotionRequestDto {
   targetAcademicYearId: number;
   items: PromotionItemDto[];
 }
+
+export interface SectionMove {
+  studentId: number;
+  targetClassSectionId: number;
+  targetRollNo: string;
+}

@@ -123,11 +123,36 @@
           <select id="student-class" formControlName="classSectionId">
             <option [ngValue]="null">Select Class</option>
             @for (section of classSections(); track section.id) {
-              <option [ngValue]="section.id">Class {{ section.displayName }}</option>
+              <option [ngValue]="section.id">Class {{ section.displayName }}{{ seatLabel(section.id) }}</option>
             }
           </select>
           @if (studentForm.get('classSectionId')?.touched && studentForm.get('classSectionId')?.invalid) {
             <span class="error">Please select a class</span>
+          }
+          @if (blockedByFullSection()) {
+            <div class="full-box" role="alert">
+              <p>
+                <strong>Class {{ selectedSectionName() }} is full</strong>
+                ({{ selectedSeats()?.studentCount }} of {{ selectedSeats()?.capacity }} seats taken).
+                A new student can't join until you make room.
+              </p>
+              @if (isRaisingSeats()) {
+                <div class="full-actions">
+                  <label for="new-seats">New number of seats</label>
+                  <input id="new-seats" type="number" min="1" step="1" [value]="newCapacity()"
+                    (input)="newCapacity.set($any($event.target).valueAsNumber)">
+                  <button type="button" class="btn-primary" [disabled]="isSavingSeats()" (click)="saveNewCapacity()">
+                    {{ isSavingSeats() ? 'Saving...' : 'Save seats' }}
+                  </button>
+                  <button type="button" class="btn-secondary" (click)="isRaisingSeats.set(false)">Cancel</button>
+                </div>
+              } @else {
+                <div class="full-actions">
+                  <button type="button" class="btn-secondary" (click)="startRaisingSeats()">Increase seats</button>
+                  <a routerLink="/classes" class="btn-secondary">Add another section</a>
+                </div>
+              }
+            </div>
           }
           @if (sectionsLoaded() && classSections().length === 0) {
             <span class="hint">No classes or sections exist yet. <a routerLink="/classes">Create them in Classes & Sections</a> before adding students.</span>
@@ -170,7 +195,7 @@
       <!-- Action Buttons -->
       <div class="form-actions">
         <a routerLink="/students" class="btn-secondary">Cancel</a>
-        <button type="submit" class="btn-primary" [disabled]="isSubmitting() || studentForm.invalid">
+        <button type="submit" class="btn-primary" [disabled]="isSubmitting() || studentForm.invalid || blockedByFullSection()">
           {{ isSubmitting() ? 'Saving...' : (isEditMode() ? 'Update Student' : 'Save Student') }}
         </button>
       </div>

@@ -1,0 +1,83 @@
+@use '../../../shared/styles/parts' as p;
+
+@include p.layout;
+@include p.buttons;
+@include p.form;
+@include p.toolbar;
+@include p.table;
+
+.intro {
+  margin: 0 0 1.25rem;
+  color: var(--muted-foreground);
+  font-size: 0.9rem;
+}
+
+.filter {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+
+.seat-line {
+  padding: 0.625rem 1rem;
+  font-size: 0.85rem;
+  color: var(--muted-foreground);
+  background: var(--muted);
+
+  &.bad {
+    color: var(--foreground);
+    background: color-mix(in oklch, var(--absent) 12%, var(--card));
+  }
+
+  a {
+    color: inherit;
+    font-weight: 600;
+  }
+}
+
+.check-col {
+  width: 2.5rem;
+
+  input {
+    width: 1.1rem;
+    height: 1.1rem;
+    accent-color: var(--primary);
+  }
+}
+
+tr.picked td {
+  background: color-mix(in oklch, var(--primary) 10%, var(--card));
+}
+
+.roll-input {
+  max-width: 7rem;
+  min-height: 38px;
+}
+
+.muted {
+  color: var(--muted-foreground);
+}
+
+.fw-medium {
+  font-weight: 600;
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem 1rem;
+  padding: 1rem;
+  border-top: 1px solid var(--border);
+
+  .count {
+    margin-right: auto;
+    font-size: 0.85rem;
+    color: var(--muted-foreground);
+  }
+
+  .problem {
+    font-size: 0.8rem;
+    color: var(--absent);
+  }
+}

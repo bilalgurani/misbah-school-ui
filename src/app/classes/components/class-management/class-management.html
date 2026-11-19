@@ -59,6 +59,7 @@
               <th>Class</th>
               <th>Section</th>
               <th>Label Shown in App</th>
+              <th>Students / Seats</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -68,6 +69,22 @@
                 <td data-label="Class" class="fw-medium">{{ section.levelName }}</td>
                 <td data-label="Section">{{ section.division }}</td>
                 <td data-label="Label Shown in App"><span class="badge">{{ section.displayName }}</span></td>
+                <td data-label="Students / Seats">
+                  @if (seatsFor(section.id); as seat) {
+                    @if (seat.capacity === null) {
+                      {{ seat.studentCount }} <span class="muted">(no seat limit)</span>
+                    } @else {
+                      {{ seat.studentCount }} of {{ seat.capacity }}
+                      @if (isOverLimit(section.id)) {
+                        <span class="seat-chip full">Over limit</span>
+                      } @else if (isFull(section.id)) {
+                        <span class="seat-chip full">Full</span>
+                      }
+                    }
+                  } @else {
+                    <span class="muted">—</span>
+                  }
+                </td>
                 <td data-label="Actions" class="actions">
                   <button type="button" class="btn-secondary" (click)="openSectionForm(section)" [attr.aria-label]="'Edit ' + section.displayName">Edit</button>
                   <button type="button" class="btn-danger" (click)="requestDeleteSection(section)" [attr.aria-label]="'Delete ' + section.displayName">Delete</button>
@@ -75,7 +92,7 @@
               </tr>
             } @empty {
               <tr>
-                <td colspan="4" class="empty-state">
+                <td colspan="5" class="empty-state">
                   @if (levels().length === 0) {
                     Create a class first, then add its sections.
                   } @else {
@@ -132,6 +149,12 @@
               <label for="section-division">Section Name <span class="required">*</span></label>
               <input id="section-division" name="sectionDivision" type="text" class="form-input" placeholder="e.g. A, B"
                      [(ngModel)]="sectionForm.division" maxlength="20" autocomplete="off">
+            </div>
+            <div class="form-group">
+              <label for="section-capacity">Seat Limit</label>
+              <input id="section-capacity" name="sectionCapacity" type="number" min="1" step="1" class="form-input"
+                     placeholder="Leave empty for no limit" [(ngModel)]="sectionForm.capacity">
+              <span class="hint">The most students this section should hold. Admission is blocked when it is full until you raise the limit or add another section. Lowering the limit never removes students.</span>
             </div>
           }
         </div>

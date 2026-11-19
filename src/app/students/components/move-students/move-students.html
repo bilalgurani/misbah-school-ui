@@ -1,0 +1,116 @@
+<div class="page-container">
+  <div class="page-header">
+    <h2>Move Students</h2>
+    <div class="header-actions">
+      <a routerLink="/students" class="btn-secondary">Back to students</a>
+    </div>
+  </div>
+
+  <p class="intro">
+    Move students from one section to another, for example when a class is split or rebalanced. Their roll numbers in the
+    new section are suggested for you and can be changed. Past attendance and marks stay where they were recorded.
+  </p>
+
+  <div class="card">
+    <div class="toolbar">
+      <div class="form-group filter">
+        <label for="mv-from">Move from</label>
+        <select id="mv-from" class="form-input" [ngModel]="fromId()" (ngModelChange)="onFromChange($event)" [disabled]="isSetupLoading()">
+          <option [ngValue]="null">Choose a section</option>
+          @for (s of sections(); track s.id) {
+            <option [ngValue]="s.id">{{ s.displayName }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-group filter">
+        <label for="mv-to">Move to</label>
+        <select id="mv-to" class="form-input" [ngModel]="toId()" (ngModelChange)="onToChange($event)"
+          [disabled]="isSetupLoading() || fromId() === null">
+          <option [ngValue]="null">Choose a section</option>
+          @for (o of toOptions(); track o.section.id) {
+            <option [ngValue]="o.section.id">{{ o.section.displayName }}{{ o.text ? ' (' + o.text + ')' : '' }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    @if (toId() !== null) {
+      <div class="seat-line" [class.bad]="overLimit()">
+        @if (seatsLeftInTarget() === null) {
+          {{ toName() }} has no seat limit.
+        } @else if (overLimit()) {
+          You selected {{ selected().size }}, but {{ toName() }} has only {{ seatsLeftInTarget() }}
+          {{ seatsLeftInTarget() === 1 ? 'seat' : 'seats' }} free.
+          @if (auth.isAdmin()) {
+            <a routerLink="/classes">Increase its seats</a> or move fewer students.
+          } @else {
+            Ask an admin to increase its seats, or move fewer students.
+          }
+        } @else {
+          {{ toName() }} has {{ seatsLeftInTarget() }} {{ seatsLeftInTarget() === 1 ? 'seat' : 'seats' }} free.
+        }
+      </div>
+    }
+  </div>
+
+  @if (isLoadingStudents()) {
+    <div class="card"><div class="loader-container"><app-loader message="Loading students..."></app-loader></div></div>
+  } @else if (fromId() === null) {
+    <div class="card"><div class="empty-block">Choose the section the students are in now.</div></div>
+  } @else if (students().length === 0) {
+    <div class="card"><div class="empty-block">There are no students in {{ fromName() }}.</div></div>
+  } @else {
+    <div class="card">
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th class="check-col">
+                <input type="checkbox" [checked]="allSelected()" (change)="toggleAll()" aria-label="Select all students">
+              </th>
+              <th>Roll No</th>
+              <th>Student</th>
+              <th>Roll no in {{ toId() === null ? 'new section' : toName() }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (student of students(); track student.id) {
+              <tr [class.picked]="selected().has(student.id)">
+                <td data-label="Select" class="check-col">
+                  <input type="checkbox" [checked]="selected().has(student.id)" (change)="toggle(student.id)"
+                    [attr.aria-label]="'Select ' + student.name">
+                </td>
+                <td data-label="Roll No">{{ student.rollNo }}</td>
+                <td data-label="Student" class="fw-medium">{{ student.name }}</td>
+                <td data-label="New roll no">
+                  @if (selected().has(student.id) && toId() !== null) {
+                    <input class="form-input roll-input" type="text" maxlength="20" [value]="rollFor(student.id)"
+                      (input)="setRoll(student.id, $any($event.target).value)" [attr.aria-label]="'New roll number for ' + student.name">
+                  } @else {
+                    <span class="muted">&mdash;</span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="footer">
+        <span class="count">{{ selected().size }} of {{ students().length }} selected</span>
+        @if (rollProblem() && selected().size > 0 && toId() !== null) {
+          <span class="problem">{{ rollProblem() }}</span>
+        }
+        <button type="button" class="btn-primary" [disabled]="!canMove()" (click)="confirming.set(true)">
+          Move {{ selected().size || '' }} {{ selected().size === 1 ? 'student' : 'students' }}
+        </button>
+      </div>
+    </div>
+  }
+</div>
+
+@if (confirming()) {
+  <app-confirm-dialog title="Move students?"
+    [message]="'Move ' + selected().size + (selected().size === 1 ? ' student' : ' students') + ' from ' + fromName() + ' to ' + toName() + '?'"
+    confirmLabel="Move" tone="primary" [busy]="isSaving()" (confirmed)="move()" (cancelled)="confirming.set(false)"></app-confirm-dialog>
+}

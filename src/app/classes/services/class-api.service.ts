@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { ClassLevel, ClassLevelRequest, ClassSectionItem, ClassSectionRequest } from '../models/class.models';
+import { ClassLevel, ClassLevelRequest, ClassSectionItem, ClassSectionRequest, SectionSeats } from '../models/class.models';
 
 @Injectable({ providedIn: 'root' })
 export class ClassApiService {
@@ -28,6 +28,16 @@ export class ClassApiService {
 
   getSections(): Observable<ClassSectionItem[]> {
     return this.http.get<ClassSectionItem[]>(this.sectionsUrl);
+  }
+
+  // Never cached on the server: the counts change with every admission.
+  getSeats(): Observable<SectionSeats[]> {
+    return this.http.get<SectionSeats[]>(`${this.sectionsUrl}/seats`);
+  }
+
+  // Admin only. A null capacity removes the limit.
+  updateCapacity(id: number, capacity: number | null): Observable<void> {
+    return this.http.put<void>(`${this.sectionsUrl}/${id}/capacity`, { capacity });
   }
 
   createSection(request: ClassSectionRequest): Observable<{ id: number }> {

@@ -1,0 +1,58 @@
+<div class="modal-backdrop" (click)="cancel()">
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="change-section-title" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3 id="change-section-title">Change section</h3>
+      <button type="button" class="close-btn" (click)="cancel()" aria-label="Close dialog">&times;</button>
+    </div>
+
+    <div class="modal-body">
+      @if (isLoading()) {
+        <p class="muted">Loading classes...</p>
+      } @else {
+        <p class="who">
+          <strong>{{ student().name }}</strong>
+          is now in <strong>{{ currentSection()?.displayName ?? student().classSectionId }}</strong>.
+        </p>
+
+        <div class="form-group">
+          <label for="move-target">Move to</label>
+          <select id="move-target" class="form-input" [ngModel]="targetId()" (ngModelChange)="onTargetChange($event)">
+            <option [ngValue]="null">Choose a section</option>
+            @for (option of options(); track option.section.id) {
+              <option [ngValue]="option.section.id" [disabled]="option.full">
+                {{ option.section.displayName }}{{ option.seatsText ? ' (' + option.seatsText + ')' : '' }}
+              </option>
+            }
+          </select>
+        </div>
+
+        @if (targetIsFull()) {
+          <div class="full-note" role="alert">
+            {{ targetName() }} is full.
+            @if (auth.isAdmin()) {
+              <a routerLink="/classes" (click)="cancel()">Increase its seats in Classes &amp; Sections</a>
+              or choose another section.
+            } @else {
+              Ask an admin to increase its seats, or choose another section.
+            }
+          </div>
+        }
+
+        <div class="form-group">
+          <label for="move-roll">Roll number in the new section</label>
+          <input id="move-roll" class="form-input" type="text" maxlength="20" [ngModel]="rollNo()"
+            (ngModelChange)="onRollChange($event)" [disabled]="targetId() === null"
+            [placeholder]="isLoadingRoll() ? 'Finding the next number...' : 'Roll number'">
+          <span class="hint">Suggested as the next free number. You can change it.</span>
+        </div>
+      }
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn-secondary" (click)="cancel()">Cancel</button>
+      <button type="button" class="btn-primary" [disabled]="!canMove()" (click)="move()">
+        {{ isSaving() ? 'Moving...' : 'Move student' }}
+      </button>
+    </div>
+  </div>
+</div>

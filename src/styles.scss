@@ -352,6 +352,22 @@ body {
   }
 }
 
+.seat-chip {
+  display: inline-block;
+  margin-left: 0.35rem;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: color-mix(in oklch, var(--success) 15%, transparent);
+  color: var(--success);
+
+  &.full {
+    background: color-mix(in oklch, var(--absent) 15%, transparent);
+    color: var(--absent);
+  }
+}
+
 .text-male { color: var(--male); }
 .text-female { color: var(--female); }
 .text-present { color: var(--present); }

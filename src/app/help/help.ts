@@ -124,6 +124,24 @@ export class Help {
       ],
     },
     {
+      title: 'Admit a student and check seats',
+      adminOnly: true,
+      steps: [
+        'Set a seat limit for each section in Classes & Sections (edit the section and fill in Seat Limit). Leave it empty for no limit.',
+        'On Students > Add Student the class list shows how many seats are left, and the next free roll number is suggested.',
+        'If the section is full, saving is blocked. Choose Increase seats to raise the limit right there, or Add another section.',
+      ],
+    },
+    {
+      title: 'Move a student to another section',
+      steps: [
+        'For one student: open Students > Directory and press the arrows button on their row, then choose the new section.',
+        'For many students at once: open Students > Move Students, choose the section they are in now and the one to move to, tick the students, and press Move.',
+        'The next free roll numbers are suggested and can be changed. A section with no free seats can\'t be chosen: ask an admin to increase its seats.',
+        'Past attendance and marks stay with the section where they were recorded.',
+      ],
+    },
+    {
       title: 'Set up an exam',
       adminOnly: true,
       steps: [

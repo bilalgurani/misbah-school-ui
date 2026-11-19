@@ -43,6 +43,50 @@ $border-color: var(--border);
   color: $text-sub;
 }
 
+.year-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 2rem;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding: 0.875rem 1.25rem;
+  background: $bg-card;
+  border: 1px solid $border-color;
+  border-radius: var(--radius);
+
+  .year-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    font-size: 0.9rem;
+  }
+
+  .year-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: $text-sub;
+  }
+
+  .year-sub {
+    font-weight: 400;
+    font-size: 0.8rem;
+    color: $text-sub;
+  }
+
+  .year-warn {
+    margin-left: auto;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+    color: var(--absent);
+    background: color-mix(in oklch, var(--absent) 12%, transparent);
+  }
+}
+
 .title {
   font-weight: 700;
   color: $text-title;

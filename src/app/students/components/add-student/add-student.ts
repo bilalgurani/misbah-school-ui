@@ -7,7 +7,8 @@ import { ToastService } from '../../../shared/services/toast.service';
 import { AttendanceApiService } from '../../../attendance/services/attendance-api.service';
 import { ClassSection } from '../../../attendance/models/attendance.models';
 import { ClassApiService } from '../../../classes/services/class-api.service';
-import { ClassLevel } from '../../../classes/models/class.models';
+import { ClassLevel, SectionSeats, isSectionFull, seatsText } from '../../../classes/models/class.models';
+import { EnrollmentService } from '../../../academics/services/enrollment.service';
 import { LoaderComponent } from '../../../shared/component/loader.component';
 
 @Component({
@@ -24,11 +25,27 @@ export class AddStudent {
   private toast = inject(ToastService);
   private attendanceApi = inject(AttendanceApiService);
   private classApi = inject(ClassApiService);
+  private enrollmentService = inject(EnrollmentService);
 
   studentForm!: FormGroup;
   classSections = signal<ClassSection[]>([]);
   classLevels = signal<ClassLevel[]>([]);
   sectionsLoaded = signal<boolean>(false);
+
+  seats = signal<Map<number, SectionSeats>>(new Map());
+  selectedSectionId = signal<number | null>(null);
+  // In edit mode the student's own section is never "full" for them, because they already hold a seat in it.
+  originalSectionId = signal<number | null>(null);
+  isRaisingSeats = signal<boolean>(false);
+  newCapacity = signal<number | null>(null);
+  isSavingSeats = signal<boolean>(false);
+
+  selectedSeats = computed(() => {
+    const id = this.selectedSectionId();
+    return id === null ? undefined : this.seats().get(id);
+  });
+  selectedSectionName = computed(() =>
+    this.classSections().find(s => s.id === this.selectedSectionId())?.displayName ?? '');
 
   // A student must belong to a section, so classes without one can't be chosen yet.
   classesWithoutSections = computed(() => {
@@ -61,6 +78,68 @@ export class AddStudent {
     });
     // Only used for the hint below the dropdown, so a failure here is not worth a toast.
     this.classApi.getLevels().subscribe({ next: (levels) => this.classLevels.set(levels) });
+    this.loadSeats();
+  }
+
+  // Seat counts are optional extras: without them the form still works and the server still enforces the limit.
+  private loadSeats(): void {
+    this.classApi.getSeats().subscribe({
+      next: (seats) => this.seats.set(new Map(seats.map(s => [s.classSectionId, s]))),
+      error: () => this.seats.set(new Map()),
+    });
+  }
+
+  seatLabel(sectionId: number): string {
+    const text = seatsText(this.seats().get(sectionId));
+    return text ? ` (${text})` : '';
+  }
+
+  // True when saving would need a seat in a section that has none free.
+  blockedByFullSection(): boolean {
+    const takesSeat = this.studentForm?.get('enrollmentStatus')?.value === 'ACTIVE';
+    const staysPut = this.isEditMode() && this.selectedSectionId() === this.originalSectionId();
+    return takesSeat && !staysPut && isSectionFull(this.selectedSeats());
+  }
+
+  startRaisingSeats(): void {
+    const capacity = this.selectedSeats()?.capacity ?? 0;
+    this.newCapacity.set(capacity + 1);
+    this.isRaisingSeats.set(true);
+  }
+
+  saveNewCapacity(): void {
+    const sectionId = this.selectedSectionId();
+    const capacity = Number(this.newCapacity());
+    if (sectionId === null || !Number.isInteger(capacity) || capacity < 1) {
+      this.toast.show('Enter the new number of seats as a whole number of 1 or more.', 'error');
+      return;
+    }
+    this.isSavingSeats.set(true);
+    this.classApi.updateCapacity(sectionId, capacity).subscribe({
+      next: () => {
+        this.isSavingSeats.set(false);
+        this.isRaisingSeats.set(false);
+        this.toast.show('Seats updated.');
+        this.loadSeats();
+      },
+      error: (err) => {
+        this.isSavingSeats.set(false);
+        this.toast.showError(err, 'Failed to update the seats.');
+      },
+    });
+  }
+
+  // A new student gets the next free roll number in the chosen section, unless one was already typed.
+  private suggestRollNo(sectionId: number): void {
+    const rollControl = this.studentForm.get('rollNo');
+    if (this.isEditMode() || !rollControl || String(rollControl.value ?? '').trim()) return;
+    this.enrollmentService.getNextRollNo(sectionId).subscribe({
+      next: ({ rollNo }) => {
+        if (this.selectedSectionId() === sectionId && !String(rollControl.value ?? '').trim()) {
+          rollControl.setValue(String(rollNo));
+        }
+      },
+    });
   }
 
   private initForm(): void {
@@ -82,6 +161,13 @@ export class AddStudent {
       classSectionId: [null, Validators.required],
       bloodGroup: ['']
     });
+
+    this.studentForm.get('classSectionId')?.valueChanges.subscribe((value) => {
+      const id = value === null || value === '' ? null : Number(value);
+      this.selectedSectionId.set(id);
+      this.isRaisingSeats.set(false);
+      if (id !== null) this.suggestRollNo(id);
+    });
   }
 
   private loadStudentData(id: string): void {
@@ -98,6 +184,7 @@ export class AddStudent {
         };
 
         this.studentForm.patchValue(sanitizedData);
+        this.originalSectionId.set(student.classSectionId ?? null);
         
         if (this.studentForm.invalid) {
           this.logInvalidControls();

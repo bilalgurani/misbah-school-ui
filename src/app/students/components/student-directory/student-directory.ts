@@ -12,6 +12,7 @@ import { ClassSection } from '../../../attendance/models/attendance.models';
 import { downloadCsv, toCsv } from '../../../shared/utils/csv.util';
 import { todayIso } from '../../../shared/utils/date.util';
 import { AttendanceTrendComponent } from '../../../shared/component/attendance-trend.component';
+import { ChangeSectionModal } from '../change-section-modal/change-section-modal';
 import { AttendanceTrendService, StudentStatMap } from '../../../attendance/services/attendance-trend.service';
 interface FullStudentDto {
   id: number;
@@ -38,7 +39,7 @@ interface FullStudentDto {
 }
 
 @Component({
-  imports: [FormsModule, RouterModule, LoaderComponent, ExitStudentModal, ConfirmDialogComponent, AttendanceTrendComponent],
+  imports: [FormsModule, RouterModule, LoaderComponent, ExitStudentModal, ConfirmDialogComponent, AttendanceTrendComponent, ChangeSectionModal],
   selector: 'app-student-directory',
   styleUrl: './student-directory.scss',
   templateUrl: './student-directory.html',
@@ -65,6 +66,13 @@ export class StudentDirectory {
 
   studentToDelete = signal<any | null>(null);
   isDeleting = signal<boolean>(false);
+
+  studentToMove = signal<any | null>(null);
+
+  onMoveClosed(moved: boolean): void {
+    this.studentToMove.set(null);
+    if (moved) this.loadStudents();
+  }
 
   studentToReadmit = signal<any | null>(null);
   isReadmitting = signal<boolean>(false);

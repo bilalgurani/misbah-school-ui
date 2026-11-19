@@ -2,7 +2,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { StudentEnrollment, PromotionRequestDto } from '../models/enrollment.model';
+import { StudentEnrollment, PromotionRequestDto, SectionMove } from '../models/enrollment.model';
 import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -20,5 +20,14 @@ export class EnrollmentService {
 
   getActiveEnrollmentsBySection(sectionId: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/enrollments/section/${sectionId}/active`);
+  }
+
+  // Moves students to another section of the current year. One call handles a single student or many.
+  moveStudents(moves: SectionMove[]): Observable<{ moved: number }> {
+    return this.http.post<{ moved: number }>(`${this.apiUrl}/enrollments/move`, { moves });
+  }
+
+  getNextRollNo(sectionId: number): Observable<{ rollNo: number }> {
+    return this.http.get<{ rollNo: number }>(`${this.apiUrl}/enrollments/section/${sectionId}/next-roll-no`);
   }
 }

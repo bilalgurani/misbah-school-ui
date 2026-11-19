@@ -1,8 +1,8 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { forkJoin, Observable } from 'rxjs';
+import { catchError, forkJoin, Observable, of, switchMap } from 'rxjs';
 import { ClassApiService } from '../../services/class-api.service';
-import { ClassLevel, ClassSectionItem } from '../../models/class.models';
+import { ClassLevel, ClassSectionItem, SectionSeats, isSectionFull } from '../../models/class.models';
 import { ToastService } from '../../../shared/services/toast.service';
 import { LoaderComponent } from '../../../shared/component/loader.component';
 import { ConfirmDialogComponent } from '../../../shared/component/confirm-dialog.component';
@@ -34,7 +34,10 @@ export class ClassManagement implements OnInit {
   isSaving = signal<boolean>(false);
 
   levelForm = { name: '', displayOrder: 1 };
-  sectionForm: { classLevelId: number | null; division: string } = { classLevelId: null, division: '' };
+  sectionForm: { classLevelId: number | null; division: string; capacity: number | null } =
+    { classLevelId: null, division: '', capacity: null };
+
+  seats = signal<Map<number, SectionSeats>>(new Map());
 
   deleteTarget = signal<DeleteTarget | null>(null);
   isDeleting = signal<boolean>(false);
@@ -47,16 +50,35 @@ export class ClassManagement implements OnInit {
     return counts;
   });
 
+  seatsFor(sectionId: number): SectionSeats | undefined {
+    return this.seats().get(sectionId);
+  }
+
+  isFull(sectionId: number): boolean {
+    return isSectionFull(this.seatsFor(sectionId));
+  }
+
+  isOverLimit(sectionId: number): boolean {
+    const seats = this.seatsFor(sectionId);
+    return !!seats && seats.capacity !== null && seats.studentCount > seats.capacity;
+  }
+
   ngOnInit(): void {
     this.load();
   }
 
   load(): void {
     this.isLoading.set(true);
-    forkJoin({ levels: this.api.getLevels(), sections: this.api.getSections() }).subscribe({
-      next: ({ levels, sections }) => {
+    forkJoin({
+      levels: this.api.getLevels(),
+      sections: this.api.getSections(),
+      // The classes list should still work if the seat counts can't be read.
+      seats: this.api.getSeats().pipe(catchError(() => of([] as SectionSeats[]))),
+    }).subscribe({
+      next: ({ levels, sections, seats }) => {
         this.levels.set(levels);
         this.sections.set(sections);
+        this.seats.set(new Map(seats.map(s => [s.classSectionId, s])));
         this.isLoading.set(false);
       },
       error: (err) => {
@@ -77,8 +99,8 @@ export class ClassManagement implements OnInit {
 
   openSectionForm(section?: ClassSectionItem): void {
     this.sectionForm = section
-      ? { classLevelId: section.classLevelId, division: section.division }
-      : { classLevelId: this.levels()[0]?.id ?? null, division: '' };
+      ? { classLevelId: section.classLevelId, division: section.division, capacity: this.seatsFor(section.id)?.capacity ?? null }
+      : { classLevelId: this.levels()[0]?.id ?? null, division: '', capacity: null };
     this.editingId.set(section?.id ?? null);
     this.formMode.set('section');
   }
@@ -140,8 +162,19 @@ export class ClassManagement implements OnInit {
     }
 
     const id = this.editingId();
-    const request = { classLevelId: Number(classLevelId), division };
-    const call: Observable<unknown> = id ? this.api.updateSection(id, request) : this.api.createSection(request);
+    const capacity = this.parseCapacity(this.sectionForm.capacity);
+    if (capacity === undefined) {
+      this.toast.show('Seats must be a whole number of 1 or more, or left empty for no limit.', 'error');
+      return;
+    }
+    const request = { classLevelId: Number(classLevelId), division, capacity };
+    const call: Observable<unknown> = id
+      ? this.api.updateSection(id, request).pipe(
+        // Seats have their own call, so only send it when the limit actually changed.
+        switchMap(() => (this.seatsFor(id)?.capacity ?? null) === capacity
+          ? of(null)
+          : this.api.updateCapacity(id, capacity)))
+      : this.api.createSection(request);
 
     this.isSaving.set(true);
     call.subscribe({
@@ -155,6 +188,13 @@ export class ClassManagement implements OnInit {
         this.toast.showError(err, 'Failed to save section.');
       }
     });
+  }
+
+  // Empty means no limit (null); a bad value returns undefined so the form can say so.
+  private parseCapacity(raw: unknown): number | null | undefined {
+    if (raw === null || raw === undefined || raw === '') return null;
+    const value = Number(raw);
+    return Number.isInteger(value) && value >= 1 ? value : undefined;
   }
 
   requestDeleteLevel(level: ClassLevel): void {
