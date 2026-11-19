@@ -41,9 +41,8 @@ export class Help {
     {
       title: 'Notify parents about absentees',
       steps: [
-        'After saving attendance, press "Notify parents of absentees".',
-        'Choose SMS, WhatsApp or both, then confirm.',
-        'Each parent is messaged only once per day for the same student.',
+        'After saving attendance, press "Notify parents of absentees", then tap WhatsApp or SMS next to each student.',
+        'Your own phone app opens with the message ready. Press send.',
       ],
     },
     {
@@ -189,7 +188,7 @@ export class Help {
     },
     {
       question: 'A parent says they did not get the absence message.',
-      answer: 'Check that the student\'s mobile number is correct in the directory. Administrators can see the delivery status of every message under Finance > Parent Messages.',
+      answer: 'Check that the student\'s mobile number is correct in the student directory.',
       adminOnly: true,
     },
     {

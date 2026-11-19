@@ -21,7 +21,7 @@ export class ChangePassword {
 
   passForm: FormGroup = this.fb.group({
     currentPassword: ['', Validators.required],
-    newPassword: ['', [Validators.required, Validators.minLength(6)]]
+    newPassword: ['', [Validators.required, Validators.minLength(10)]]
   });
 
   updatePassword() {

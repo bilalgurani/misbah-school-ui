@@ -1,7 +1,6 @@
 @use '../../shared/styles/parts' as p;
 
 @include p.buttons;
-@include p.form;
 @include p.modal;
 
 :host {
@@ -42,11 +41,6 @@
   @media (min-width: 640px) {
     width: auto;
   }
-}
-
-.hint-error {
-  font-size: 0.8rem;
-  color: var(--destructive);
 }
 
 .intro {
@@ -129,11 +123,4 @@
   margin: 0.75rem 0 0;
   font-size: 0.775rem;
   color: var(--muted-foreground);
-}
-
-.auto-send {
-  margin-top: 1.25rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--border);
-  text-align: left;
 }

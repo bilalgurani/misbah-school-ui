@@ -5,9 +5,7 @@
 @include p.form;
 @include p.toolbar;
 @include p.table;
-@include p.alert;
 @include p.stats;
-@include p.modal;
 
 .filter {
   flex: 0 1 240px;
@@ -30,24 +28,4 @@
   font-size: 0.8rem;
   color: var(--muted-foreground);
   text-decoration: none;
-}
-
-.link-like a {
-  color: inherit;
-  font-weight: 600;
-}
-
-.channel-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-
-  small {
-    color: var(--muted-foreground);
-  }
-}
-
-.field-hint.error {
-  font-size: 0.8rem;
-  color: var(--destructive);
 }

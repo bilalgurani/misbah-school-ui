@@ -1,8 +1,7 @@
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-import { FormsModule } from '@angular/forms';
 import { AttendanceApiService } from '../../attendance/services/attendance-api.service';
-import { MessageChannel, MessagingService, NotificationConfig } from '../messaging.service';
+import { MessagingService, NotificationConfig } from '../messaging.service';
 import { ToastService } from '../../shared/services/toast.service';
 import { absenceText, normalizePhone, smsLink, whatsappLink } from '../utils/parent-message.util';
 
@@ -20,7 +19,6 @@ interface ContactRow {
 }
 
 @Component({
-  imports: [FormsModule],
   selector: 'app-absence-alert',
   styleUrl: './absence-alert.scss',
   templateUrl: './absence-alert.html',
@@ -38,20 +36,11 @@ export class AbsenceAlert {
   className = input<string>('');
 
   isOpen = signal<boolean>(false);
-  sendSms = signal<boolean>(true);
-  sendWhatsapp = signal<boolean>(false);
-  isSending = signal<boolean>(false);
 
   config = signal<NotificationConfig | null>(null);
   phones = signal<Map<number, string | null>>(new Map());
   contactsLoading = signal<boolean>(false);
   opened = signal<Set<string>>(new Set());
-
-  // Automatic sending needs a paid provider, so it only appears when the server has it switched on.
-  autoSendAvailable = computed(() => {
-    const c = this.config();
-    return !!c && c.enabled && (c.smsConfigured || c.whatsappConfigured);
-  });
 
   rows = computed<ContactRow[]>(() => {
     const school = this.config()?.schoolName || 'School';
@@ -77,8 +66,6 @@ export class AbsenceAlert {
       this.toast.show('No absent students to notify.', 'error');
       return;
     }
-    this.sendSms.set(true);
-    this.sendWhatsapp.set(false);
     this.opened.set(new Set());
     this.isOpen.set(true);
     this.loadContacts();
@@ -111,29 +98,6 @@ export class AbsenceAlert {
   }
 
   close(): void {
-    if (this.isSending()) return;
     this.isOpen.set(false);
-  }
-
-  send(): void {
-    const channels: MessageChannel[] = [];
-    if (this.sendSms()) channels.push('SMS');
-    if (this.sendWhatsapp()) channels.push('WHATSAPP');
-    if (channels.length === 0) return;
-
-    this.isSending.set(true);
-    this.messaging.sendAbsenceAlerts(this.classSectionId(), this.date(), channels).subscribe({
-      next: (result) => {
-        this.isSending.set(false);
-        this.isOpen.set(false);
-        this.toast.show(
-          `Absence alerts: ${result.sent} sent, ${result.failed} failed, ${result.skipped} skipped.`,
-          result.failed > 0 ? 'error' : 'success');
-      },
-      error: (err) => {
-        this.isSending.set(false);
-        this.toast.showError(err, 'Failed to send absence alerts');
-      },
-    });
   }
 }

@@ -46,14 +46,20 @@ export class DatabaseBackup {
   private toast = inject(ToastService);
 
   running = signal<boolean>(false);
+  password = signal<string>('');
   lastBackupAt = signal<string | null>(readLastBackup());
   lastFile = signal<{ name: string; size: string } | null>(null);
 
   download(): void {
     if (this.running()) return;
+    if (!this.password()) {
+      this.toast.show('Enter your password to download a backup.', 'error');
+      return;
+    }
     this.running.set(true);
-    this.backupService.download().subscribe({
+    this.backupService.download(this.password()).subscribe({
       next: res => {
+        this.password.set('');
         const blob = res.body;
         if (!blob || blob.size === 0) {
           this.running.set(false);

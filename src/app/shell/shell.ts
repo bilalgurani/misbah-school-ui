@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { HostListener } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
@@ -15,6 +15,9 @@ export class Shell implements OnInit {
   public authService = inject(AuthService);
   private router = inject(Router); 
   isUserMenuOpen = false;
+
+  // Initials are drawn locally so usernames never go to an outside avatar service.
+  userInitials = computed(() => (this.authService.currentUser() || 'U').trim().slice(0, 2).toUpperCase());
 
   toggleSidebar(): void {
     this.isSidebarOpen.update(prev => !prev);

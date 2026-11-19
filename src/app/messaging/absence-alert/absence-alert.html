@@ -38,31 +38,9 @@
         </ul>
 
         <p class="hint">SMS buttons work on phones. On a computer, use WhatsApp.</p>
-
-        @if (autoSendAvailable()) {
-          <div class="auto-send">
-            <p>Or send automatically to the parents of <strong>{{ absentCount() }}</strong> absent student(s):</p>
-            <label class="check-row">
-              <input type="checkbox" [ngModel]="sendSms()" (ngModelChange)="sendSms.set($event)">
-              <span>SMS</span>
-            </label>
-            <label class="check-row">
-              <input type="checkbox" [ngModel]="sendWhatsapp()" (ngModelChange)="sendWhatsapp.set($event)">
-              <span>WhatsApp</span>
-            </label>
-            @if (!sendSms() && !sendWhatsapp()) {
-              <span class="hint-error">Choose at least one channel.</span>
-            }
-          </div>
-        }
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn-secondary" [disabled]="isSending()" (click)="close()">Close</button>
-        @if (autoSendAvailable()) {
-          <button type="button" class="btn-primary" [disabled]="isSending() || (!sendSms() && !sendWhatsapp())" (click)="send()">
-            {{ isSending() ? 'Sending...' : 'Send Automatically' }}
-          </button>
-        }
+        <button type="button" class="btn-secondary" (click)="close()">Close</button>
       </div>
     </div>
   </div>

@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { RouterLink } from '@angular/router';
 import { FeeDueRow, FeeService, FeeSummary } from '../fee.service';
-import { MessageChannel, MessagingService, NotificationConfig, NotificationResult } from '../../messaging/messaging.service';
+import { MessagingService, NotificationConfig } from '../../messaging/messaging.service';
 import { AttendanceApiService } from '../../attendance/services/attendance-api.service';
 import { ClassSection } from '../../attendance/models/attendance.models';
 import { ToastService } from '../../shared/services/toast.service';
@@ -37,13 +37,6 @@ export class FeeDues implements OnInit {
   classSectionId = signal<number | null>(null);
   overdueOnly = signal<boolean>(false);
   searchQuery = signal<string>('');
-  selectedIds = signal<number[]>([]);
-
-  reminderOpen = signal<boolean>(false);
-  sendSms = signal<boolean>(true);
-  sendWhatsapp = signal<boolean>(false);
-  isSending = signal<boolean>(false);
-  lastResult = signal<NotificationResult | null>(null);
 
   filteredDues = computed(() => {
     const query = this.searchQuery().toLowerCase().trim();
@@ -53,12 +46,6 @@ export class FeeDues implements OnInit {
       (d.fatherName ?? '').toLowerCase().includes(query) ||
       (d.mobileNo ?? '').includes(query) ||
       String(d.rollNo ?? '').toLowerCase().includes(query));
-  });
-
-  // Automatic sending needs a paid provider, so it only appears when the server has it switched on.
-  autoSendAvailable = computed(() => {
-    const c = this.config();
-    return !!c && c.enabled && (c.smsConfigured || c.whatsappConfigured);
   });
 
   // Free click-to-send links that open the user's own WhatsApp / SMS app with the message filled in.
@@ -76,21 +63,6 @@ export class FeeDues implements OnInit {
       });
     }
     return links;
-  });
-
-  selectedVisible = computed(() => {
-    const selected = new Set(this.selectedIds());
-    return this.filteredDues().filter(d => selected.has(d.studentId));
-  });
-
-  allSelected = computed(() =>
-    this.filteredDues().length > 0 && this.selectedVisible().length === this.filteredDues().length);
-
-  channels = computed<MessageChannel[]>(() => {
-    const list: MessageChannel[] = [];
-    if (this.sendSms()) list.push('SMS');
-    if (this.sendWhatsapp()) list.push('WHATSAPP');
-    return list;
   });
 
   ngOnInit(): void {
@@ -114,7 +86,6 @@ export class FeeDues implements OnInit {
     this.feeService.getDues(this.classSectionId(), this.overdueOnly()).subscribe({
       next: (data) => {
         this.dues.set(data);
-        this.selectedIds.set([]);
         this.isLoading.set(false);
       },
       error: (err) => {
@@ -133,55 +104,6 @@ export class FeeDues implements OnInit {
   onOverdueChange(value: boolean): void {
     this.overdueOnly.set(value);
     this.loadDues();
-  }
-
-  isSelected(id: number): boolean {
-    return this.selectedIds().includes(id);
-  }
-
-  toggleRow(id: number): void {
-    this.selectedIds.update(ids => ids.includes(id) ? ids.filter(x => x !== id) : [...ids, id]);
-  }
-
-  toggleAll(): void {
-    this.selectedIds.set(this.allSelected() ? [] : this.filteredDues().map(d => d.studentId));
-  }
-
-  openReminder(): void {
-    if (this.selectedVisible().length === 0) {
-      this.toast.show('Select at least one student first.', 'error');
-      return;
-    }
-    this.sendSms.set(true);
-    this.sendWhatsapp.set(false);
-    this.reminderOpen.set(true);
-  }
-
-  closeReminder(): void {
-    if (this.isSending()) return;
-    this.reminderOpen.set(false);
-  }
-
-  sendReminders(): void {
-    const ids = this.selectedVisible().map(d => d.studentId);
-    const channels = this.channels();
-    if (ids.length === 0 || channels.length === 0) return;
-
-    this.isSending.set(true);
-    this.messaging.sendFeeReminders(ids, channels).subscribe({
-      next: (result) => {
-        this.isSending.set(false);
-        this.reminderOpen.set(false);
-        this.lastResult.set(result);
-        this.selectedIds.set([]);
-        this.toast.show(`Reminders: ${result.sent} sent, ${result.failed} failed, ${result.skipped} skipped.`,
-          result.failed > 0 ? 'error' : 'success');
-      },
-      error: (err) => {
-        this.isSending.set(false);
-        this.toast.showError(err, 'Failed to send reminders');
-      },
-    });
   }
 
   exportCsv(): void {

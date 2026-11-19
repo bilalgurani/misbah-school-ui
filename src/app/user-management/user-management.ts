@@ -36,11 +36,25 @@ export class UserManagement implements OnInit {
   isSaving = signal(false);
 
   resetForm: FormGroup = this.fb.group({
-    newPassword: ['', [Validators.required, Validators.minLength(8)]]
+    newPassword: ['', [Validators.required, Validators.minLength(10)]]
   });
 
   ngOnInit(): void {
     this.loadUsers();
+  }
+
+  toggleEnabled(user: ManagedUser): void {
+    const enable = !user.enabled;
+    const verb = enable ? 'Enable' : 'Disable';
+    if (!confirm(`${verb} the login for ${user.username}?${enable ? '' : ' They will be signed out straight away.'}`)) return;
+
+    this.http.patch(`${this.usersUrl}/${user.id}/enabled`, { enabled: enable }).subscribe({
+      next: () => {
+        this.toast.show(`${user.username} ${enable ? 'enabled' : 'disabled'}.`);
+        this.loadUsers();
+      },
+      error: (err) => this.toast.showError(err, `Failed to ${verb.toLowerCase()} this user.`)
+    });
   }
 
   isSelf(user: ManagedUser): boolean {

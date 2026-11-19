@@ -74,8 +74,6 @@ export const routes: Routes = [
       { path: 'fees/collect', loadComponent: () => import('./fees/fee-collection/fee-collection').then(m => m.FeeCollection), canActivate: [AuthGuards.roleGuard('ADMIN')] },
       { path: 'fees/receipt/:id', loadComponent: () => import('./fees/fee-receipt/fee-receipt').then(m => m.FeeReceipt), canActivate: [AuthGuards.roleGuard('ADMIN')] },
       { path: 'fees/dues', loadComponent: () => import('./fees/fee-dues/fee-dues').then(m => m.FeeDues), canActivate: [AuthGuards.roleGuard('ADMIN')] },
-      { path: 'messages', loadComponent: () => import('./messaging/message-log/message-log').then(m => m.MessageLog), canActivate: [AuthGuards.roleGuard('ADMIN')] },
-
       { path: 'admin/backup', loadComponent: () => import('./admin-tools/backup/backup').then(m => m.DatabaseBackup), canActivate: [AuthGuards.roleGuard('ADMIN')] },
 
       { path: 'leave/my', loadComponent: () => import('./leave/my-leave/my-leave').then(m => m.MyLeave) },

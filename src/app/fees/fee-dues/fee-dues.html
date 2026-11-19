@@ -3,21 +3,8 @@
     <h2>Fee Dues</h2>
     <div class="header-actions">
       <button type="button" class="btn-secondary" (click)="exportCsv()" [disabled]="isLoading()">Export CSV</button>
-      @if (autoSendAvailable()) {
-        <button type="button" class="btn-primary" (click)="openReminder()" [disabled]="selectedVisible().length === 0">
-          Send reminder ({{ selectedVisible().length }})
-        </button>
-      }
     </div>
   </div>
-
-  @if (config(); as cfg) {
-    @if (!cfg.enabled) {
-      <div class="alert alert-warning" role="alert">
-        Automatic sending is off. Use the WhatsApp or SMS buttons on each row to send the reminder from your own phone.
-      </div>
-    }
-  }
 
   @if (summary(); as s) {
     <div class="stat-grid">
@@ -26,16 +13,6 @@
       <div class="stat-card danger"><span class="stat-label">Outstanding</span><span class="stat-value">{{ s.totalOutstanding | inr }}</span></div>
       <div class="stat-card danger"><span class="stat-label">Overdue</span><span class="stat-value">{{ s.overdueOutstanding | inr }}</span></div>
       <div class="stat-card"><span class="stat-label">Collected This Month</span><span class="stat-value">{{ s.collectedThisMonth | inr }}</span></div>
-    </div>
-  }
-
-  @if (lastResult(); as r) {
-    <div class="alert" [class.alert-success]="r.failed === 0" [class.alert-error]="r.failed > 0" role="status">
-      <div>
-        <strong>Last reminder run:</strong>
-        {{ r.total }} total, {{ r.sent }} sent, {{ r.failed }} failed, {{ r.skipped }} skipped.
-        <span class="link-like">See the <a routerLink="/messages">message log</a> for details.</span>
-      </div>
     </div>
   }
 
@@ -74,10 +51,6 @@
         <table class="data-table">
           <thead>
             <tr>
-              <th class="check-col">
-                <input type="checkbox" [checked]="allSelected()" (change)="toggleAll()"
-                  [disabled]="filteredDues().length === 0" aria-label="Select all students">
-              </th>
               <th>Roll No</th>
               <th>Student</th>
               <th>Class</th>
@@ -93,10 +66,6 @@
           <tbody>
             @for (d of filteredDues(); track d.studentId) {
               <tr>
-                <td data-label="Select" class="check-col">
-                  <input type="checkbox" [checked]="isSelected(d.studentId)" (change)="toggleRow(d.studentId)"
-                    [attr.aria-label]="'Select ' + d.name">
-                </td>
                 <td data-label="Roll No"><span class="badge">{{ d.rollNo ?? '-' }}</span></td>
                 <td data-label="Student" class="fw-medium">
                   {{ d.name }}
@@ -134,7 +103,7 @@
               </tr>
             } @empty {
               <tr>
-                <td colspan="11" class="empty-state">No outstanding dues found.</td>
+                <td colspan="10" class="empty-state">No outstanding dues found.</td>
               </tr>
             }
           </tbody>
@@ -143,36 +112,3 @@
     }
   </div>
 </div>
-
-@if (reminderOpen()) {
-  <div class="modal-backdrop" (click)="closeReminder()">
-    <div class="modal-card" role="alertdialog" aria-modal="true" aria-labelledby="reminder-title" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h3 id="reminder-title">Send Fee Reminder</h3>
-        <button type="button" class="close-btn" (click)="closeReminder()" aria-label="Close dialog">&times;</button>
-      </div>
-      <div class="modal-body">
-        <p>Send a fee reminder to the parents of <strong>{{ selectedVisible().length }}</strong> student(s)?</p>
-        <div class="channel-list">
-          <label class="check-row">
-            <input type="checkbox" [ngModel]="sendSms()" (ngModelChange)="sendSms.set($event)">
-            <span>SMS @if (config() && !config()!.smsConfigured) { <small>(not configured)</small> }</span>
-          </label>
-          <label class="check-row">
-            <input type="checkbox" [ngModel]="sendWhatsapp()" (ngModelChange)="sendWhatsapp.set($event)">
-            <span>WhatsApp @if (config() && !config()!.whatsappConfigured) { <small>(not configured)</small> }</span>
-          </label>
-        </div>
-        @if (channels().length === 0) {
-          <span class="field-hint error">Choose at least one channel.</span>
-        }
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn-secondary" [disabled]="isSending()" (click)="closeReminder()">Cancel</button>
-        <button type="button" class="btn-primary" [disabled]="isSending() || channels().length === 0" (click)="sendReminders()">
-          {{ isSending() ? 'Sending...' : 'Send Reminder' }}
-        </button>
-      </div>
-    </div>
-  </div>
-}

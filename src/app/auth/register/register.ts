@@ -33,7 +33,7 @@ export class Register implements OnInit {
     {
       username: ['', [Validators.required, Validators.minLength(3)]],
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
+      password: ['', [Validators.required, Validators.minLength(10)]],
       confirmPassword: ['', [Validators.required]],
       role: ['TEACHER', [Validators.required]],
       teacherId: [null]

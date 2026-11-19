@@ -9,7 +9,10 @@
   <div class="card">
     <div class="card-body action-box">
       <div>
-        <button type="button" class="btn-primary" (click)="download()" [disabled]="running()" [attr.aria-busy]="running()">
+        <label for="backup-password" class="muted">Confirm your password to download</label>
+        <input id="backup-password" type="password" class="form-input" autocomplete="current-password"
+          [value]="password()" (input)="password.set($any($event.target).value)" (keydown.enter)="download()" />
+        <button type="button" class="btn-primary" (click)="download()" [disabled]="running() || !password()" [attr.aria-busy]="running()">
           @if (running()) { <span class="spinner" aria-hidden="true"></span> Preparing backup... } @else { Download full backup }
         </button>
         @if (running()) {

@@ -39,7 +39,7 @@ export class Profile {
       ? [
           'Manage students, teachers and academic years',
           'Mark and review student and teacher attendance',
-          'Collect fees, send parent messages and view reports',
+          'Collect fees, follow up on absences and dues, and view reports',
           'Create user accounts and reset passwords',
           'View the audit log',
         ]

@@ -225,12 +225,6 @@
             </svg>
             <span>Fee Setup</span>
           </a>
-          <a routerLink="/messages" routerLinkActive="active-link" class="nav-link" (click)="closeSidebar()">
-            <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/>
-            </svg>
-            <span>Parent Messages</span>
-          </a>
           <a routerLink="/financials" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}" class="nav-link" (click)="closeSidebar()">
             <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
               <path d="M4 13h6c.55 0 1-.45 1-1V4c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1zm0 8h6c.55 0 1-.45 1-1v-4c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v4c0 .55.45 1 1 1zm10 0h6c.55 0 1-.45 1-1v-8c0-.55-.45-1-1-1h-6c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1zM13 4v4c0 .55.45 1 1 1h6c.55 0 1-.45 1-1V4c0-.55-.45-1-1-1h-6c-.55 0-1 .45-1 1z"/>
@@ -275,11 +269,8 @@
 
       <div class="user-menu-container">
         <button class="avatar-btn" (click)="toggleUserMenu()" aria-label="User menu">
-          <img 
-            [src]="'https://ui-avatars.com/api/?name=' + (authService.currentUser() || 'User') + '&background=e0e7ff&color=4f46e5'" 
-            alt="User Avatar" 
-            class="avatar-img" 
-          />
+          <span class="avatar-img" aria-hidden="true"
+            style="display:grid;place-items:center;font-weight:700;font-size:0.9rem;background:#e0e7ff;color:#4f46e5">{{ userInitials() }}</span>
         </button>
         <div class="dropdown-menu" [class.show]="isUserMenuOpen">
           <div class="user-info-header">

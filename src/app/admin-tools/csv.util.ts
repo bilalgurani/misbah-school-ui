@@ -2,7 +2,7 @@ type CsvCell = string | number | null | undefined;
 
 const cell = (value: CsvCell): string => {
   const text = value === null || value === undefined ? '' : String(value);
-  const safe = /^[=+\-@]/.test(text) && Number.isNaN(Number(text)) ? `'${text}` : text;
+  const safe = /^[=+\-@\t\r]/.test(text) && Number.isNaN(Number(text)) ? `'${text}` : text;
   return /[",\r\n]/.test(safe) ? `"${safe.replace(/"/g, '""')}"` : safe;
 };
 

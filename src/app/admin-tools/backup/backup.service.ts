@@ -7,7 +7,7 @@ import { environment } from '../../../environments/environment';
 export class BackupService {
   private http = inject(HttpClient);
 
-  download(): Observable<HttpResponse<Blob>> {
-    return this.http.post(`${environment.apiUrl}/admin/backup`, null, { responseType: 'blob', observe: 'response' });
+  download(password: string): Observable<HttpResponse<Blob>> {
+    return this.http.post(`${environment.apiUrl}/admin/backup`, { password }, { responseType: 'blob', observe: 'response' });
   }
 }
