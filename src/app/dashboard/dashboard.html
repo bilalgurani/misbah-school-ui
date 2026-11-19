@@ -1,6 +1,7 @@
 <div class="dashboard-container">
   <header class="dashboard-header">
     <div class="header-text">
+      <p class="welcome">{{ greeting }}, {{ auth.currentUser() || 'there' }}</p>
       <h1 class="title">School Overview</h1>
       <p class="subtitle">Real-time stats and metrics for Misbah School</p>
     </div>

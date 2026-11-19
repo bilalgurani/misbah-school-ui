@@ -6,6 +6,13 @@ import { DashboardStats } from './models/dashboard.models';
 import { DashboardService } from './services/dashboard-api.service';
 import { DashboardCharts } from './components/dashboard-charts/dashboard-charts';
 import { ToastService } from '../shared/services/toast.service';
+import { AuthService } from '../auth/auth.service';
+
+function greetingFor(hour: number): string {
+  if (hour < 12) return 'Good morning';
+  if (hour < 17) return 'Good afternoon';
+  return 'Good evening';
+}
 
 @Component({
   selector: 'app-dashboard',
@@ -23,6 +30,9 @@ export class Dashboard implements OnInit {
 
   private dashboardService = inject(DashboardService);
   private toast = inject(ToastService);
+  protected auth = inject(AuthService);
+
+  protected readonly greeting = greetingFor(new Date().getHours());
 
   ngOnInit(): void {
     this.fetchDashboardStats();
