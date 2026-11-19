@@ -436,6 +436,24 @@ $danger-bg: color-mix(in oklch, var(--absent) 15%, transparent);
 
 /* Footer Submit */
 .form-footer {
+  .clear-attendance-btn {
+    width: 100%;
+    min-height: 40px;
+    margin-top: 0.5rem;
+    background: transparent;
+    color: var(--destructive);
+    border: 1px solid var(--destructive);
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+
   .submit-btn {
     width: 100%;
     min-height: 48px;

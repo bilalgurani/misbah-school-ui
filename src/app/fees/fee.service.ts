@@ -149,6 +149,10 @@ export class FeeService {
     return this.http.post<FeeReceipt>(`${this.baseUrl}/payments`, request);
   }
 
+  voidPayment(paymentId: number, reason: string): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/payments/${paymentId}/void`, { reason });
+  }
+
   getReceipt(paymentId: number): Observable<FeeReceipt> {
     return this.http.get<FeeReceipt>(`${this.baseUrl}/payments/${paymentId}/receipt`);
   }

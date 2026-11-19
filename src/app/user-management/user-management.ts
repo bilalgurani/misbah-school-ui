@@ -57,6 +57,18 @@ export class UserManagement implements OnInit {
     });
   }
 
+  deleteUser(user: ManagedUser): void {
+    if (!confirm(`Delete the login for ${user.username}? This can't be undone. If you only want to stop them signing in, use Disable instead.`)) return;
+
+    this.http.delete(`${this.usersUrl}/${user.id}`).subscribe({
+      next: () => {
+        this.toast.show(`${user.username} deleted.`);
+        this.loadUsers();
+      },
+      error: (err) => this.toast.showError(err, 'Failed to delete this user.')
+    });
+  }
+
   isSelf(user: ManagedUser): boolean {
     return user.username === this.authService.currentUser();
   }

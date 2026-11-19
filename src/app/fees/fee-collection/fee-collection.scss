@@ -154,10 +154,15 @@
   }
 }
 
-.collect-form {
+.collect-form,
+.void-form {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+}
+
+.void-btn {
+  color: var(--destructive);
 }
 
 .collect-actions {

@@ -72,6 +72,8 @@ export class AssessmentEntry implements OnInit {
   selected = computed(() => this.roster().find(s => s.id === this.selectedId()) ?? null);
   ratedCount = computed(() => this.criteria().filter(c => this.draftRatings().has(c.id)).length);
   canSave = computed(() => this.dirty() && !this.isSaving() && (this.ratedCount() > 0 || this.draftRemark().trim().length > 0));
+  hasSaved = computed(() => this.selectedId() !== null && this.assessments().has(this.selectedId() as number));
+  confirmingClear = signal(false);
 
   ngOnInit(): void {
     forkJoin({
@@ -210,6 +212,31 @@ export class AssessmentEntry implements OnInit {
       error: err => {
         this.isSaving.set(false);
         this.toast.showError(err, 'Failed to save the assessment.');
+      },
+    });
+  }
+
+  clearSaved(): void {
+    const studentId = this.selectedId();
+    const yearId = this.yearId();
+    if (studentId === null || yearId === null) return;
+    this.isSaving.set(true);
+    this.progress.deleteAssessment(studentId, yearId, this.term()).subscribe({
+      next: () => {
+        this.isSaving.set(false);
+        this.confirmingClear.set(false);
+        this.assessments.update(map => {
+          const next = new Map(map);
+          next.delete(studentId);
+          return next;
+        });
+        this.openStudent(studentId);
+        this.toast.show('Saved ratings and remark cleared.');
+      },
+      error: err => {
+        this.isSaving.set(false);
+        this.confirmingClear.set(false);
+        this.toast.showError(err, 'Failed to clear the assessment.');
       },
     });
   }

@@ -33,6 +33,11 @@ export class AttendanceApiService {
     return this.http.post<void>(`${this.baseUrl}/attendance`, request);
   }
 
+  clearAttendance(classSectionId: number, date: string): Observable<{ removed: number }> {
+    const params = new HttpParams().set('classSectionId', classSectionId).set('date', date);
+    return this.http.delete<{ removed: number }>(`${this.baseUrl}/attendance`, { params });
+  }
+
   // --- Teacher Attendance Operations ---
 
   getTeacherAttendance(date: string): Observable<TeacherAttendanceRecordDto[]> {

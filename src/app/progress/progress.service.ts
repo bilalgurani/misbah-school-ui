@@ -59,4 +59,9 @@ export class ProgressService {
   saveAssessment(request: SaveAssessmentRequest): Observable<StudentAssessment> {
     return this.http.put<StudentAssessment>(`${this.baseUrl}/assessments`, request);
   }
+
+  deleteAssessment(studentId: number, academicYearId: number, term: number): Observable<void> {
+    const params = new HttpParams().set('studentId', studentId).set('academicYearId', academicYearId).set('term', term);
+    return this.http.delete<void>(`${this.baseUrl}/assessments`, { params });
+  }
 }

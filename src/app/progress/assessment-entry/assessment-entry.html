@@ -126,6 +126,9 @@
           </div>
 
           <div class="actions">
+            @if (hasSaved()) {
+              <button type="button" class="btn-secondary clear-btn" [disabled]="isSaving()" (click)="confirmingClear.set(true)">Clear saved</button>
+            }
             @if (dirty()) {
               <button type="button" class="btn-secondary" [disabled]="isSaving()" (click)="discardChanges()">Discard</button>
             }
@@ -139,6 +142,11 @@
     </div>
   }
 </div>
+
+@if (confirmingClear()) {
+  <app-confirm-dialog title="Clear saved assessment?" message="This removes the saved ratings and remark for this student in this term."
+    confirmLabel="Clear" tone="danger" [busy]="isSaving()" (confirmed)="clearSaved()" (cancelled)="confirmingClear.set(false)"></app-confirm-dialog>
+}
 
 @if (pendingSwitchId() !== null) {
   <app-confirm-dialog title="Discard changes?" message="You have unsaved ratings or remarks for this student. Switching will discard them."

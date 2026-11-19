@@ -131,6 +131,16 @@
     }
     <button [disabled]="students().length === 0 || isSubmitting() || isLoading() || this.isAttendanceIncomplete()" 
       class="submit-btn" (click)="submitAttendance()">Save & Submit Attendance</button>
+    @if (authService.isAdmin() && savedOnServer()) {
+      <button type="button" class="clear-attendance-btn" [disabled]="isSubmitting()" (click)="confirmingClear.set(true)">
+        Clear attendance for this day
+      </button>
+    }
   </footer>
+}
+@if (confirmingClear()) {
+  <app-confirm-dialog title="Clear attendance?"
+    [message]="'This removes every mark for Class ' + selectedSectionName() + ' on ' + selectedDate() + '. You can mark it again afterwards.'"
+    confirmLabel="Clear" tone="danger" [busy]="isSubmitting()" (confirmed)="clearAttendance()" (cancelled)="confirmingClear.set(false)"></app-confirm-dialog>
 }
 </div>

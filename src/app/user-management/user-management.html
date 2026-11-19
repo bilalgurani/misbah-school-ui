@@ -41,6 +41,7 @@
                     <button type="button" class="btn-secondary" (click)="selectUser(user)" [attr.aria-label]="'Reset password for ' + user.username">Reset password</button>
                     <button type="button" class="btn-secondary" (click)="toggleEnabled(user)"
                       [attr.aria-label]="(user.enabled ? 'Disable ' : 'Enable ') + user.username">{{ user.enabled ? 'Disable' : 'Enable' }}</button>
+                    <button type="button" class="btn-danger" (click)="deleteUser(user)" [attr.aria-label]="'Delete ' + user.username">Delete</button>
                   }
                 </td>
               </tr>

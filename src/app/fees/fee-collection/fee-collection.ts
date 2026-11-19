@@ -35,6 +35,8 @@ export class FeeCollection implements OnInit {
   isSaving = signal<boolean>(false);
   collectingId = signal<number | null>(null);
   submitted = signal<boolean>(false);
+  voidingId = signal<number | null>(null);
+  voidReason = signal<string>('');
 
   matches = computed(() => {
     const query = this.searchQuery().toLowerCase().trim();
@@ -108,6 +110,31 @@ export class FeeCollection implements OnInit {
 
   closeCollect(): void {
     this.collectingId.set(null);
+  }
+
+  openVoid(paymentId: number): void {
+    this.voidingId.set(paymentId);
+    this.voidReason.set('');
+  }
+
+  confirmVoid(): void {
+    const id = this.voidingId();
+    const data = this.details();
+    const reason = this.voidReason().trim();
+    if (id === null || !data || !reason) return;
+    this.isSaving.set(true);
+    this.feeService.voidPayment(id, reason).subscribe({
+      next: () => {
+        this.isSaving.set(false);
+        this.voidingId.set(null);
+        this.toast.show('Payment voided.');
+        this.loadFees(data.studentId);
+      },
+      error: (err) => {
+        this.isSaving.set(false);
+        this.toast.showError(err, 'Failed to void the payment');
+      },
+    });
   }
 
   isOverBalance(installment: StudentInstallmentStatus): boolean {

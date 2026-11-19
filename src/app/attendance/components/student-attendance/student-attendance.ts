@@ -9,9 +9,11 @@ import { AbsenceAlert } from "../../../messaging/absence-alert/absence-alert";
 import { AttendanceTrendComponent } from "../../../shared/component/attendance-trend.component";
 import { AttendanceTrendService, StudentStatMap } from "../../services/attendance-trend.service";
 import { toMonthKey } from "../../attendance-trend.util";
+import { AuthService } from "../../../auth/auth.service";
+import { ConfirmDialogComponent } from "../../../shared/component/confirm-dialog.component";
 
 @Component({
-  imports: [FormsModule, AbsenceAlert, LoaderComponent, AttendanceTrendComponent],
+  imports: [FormsModule, AbsenceAlert, LoaderComponent, AttendanceTrendComponent, ConfirmDialogComponent],
   selector: 'app-student-attendance',
   styleUrl: './student-attendance.scss',
   templateUrl: './student-attendance.html',
@@ -19,6 +21,7 @@ import { toMonthKey } from "../../attendance-trend.util";
 export class StudentAttendance implements OnInit {
 
   private api = inject(AttendanceApiService);
+  protected authService = inject(AuthService);
   private trendService = inject(AttendanceTrendService);
   private toast = inject(ToastService);
   private route = inject(ActivatedRoute);
@@ -35,6 +38,8 @@ export class StudentAttendance implements OnInit {
   isLoading = signal<boolean>(false);
   isSubmitting = signal<boolean>(false);
   attendanceSaved = signal<boolean>(false);
+  savedOnServer = signal<boolean>(false);
+  confirmingClear = signal<boolean>(false);
 
 
 // Derived counts
@@ -99,6 +104,7 @@ selectedSectionName = computed(() => {
 
     this.isLoading.set(true);
     this.attendanceSaved.set(false);
+    this.savedOnServer.set(false);
     this.loadTrend(sectionId, date);
 
     // 1. Try loading existing attendance record first
@@ -114,6 +120,7 @@ selectedSectionName = computed(() => {
           }));
           this.students.set(mapped);
           this.attendanceSaved.set(true);
+          this.savedOnServer.set(records.some(r => !!r.status));
           this.isLoading.set(false);
         } else {
           // 2. Fall back to raw student roster if attendance isn't marked yet
@@ -206,11 +213,34 @@ submitAttendance() {
     next: () => {
       this.isSubmitting.set(false);
       this.attendanceSaved.set(true);
+      this.savedOnServer.set(true);
       this.toast.show('Attendance submitted successfully!');
     },
     error: (err) => {
       this.isSubmitting.set(false);
       this.toast.showError(err, 'Failed to save attendance');
+    }
+  });
+}
+
+clearAttendance() {
+  const sectionId = this.selectedSectionId();
+  const date = this.selectedDate();
+  if (!sectionId || !date) return;
+
+  this.isSubmitting.set(true);
+  this.api.clearAttendance(sectionId, date).subscribe({
+    next: () => {
+      this.isSubmitting.set(false);
+      this.confirmingClear.set(false);
+      this.toast.show('Attendance cleared for this class and day.');
+      this.trendKey = '';
+      this.fetchAttendanceOrStudents();
+    },
+    error: (err) => {
+      this.isSubmitting.set(false);
+      this.confirmingClear.set(false);
+      this.toast.showError(err, 'Failed to clear attendance');
     }
   });
 }

@@ -36,7 +36,8 @@ $bg-alt: var(--muted);
 }
 
 .btn-primary,
-.btn-secondary {
+.btn-secondary,
+.btn-danger {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -147,7 +148,8 @@ $bg-alt: var(--muted);
   }
 
   .actions {
-    .btn-secondary {
+    .btn-secondary,
+    .btn-danger {
       min-height: 38px;
       padding: 0.375rem 0.875rem;
     }
