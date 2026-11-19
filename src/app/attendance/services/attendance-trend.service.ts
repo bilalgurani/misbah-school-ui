@@ -13,6 +13,8 @@ export class AttendanceTrendService {
   private register = inject(AttendanceRegisterService);
 
   getSectionStats(classSectionId: number, date: string | Date): Observable<StudentStatMap> {
+    // A section id that is not a real number must never reach the API.
+    if (!Number.isFinite(classSectionId)) return of(new Map());
     const month = toMonthKey(date);
     return forkJoin({
       current: this.loadMonth(month, classSectionId),

@@ -53,6 +53,7 @@ export class StudentDirectory {
   students = signal<any[]>([]);
   attendanceStats = signal<StudentStatMap>(new Map());
   isAttendanceLoading = signal<boolean>(false);
+  private loadedStatsKey = '';
   classSections = signal<ClassSection[]>([]);
   isLoading = signal<boolean>(false);
   searchQuery = signal<string>('');
@@ -124,7 +125,10 @@ export class StudentDirectory {
   ngOnInit(): void {
     this.loadStudents();
     this.attendanceApi.getClassSections().subscribe({
-      next: (sections) => this.classSections.set(sections),
+      next: (sections) => {
+        this.classSections.set(sections);
+        this.loadAttendanceStats();
+      },
       error: () => this.classSections.set([])
     });
   }
@@ -157,7 +161,7 @@ export class StudentDirectory {
       next: (data) => {
         this.students.set(data);
         this.isLoading.set(false);
-        this.loadAttendanceStats(data);
+        this.loadAttendanceStats();
       },
       error: (err) => {
         this.toast.showError(err, 'Failed to load students');
@@ -166,11 +170,24 @@ export class StudentDirectory {
     });
   }
 
-  // Loaded in the background so the list itself is never held up by attendance.
-  private loadAttendanceStats(students: any[]): void {
+  // Loaded in the background so the list itself is never held up by attendance. The students list gives each
+  // student's class as a name ("5 - A"), so the real section ids come from the class list, which loads separately.
+  private loadAttendanceStats(): void {
+    const students = this.students();
+    const sections = this.classSections();
+    if (students.length === 0 || sections.length === 0) return;
+
+    const idByName = new Map(sections.map(s => [s.displayName, s.id]));
     const sectionIds = [...new Set(
-      students.filter(s => s.enrollmentStatus === 'ACTIVE' && s.classSectionId).map(s => Number(s.classSectionId)),
+      students
+        .filter(s => s.enrollmentStatus === 'ACTIVE')
+        .map(s => idByName.get(String(s.classSectionId)))
+        .filter((id): id is number => id !== undefined),
     )];
+    const key = sectionIds.join(',');
+    if (key === this.loadedStatsKey) return;
+    this.loadedStatsKey = key;
+
     this.isAttendanceLoading.set(sectionIds.length > 0);
     this.trendService.getManySectionStats(sectionIds, new Date()).subscribe({
       next: stats => {
