@@ -171,6 +171,9 @@ body {
   color: var(--card-foreground);
   width: 100%;
   max-width: 550px;
+  // Taller content scrolls inside the dialog, so its buttons stay reachable on small or short screens.
+  max-height: calc(100vh - 2rem);
+  max-height: calc(100dvh - 2rem);
   border-radius: 12px;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   display: flex;
@@ -226,6 +229,8 @@ body {
 
 .modal-body {
   padding: 1.5rem;
+  overflow-y: auto;
+  min-height: 0;
 
   .info-grid {
     display: grid;

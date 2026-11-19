@@ -61,13 +61,15 @@
     <div class="card"><div class="empty-block">There are no students in {{ fromName() }}.</div></div>
   } @else {
     <div class="card">
+      <label class="select-all">
+        <input type="checkbox" [checked]="allSelected()" (change)="toggleAll()">
+        Select all {{ students().length }} {{ students().length === 1 ? 'student' : 'students' }}
+      </label>
       <div class="table-responsive">
         <table class="data-table">
           <thead>
             <tr>
-              <th class="check-col">
-                <input type="checkbox" [checked]="allSelected()" (change)="toggleAll()" aria-label="Select all students">
-              </th>
+              <th class="check-col"><span class="sr-only">Select</span></th>
               <th>Roll No</th>
               <th>Student</th>
               <th>Roll no in {{ toId() === null ? 'new section' : toName() }}</th>

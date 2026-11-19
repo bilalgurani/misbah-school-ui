@@ -34,6 +34,32 @@
   }
 }
 
+.select-all {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  input {
+    width: 1.1rem;
+    height: 1.1rem;
+    accent-color: var(--primary);
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
 .check-col {
   width: 2.5rem;
 

@@ -4,6 +4,8 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { catchError, forkJoin, of } from 'rxjs';
 import { AcademicYear } from '../../academics/models/academic-year.model';
 import { AcademicYearService } from '../../academics/services/academic-year.service';
+import { EnrollmentService } from '../../academics/services/enrollment.service';
+import { StudentEnrollment } from '../../academics/models/enrollment.model';
 import { ExamService, ReportCardData } from '../../exams/exam.service';
 import { AttendanceRegisterService, StudentAttendanceResponse } from '../../reports/services/attendance-register.service';
 import { LoaderComponent } from '../../shared/component/loader.component';
@@ -27,6 +29,7 @@ export class ProgressCard implements OnInit {
   private yearService = inject(AcademicYearService);
   private register = inject(AttendanceRegisterService);
   private progress = inject(ProgressService);
+  private enrollmentService = inject(EnrollmentService);
   private toast = inject(ToastService);
   private route = inject(ActivatedRoute);
 
@@ -45,6 +48,8 @@ export class ProgressCard implements OnInit {
   academics = signal<ReportCardData | null>(null);
   attendance = signal<StudentAttendanceResponse | null>(null);
   assessments = signal<StudentAssessment[]>([]);
+  // The class the student was in during the chosen year. The exam report only knows their current class.
+  yearClassName = signal<string | null>(null);
 
   isLoading = signal(false);
   hasLoaded = signal(false);
@@ -75,7 +80,7 @@ export class ProgressCard implements OnInit {
       studentId: this.studentId() ?? 0,
       name: academics?.name ?? attendance?.name ?? student?.name ?? '',
       rollNo: academics?.rollNo ?? attendance?.rollNo ?? student?.rollNo ?? null,
-      className: academics?.className ?? attendance?.className ?? '',
+      className: this.yearClassName() ?? academics?.className ?? attendance?.className ?? '',
       fatherName: academics?.fatherName ?? null,
       schoolName: academics?.schoolName ?? null,
       yearName: this.selectedYear()?.name ?? '',
@@ -167,8 +172,12 @@ export class ProgressCard implements OnInit {
         catchError(() => { this.attendanceFailed.set(true); return of(null); })),
       assessments: this.progress.getStudentAssessments(studentId, yearId).pipe(
         catchError(() => { this.assessmentsFailed.set(true); return of([] as StudentAssessment[]); })),
+      history: this.enrollmentService.getHistory(studentId).pipe(catchError(() => of([] as StudentEnrollment[]))),
     }).subscribe(result => {
       if (studentId !== this.studentId() || yearId !== this.yearId()) return;
+      const enrollment = result.history.find(e => e.academicYearId === yearId);
+      this.yearClassName.set(enrollment?.className && enrollment.sectionName
+        ? `${enrollment.className} - ${enrollment.sectionName}` : null);
       this.academics.set(result.academics);
       this.attendance.set(result.attendance);
       this.assessments.set(result.assessments);

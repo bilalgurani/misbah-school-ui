@@ -128,7 +128,8 @@ export class ClassCards implements OnInit, OnDestroy {
       studentId: card.studentId,
       name: card.academics?.name ?? card.name,
       rollNo: card.academics?.rollNo ?? card.rollNo,
-      className: card.academics?.className ?? response.className,
+      // The class for that year, not the student's current one, which differs once they have moved or been promoted.
+      className: response.className,
       fatherName: card.academics?.fatherName ?? null,
       schoolName: card.academics?.schoolName ?? null,
       yearName: response.academicYear,

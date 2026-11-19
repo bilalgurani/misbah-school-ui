@@ -20,6 +20,7 @@ describe('seat helpers', () => {
     expect(seatsText(seats(40, 30))).toBe('10 seats left');
     expect(seatsText(seats(40, 40))).toBe('Full');
     expect(seatsText(seats(null, 12))).toBe('12 students');
+    expect(seatsText(seats(null, 1))).toBe('1 student');
     expect(seatsText(undefined)).toBe('');
   });
 });

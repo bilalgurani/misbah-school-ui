@@ -44,7 +44,7 @@ export function isSectionFull(seats: SectionSeats | undefined): boolean {
 export function seatsText(seats: SectionSeats | undefined): string {
   if (!seats) return '';
   const left = seatsLeft(seats);
-  if (left === null) return `${seats.studentCount} students`;
+  if (left === null) return `${seats.studentCount} ${seats.studentCount === 1 ? 'student' : 'students'}`;
   if (left === 0) return 'Full';
   return `${left} ${left === 1 ? 'seat' : 'seats'} left`;
 }
