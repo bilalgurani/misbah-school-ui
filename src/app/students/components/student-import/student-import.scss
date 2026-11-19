@@ -109,7 +109,7 @@
   }
 
   tr.row-imported {
-    background: color-mix(in oklch, var(--chart-3) 8%, transparent);
+    background: color-mix(in oklch, var(--success) 8%, transparent);
   }
 
   .cell-error {

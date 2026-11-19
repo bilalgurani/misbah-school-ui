@@ -126,8 +126,8 @@ $bg-alt: var(--muted);
 
     &.badge-active {
       margin-left: 0.5rem;
-      background: color-mix(in oklch, var(--chart-3) 15%, transparent);
-      color: var(--chart-3);
+      background: color-mix(in oklch, var(--success) 15%, transparent);
+      color: var(--success);
     }
   }
 

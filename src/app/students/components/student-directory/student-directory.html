@@ -45,7 +45,7 @@
               <tr>
                 <td data-label="Roll No"><span class="badge">{{ student.rollNo }}</span></td>
                 <td data-label="Student Name" class="fw-medium">{{ student.name }}</td>
-                <td data-label="Gender">{{ student.gender === 'M' ? 'Male' : (student.gender === 'F' ? 'Female' : 'Other') }}</td>
+                <td data-label="Gender"><span class="gender-chip" [class.male]="student.gender === 'M'" [class.female]="student.gender === 'F'">{{ student.gender === 'M' ? 'Male' : (student.gender === 'F' ? 'Female' : 'Other') }}</span></td>
                 <td data-label="Class & Section">{{ student.classSectionId }}</td>
                 <td data-label="Contact">
                   @if (student.mobileNo) {

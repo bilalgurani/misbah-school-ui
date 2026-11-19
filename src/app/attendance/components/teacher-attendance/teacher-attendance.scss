@@ -3,10 +3,10 @@ $brand-color: var(--primary);
 $border-color: var(--border);
 $text-primary: var(--foreground);
 $text-secondary: var(--muted-foreground);
-$success-color: var(--chart-3);
-$success-bg: color-mix(in oklch, var(--chart-3) 15%, transparent);
-$danger-color: var(--destructive);
-$danger-bg: color-mix(in oklch, var(--destructive) 15%, transparent);
+$success-color: var(--present);
+$success-bg: color-mix(in oklch, var(--present) 15%, transparent);
+$danger-color: var(--absent);
+$danger-bg: color-mix(in oklch, var(--absent) 15%, transparent);
 
 .attendance-container {
   display: flex;
@@ -571,13 +571,12 @@ $danger-bg: color-mix(in oklch, var(--destructive) 15%, transparent);
 }
 
 .roster-row.is-present {
-  background-color: var(--success-bg, #f0fdf4);
-  border-left: 4px solid var(--success-color, #16a34a);
+  background-color: $success-bg;
+  border-left: 4px solid $success-color;
 }
 
-/* Badge Exception: Direct green highlight for present status */
 .badge.badge-present {
-  background-color: #f0fdf4;
-  color: #16a34a;
-  border: 1px solid #bbf7d0;
+  background-color: $success-bg;
+  color: $success-color;
+  border: 1px solid color-mix(in oklch, $success-color 30%, transparent);
 }

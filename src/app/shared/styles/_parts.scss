@@ -388,13 +388,13 @@ $danger: var(--destructive);
     white-space: nowrap;
 
     &.badge-success {
-      background: color-mix(in oklch, var(--chart-3) 15%, transparent);
-      color: var(--chart-3);
+      background: color-mix(in oklch, var(--success) 15%, transparent);
+      color: var(--success);
     }
 
     &.badge-danger {
-      background: color-mix(in oklch, var(--destructive) 12%, transparent);
-      color: $danger;
+      background: color-mix(in oklch, var(--absent) 12%, transparent);
+      color: var(--absent);
     }
 
     &.badge-warning {
@@ -429,8 +429,8 @@ $danger: var(--destructive);
     }
 
     &.alert-success {
-      background: color-mix(in oklch, var(--chart-3) 12%, transparent);
-      border-color: color-mix(in oklch, var(--chart-3) 40%, transparent);
+      background: color-mix(in oklch, var(--success) 12%, transparent);
+      border-color: color-mix(in oklch, var(--success) 40%, transparent);
     }
   }
 }
@@ -473,7 +473,7 @@ $danger: var(--destructive);
       }
 
       &.success .stat-value {
-        color: var(--chart-3);
+        color: var(--success);
       }
     }
   }

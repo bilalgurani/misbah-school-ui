@@ -3,10 +3,10 @@ $brand-color: var(--primary);
 $border-color: var(--border);
 $text-primary: var(--foreground);
 $text-secondary: var(--muted-foreground);
-$success-color: var(--chart-3);
-$success-bg: color-mix(in oklch, var(--chart-3) 15%, transparent);
-$danger-color: var(--destructive);
-$danger-bg: color-mix(in oklch, var(--destructive) 15%, transparent);
+$success-color: var(--present);
+$success-bg: color-mix(in oklch, var(--present) 15%, transparent);
+$danger-color: var(--absent);
+$danger-bg: color-mix(in oklch, var(--absent) 15%, transparent);
 
 .attendance-container {
   display: flex;

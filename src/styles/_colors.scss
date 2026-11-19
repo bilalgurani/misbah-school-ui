@@ -23,6 +23,12 @@
   --chart-4: oklch(0.555 0.163 48.998);
   --chart-5: oklch(0.473 0.137 46.201);
   --radius: 0.625rem;
+  /* Semantic status colours: present/success = green, absent = red, male = blue, female = pink */
+  --success: oklch(0.527 0.154 150.069);
+  --present: oklch(0.527 0.154 150.069);
+  --absent: oklch(0.577 0.245 27.325);
+  --male: oklch(0.546 0.245 262.881);
+  --female: oklch(0.592 0.249 0.584);
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.681 0.162 75.834);
@@ -57,6 +63,11 @@
   --chart-3: oklch(0.666 0.179 58.318);
   --chart-4: oklch(0.555 0.163 48.998);
   --chart-5: oklch(0.473 0.137 46.201);
+  --success: oklch(0.723 0.219 149.579);
+  --present: oklch(0.723 0.219 149.579);
+  --absent: oklch(0.704 0.191 22.216);
+  --male: oklch(0.707 0.165 254.624);
+  --female: oklch(0.718 0.202 349.761);
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.795 0.184 86.047);

@@ -15,6 +15,12 @@ export const CHART_COLORS = {
 
 export const CHART_PALETTE = Object.values(CHART_COLORS);
 
+// Canvas can't read CSS variables, so these mirror --male / --female.
+export const GENDER_COLORS = {
+  male: '#2563eb',
+  female: '#ec4899',
+} as const;
+
 // Deep copy that keeps functions (plain objects and arrays are copied, everything else is shared).
 function cloneOptions<T>(value: T): T {
   if (Array.isArray(value)) {

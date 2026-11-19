@@ -4,7 +4,7 @@ import { AttendanceTrend, ClassAttendanceDay, DashboardStats } from '../../model
 import { DashboardService } from '../../services/dashboard-api.service';
 import { ToastService } from '../../../shared/services/toast.service';
 import { LoaderComponent } from '../../../shared/component/loader.component';
-import { CHART_COLORS, ChartComponent } from '../../../shared/component/chart.component';
+import { CHART_COLORS, ChartComponent, GENDER_COLORS } from '../../../shared/component/chart.component';
 
 type ChartOptions = ChartConfiguration['options'];
 
@@ -76,7 +76,7 @@ export class DashboardCharts implements OnInit {
 
   genderData = computed<ChartConfiguration['data']>(() => ({
     labels: ['Boys', 'Girls'],
-    datasets: [{ data: [this.stats().totalBoys, this.stats().totalGirls], backgroundColor: [CHART_COLORS.blue, CHART_COLORS.pink] }],
+    datasets: [{ data: [this.stats().totalBoys, this.stats().totalGirls], backgroundColor: [GENDER_COLORS.male, GENDER_COLORS.female] }],
   }));
 
   levelData = computed<ChartConfiguration['data']>(() => ({

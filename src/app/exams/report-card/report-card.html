@@ -106,7 +106,7 @@
                       <td class="num muted">-</td>
                       <td class="num muted">-</td>
                     } @else if (cell.absent) {
-                      <td class="num"><strong>AB</strong></td>
+                      <td class="num"><strong class="text-absent">AB</strong></td>
                       <td class="num muted">-</td>
                     } @else if (cell.marks === null) {
                       <td class="num muted pending">Pending</td>
@@ -196,7 +196,7 @@
                         @if (!cell || (cell.marks === null && !cell.absent)) {
                           <td class="num muted">-</td>
                         } @else if (cell.absent) {
-                          <td class="num"><strong>AB</strong></td>
+                          <td class="num"><strong class="text-absent">AB</strong></td>
                         } @else {
                           <td class="num" [class.fail]="isFail(cell)">{{ cell.marks }}/{{ cell.maxMarks }}</td>
                         }

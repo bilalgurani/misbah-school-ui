@@ -145,10 +145,10 @@
             <tbody>
               @for (g of r.genders; track g.label) {
                 <tr>
-                  <td class="fw-medium">{{ g.label }}</td>
+                  <td class="fw-medium" [class.text-male]="g.label === 'Boys'" [class.text-female]="g.label === 'Girls'">{{ g.label }}</td>
                   <td class="num">{{ g.total }}</td>
-                  <td class="num">{{ g.attended }}</td>
-                  <td class="num">{{ g.absent }}</td>
+                  <td class="num text-present">{{ g.attended }}</td>
+                  <td class="num text-absent">{{ g.absent }}</td>
                   <td class="num">{{ g.attendancePct === null ? '—' : (g.attendancePct | number: '1.0-1') + '%' }}</td>
                 </tr>
               }

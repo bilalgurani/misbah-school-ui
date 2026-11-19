@@ -127,8 +127,8 @@ $bg-alt: var(--muted);
     white-space: nowrap;
 
     &.badge-active {
-      background: color-mix(in oklch, var(--chart-3) 15%, transparent);
-      color: var(--chart-3);
+      background: color-mix(in oklch, var(--success) 15%, transparent);
+      color: var(--success);
     }
 
     &.badge-pending {
