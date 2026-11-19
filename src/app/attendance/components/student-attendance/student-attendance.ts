@@ -6,9 +6,12 @@ import { ToastService } from "../../../shared/services/toast.service";
 import { ActivatedRoute } from "@angular/router";
 import { LoaderComponent } from "../../../shared/component/loader.component";
 import { AbsenceAlert } from "../../../messaging/absence-alert/absence-alert";
+import { AttendanceTrendComponent } from "../../../shared/component/attendance-trend.component";
+import { AttendanceTrendService, StudentStatMap } from "../../services/attendance-trend.service";
+import { toMonthKey } from "../../attendance-trend.util";
 
 @Component({
-  imports: [FormsModule, AbsenceAlert, LoaderComponent],
+  imports: [FormsModule, AbsenceAlert, LoaderComponent, AttendanceTrendComponent],
   selector: 'app-student-attendance',
   styleUrl: './student-attendance.scss',
   templateUrl: './student-attendance.html',
@@ -16,8 +19,12 @@ import { AbsenceAlert } from "../../../messaging/absence-alert/absence-alert";
 export class StudentAttendance implements OnInit {
 
   private api = inject(AttendanceApiService);
+  private trendService = inject(AttendanceTrendService);
   private toast = inject(ToastService);
   private route = inject(ActivatedRoute);
+  private trendKey = '';
+
+  attendanceStats = signal<StudentStatMap>(new Map());
   
   classSections = signal<ClassSection[]>([]);
   selectedSectionId = signal<number | null>(null);
@@ -92,6 +99,7 @@ selectedSectionName = computed(() => {
 
     this.isLoading.set(true);
     this.attendanceSaved.set(false);
+    this.loadTrend(sectionId, date);
 
     // 1. Try loading existing attendance record first
     this.api.getAttendance(sectionId, date).subscribe({
@@ -115,6 +123,17 @@ selectedSectionName = computed(() => {
       error: () => {
         this.loadDefaultRoster(sectionId);
       }
+    });
+  }
+
+  // The figures only change with the section or the month, so changing the day within a month reuses them.
+  private loadTrend(sectionId: number, date: string) {
+    const key = `${sectionId}|${toMonthKey(date)}`;
+    if (key === this.trendKey) return;
+    this.trendKey = key;
+    this.attendanceStats.set(new Map());
+    this.trendService.getSectionStats(sectionId, date).subscribe(stats => {
+      if (this.trendKey === key) this.attendanceStats.set(stats);
     });
   }
 

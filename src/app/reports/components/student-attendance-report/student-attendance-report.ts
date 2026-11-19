@@ -10,6 +10,8 @@ import { LoaderComponent } from '../../../shared/component/loader.component';
 import { ToastService } from '../../../shared/services/toast.service';
 import { StudentService } from '../../../students/student.service';
 import { AttendanceRegisterService, StudentAttendanceResponse } from '../../services/attendance-register.service';
+import { AttendanceTrendComponent } from '../../../shared/component/attendance-trend.component';
+import { AttendanceTrend, computeTrend, trendFromMonths } from '../../../attendance/attendance-trend.util';
 
 const LOW_THRESHOLD = 75;
 const MAX_OPTIONS = 50;
@@ -30,7 +32,7 @@ const toLocalDate = (iso: string): Date => {
 
 @Component({
   selector: 'app-student-attendance-report',
-  imports: [FormsModule, DatePipe, DecimalPipe, LoaderComponent],
+  imports: [FormsModule, DatePipe, DecimalPipe, LoaderComponent, AttendanceTrendComponent],
   templateUrl: './student-attendance-report.html',
   styleUrl: './student-attendance-report.scss',
 })
@@ -65,6 +67,22 @@ export class StudentAttendanceReport implements OnInit, OnDestroy {
     const all = this.students();
     const matches = q ? all.filter(s => s.haystack.includes(q)) : all;
     return matches.slice(0, MAX_OPTIONS);
+  });
+
+  // The headline arrow compares the latest two months that have attendance recorded.
+  latestTrend = computed(() => trendFromMonths(this.report()?.months ?? []).trend);
+
+  // Each month is compared with the closest earlier month that has data.
+  monthTrends = computed(() => {
+    const result = new Map<string, AttendanceTrend | null>();
+    let previous: number | null = null;
+    for (const m of this.report()?.months ?? []) {
+      const pct = m.attendancePct ?? null;
+      if (pct === null) continue;
+      result.set(m.month, computeTrend(pct, previous));
+      previous = pct;
+    }
+    return result;
   });
 
   ngOnInit(): void {

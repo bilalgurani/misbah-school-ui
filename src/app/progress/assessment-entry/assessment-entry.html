@@ -1,0 +1,146 @@
+<div class="page-container">
+  <div class="page-header">
+    <h2>Skills &amp; Remarks</h2>
+  </div>
+
+  <div class="card">
+    <div class="toolbar">
+      <div class="form-group filter">
+        <label for="as-year">Academic Year</label>
+        <select id="as-year" class="form-input" [ngModel]="yearId()" (ngModelChange)="onYearChange($event)"
+          [disabled]="dirty() || isLoadingSetup()">
+          @for (year of years(); track year.id) {
+            <option [ngValue]="year.id">{{ year.name }}{{ year.current ? ' (current)' : '' }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-group filter">
+        <label for="as-term">Term</label>
+        <select id="as-term" class="form-input" [ngModel]="term()" (ngModelChange)="onTermChange($event)" [disabled]="dirty()">
+          @for (t of terms; track t) {
+            <option [ngValue]="t">Term {{ t }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-group filter">
+        <label for="as-section">Class / Section</label>
+        <select id="as-section" class="form-input" [ngModel]="sectionId()" (ngModelChange)="onSectionChange($event)"
+          [disabled]="dirty() || isLoadingSetup()">
+          <option [ngValue]="null">Select class</option>
+          @for (s of sections(); track s.id) {
+            <option [ngValue]="s.id">{{ s.displayName }}</option>
+          }
+        </select>
+      </div>
+    </div>
+    @if (dirty()) {
+      <div class="lock-note">Save or discard your changes to change the year, term or class.</div>
+    }
+  </div>
+
+  @if (isLoadingSetup() || isLoadingRoster()) {
+    <div class="card"><div class="loader-container"><app-loader message="Loading..."></app-loader></div></div>
+  } @else if (criteria().length === 0) {
+    <div class="card">
+      <div class="empty-block">
+        No skills or values have been set up to rate yet.
+        @if (authService.isAdmin()) {
+          <a routerLink="/progress/criteria">Add them in Skill Criteria</a>.
+        } @else {
+          Ask your administrator to add them.
+        }
+      </div>
+    </div>
+  } @else if (rosterError()) {
+    <div class="alert alert-error" role="alert">
+      The students could not be loaded.
+      <button type="button" class="btn-secondary btn-sm" (click)="loadRoster()">Retry</button>
+    </div>
+  } @else if (sectionId() === null) {
+    <div class="card"><div class="empty-block">Choose a class to start rating students.</div></div>
+  } @else if (roster().length === 0) {
+    <div class="card"><div class="empty-block">No students found in this class.</div></div>
+  } @else {
+    <div class="workspace">
+      <aside class="card roster" aria-label="Students">
+        <div class="roster-head">
+          <strong>Students</strong>
+          <span class="progress-count">{{ doneCount() }} of {{ roster().length }} complete</span>
+        </div>
+        <ul class="roster-list">
+          @for (row of rows(); track row.student.id) {
+            <li>
+              <button type="button" class="roster-item" [class.active]="row.student.id === selectedId()"
+                [attr.aria-current]="row.student.id === selectedId() ? 'true' : null" (click)="selectStudent(row.student.id)">
+                <span class="roll">{{ row.student.rollNo }}</span>
+                <span class="name">{{ row.student.name }}</span>
+                <span class="chip" [class.done]="row.state === 'done'" [class.partial]="row.state === 'partial'">
+                  {{ row.state === 'done' ? 'Done' : row.state === 'partial' ? 'Partial' : 'Pending' }}
+                </span>
+              </button>
+            </li>
+          }
+        </ul>
+      </aside>
+
+      @if (selected(); as student) {
+        <section class="card form-card" aria-label="Assessment form">
+          <div class="form-head">
+            <div>
+              <h3>{{ student.name }}</h3>
+              <span class="meta">Roll No {{ student.rollNo }} &middot; Term {{ term() }}</span>
+            </div>
+            <span class="rated">{{ ratedCount() }} of {{ criteria().length }} rated</span>
+          </div>
+
+          <p class="legend">
+            @for (r of [5, 4, 3, 2, 1]; track r) {
+              <span><strong>{{ r }}</strong> {{ ratingLabels[r] }}</span>
+            }
+          </p>
+
+          @for (group of groups(); track group.category) {
+            <fieldset class="group">
+              <legend>{{ group.label }}</legend>
+              @for (c of group.criteria; track c.id) {
+                <div class="criterion" role="radiogroup" [attr.aria-label]="c.name">
+                  <span class="criterion-name">{{ c.name }}</span>
+                  <div class="scale">
+                    @for (r of ratings; track r) {
+                      <button type="button" role="radio" class="rate" [class.selected]="ratingOf(c.id) === r"
+                        [attr.aria-checked]="ratingOf(c.id) === r" [attr.title]="ratingLabels[r]"
+                        [attr.aria-label]="r + ' - ' + ratingLabels[r]" (click)="setRating(c.id, r)">{{ r }}</button>
+                    }
+                  </div>
+                </div>
+              }
+            </fieldset>
+          }
+
+          <div class="form-group remark">
+            <label for="as-remark">Teacher remark</label>
+            <textarea id="as-remark" class="form-input" rows="4" [maxlength]="remarkMax"
+              placeholder="A short note on the student's progress, strengths and areas to improve"
+              [ngModel]="draftRemark()" (ngModelChange)="setRemark($event)"></textarea>
+            <span class="counter">{{ draftRemark().length }} / {{ remarkMax }}</span>
+          </div>
+
+          <div class="actions">
+            @if (dirty()) {
+              <button type="button" class="btn-secondary" [disabled]="isSaving()" (click)="discardChanges()">Discard</button>
+            }
+            <button type="button" class="btn-secondary" [disabled]="!canSave()" (click)="save(false)">Save</button>
+            <button type="button" class="btn-primary" [disabled]="!canSave()" (click)="save(true)">
+              {{ isSaving() ? 'Saving...' : 'Save & next' }}
+            </button>
+          </div>
+        </section>
+      }
+    </div>
+  }
+</div>
+
+@if (pendingSwitchId() !== null) {
+  <app-confirm-dialog title="Discard changes?" message="You have unsaved ratings or remarks for this student. Switching will discard them."
+    confirmLabel="Discard and switch" tone="danger" (confirmed)="confirmSwitch()" (cancelled)="pendingSwitchId.set(null)"></app-confirm-dialog>
+}

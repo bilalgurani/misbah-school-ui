@@ -85,6 +85,10 @@ export const routes: Routes = [
       { path: 'exams/results', loadComponent: () => import('./exams/exam-results/exam-results').then(m => m.ExamResults) },
       { path: 'exams/report-card', loadComponent: () => import('./exams/report-card/report-card').then(m => m.ReportCard) },
 
+      { path: 'progress/assess', loadComponent: () => import('./progress/assessment-entry/assessment-entry').then(m => m.AssessmentEntry) },
+      { path: 'progress/card', loadComponent: () => import('./progress/progress-card/progress-card').then(m => m.ProgressCard) },
+      { path: 'progress/criteria', loadComponent: () => import('./progress/criteria-management/criteria-management').then(m => m.CriteriaManagement), canActivate: [AuthGuards.roleGuard('ADMIN')] },
+
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: '**', redirectTo: 'dashboard' }
     ]

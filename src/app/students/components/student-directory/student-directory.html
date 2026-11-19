@@ -36,6 +36,7 @@
               <th>Gender</th>
               <th>Class & Section</th>
               <th>Contact</th>
+              <th>Attendance</th>
               <th>Status</th>
               <th>Actions</th>
             </tr>
@@ -55,6 +56,16 @@
                       </svg>
                       <span>{{ student.mobileNo }}</span>
                     </a>
+                  } @else {
+                    <span class="text-muted">—</span>
+                  }
+                </td>
+                <td data-label="Attendance">
+                  @if (attendanceStats().get(student.id); as stat) {
+                    <app-attendance-trend [pct]="stat.pct" [trend]="stat.trend"
+                      [note]="stat.fromPreviousMonth ? 'Nothing marked this month yet, showing last month.' : ''"></app-attendance-trend>
+                  } @else if (isAttendanceLoading()) {
+                    <span class="text-muted">…</span>
                   } @else {
                     <span class="text-muted">—</span>
                   }
@@ -85,7 +96,7 @@
               </tr>
             } @empty {
               <tr>
-                <td colspan="7" class="empty-state">No students found matching</td>
+                <td colspan="8" class="empty-state">No students found matching</td>
                 
               </tr>
             }

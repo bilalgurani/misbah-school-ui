@@ -73,6 +73,7 @@
       <div class="roster-header">
         <span>Roll No</span>
         <span>Student Name</span>
+        <span title="This month, compared with last month">Attendance</span>
         <span>Status</span>
         <span>Action</span>
       </div>
@@ -85,6 +86,15 @@
             <div class="item-col col-name">
               <div class="avatar">{{ student.name.charAt(0) }}</div>
               <span class="name-text">{{ student.name }}</span>
+            </div>
+
+            <div class="item-col col-trend">
+              @if (attendanceStats().get(student.id); as stat) {
+                <app-attendance-trend [pct]="stat.pct" [trend]="stat.trend"
+                  [note]="stat.fromPreviousMonth ? 'Nothing marked this month yet, showing last month.' : ''"></app-attendance-trend>
+              } @else {
+                <span class="trend-empty">—</span>
+              }
             </div>
 
             <div class="item-col col-status">

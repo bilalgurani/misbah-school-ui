@@ -90,6 +90,32 @@ export class Help {
       ],
     },
     {
+      title: 'Choose what teachers rate on the progress card',
+      adminOnly: true,
+      steps: [
+        'Open Exams > Skill Criteria. Nothing is added for you, so start by adding your own items.',
+        'Add life skills (for example Communication), values (for example Honesty) and participation items (for example Sports).',
+        'Rename an item any time. An item that has already been rated can\'t be deleted: deactivate it so the saved ratings stay on old cards.',
+      ],
+    },
+    {
+      title: 'Fill in life skills, values and a teacher remark',
+      steps: [
+        'Open Exams > Skills & Remarks and choose the academic year, the term and the class.',
+        'Pick a student and rate each life skill, value and participation item from 1 (needs improvement) to 5 (outstanding).',
+        'Add a short teacher remark, then press Save & next to move on to the next student.',
+      ],
+    },
+    {
+      title: 'Print a holistic progress card',
+      steps: [
+        'Open Exams > Progress Card, pick the student, the academic year and the term.',
+        'The card combines exam results, attendance with its trend arrow, the ratings and the teacher remark.',
+        'The arrow is green and points up when attendance improved on the previous month, and red pointing down when it dropped.',
+        'Press Print. Sections with nothing recorded yet show "Not assessed" or a short message.',
+      ],
+    },
+    {
       title: 'Set up an exam',
       adminOnly: true,
       steps: [

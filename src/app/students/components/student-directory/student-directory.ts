@@ -11,6 +11,8 @@ import { AttendanceApiService } from '../../../attendance/services/attendance-ap
 import { ClassSection } from '../../../attendance/models/attendance.models';
 import { downloadCsv, toCsv } from '../../../shared/utils/csv.util';
 import { todayIso } from '../../../shared/utils/date.util';
+import { AttendanceTrendComponent } from '../../../shared/component/attendance-trend.component';
+import { AttendanceTrendService, StudentStatMap } from '../../../attendance/services/attendance-trend.service';
 interface FullStudentDto {
   id: number;
   name: string;
@@ -36,7 +38,7 @@ interface FullStudentDto {
 }
 
 @Component({
-  imports: [FormsModule, RouterModule, LoaderComponent, ExitStudentModal, ConfirmDialogComponent],
+  imports: [FormsModule, RouterModule, LoaderComponent, ExitStudentModal, ConfirmDialogComponent, AttendanceTrendComponent],
   selector: 'app-student-directory',
   styleUrl: './student-directory.scss',
   templateUrl: './student-directory.html',
@@ -45,9 +47,12 @@ export class StudentDirectory {
   private studentService = inject(StudentService);
   private toast = inject(ToastService);
   private attendanceApi = inject(AttendanceApiService);
+  private trendService = inject(AttendanceTrendService);
   public authService = inject(AuthService);
 
   students = signal<any[]>([]);
+  attendanceStats = signal<StudentStatMap>(new Map());
+  isAttendanceLoading = signal<boolean>(false);
   classSections = signal<ClassSection[]>([]);
   isLoading = signal<boolean>(false);
   searchQuery = signal<string>('');
@@ -152,11 +157,27 @@ export class StudentDirectory {
       next: (data) => {
         this.students.set(data);
         this.isLoading.set(false);
+        this.loadAttendanceStats(data);
       },
       error: (err) => {
         this.toast.showError(err, 'Failed to load students');
         this.isLoading.set(false);
       }
+    });
+  }
+
+  // Loaded in the background so the list itself is never held up by attendance.
+  private loadAttendanceStats(students: any[]): void {
+    const sectionIds = [...new Set(
+      students.filter(s => s.enrollmentStatus === 'ACTIVE' && s.classSectionId).map(s => Number(s.classSectionId)),
+    )];
+    this.isAttendanceLoading.set(sectionIds.length > 0);
+    this.trendService.getManySectionStats(sectionIds, new Date()).subscribe({
+      next: stats => {
+        this.attendanceStats.set(stats);
+        this.isAttendanceLoading.set(false);
+      },
+      error: () => this.isAttendanceLoading.set(false),
     });
   }
 

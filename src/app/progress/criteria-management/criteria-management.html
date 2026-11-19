@@ -1,0 +1,82 @@
+<div class="page-container">
+  <div class="page-header">
+    <h2>Skill Criteria</h2>
+  </div>
+
+  <p class="intro">
+    These are the life skills, values and participation items that teachers rate on the progress card.
+    Teachers rate each one from 1 to 5 in Skills &amp; Remarks.
+  </p>
+
+  @if (isLoading()) {
+    <div class="card"><div class="loader-container"><app-loader message="Loading criteria..."></app-loader></div></div>
+  } @else if (loadFailed()) {
+    <div class="alert alert-error" role="alert">
+      The criteria could not be loaded.
+      <button type="button" class="btn-secondary btn-sm" (click)="load()">Retry</button>
+    </div>
+  } @else {
+    @if (!hasAny()) {
+      <div class="notice" role="status">Nothing is set up yet. Add the items you want to rate below.</div>
+    }
+
+    @for (block of blocks(); track block.category) {
+      <section class="card block" [attr.aria-label]="block.label">
+        <h3 class="card-title">{{ block.label }}</h3>
+
+        <ul class="items">
+          @for (item of block.items; track item.id) {
+            <li class="item" [class.inactive]="!item.active">
+              @if (editingId() === item.id) {
+                <input class="form-input edit-input" type="text" [maxlength]="nameMax" [ngModel]="editName()"
+                  (ngModelChange)="editName.set($event)" (keydown.enter)="saveEdit(item)" (keydown.escape)="cancelEdit()"
+                  [attr.aria-label]="'Rename ' + item.name" autofocus>
+                <div class="item-actions">
+                  <button type="button" class="btn-primary btn-sm" [disabled]="isBusy() || !editName().trim()"
+                    (click)="saveEdit(item)">Save</button>
+                  <button type="button" class="btn-secondary btn-sm" (click)="cancelEdit()">Cancel</button>
+                </div>
+              } @else {
+                <div class="item-main">
+                  <span class="item-name">{{ item.name }}</span>
+                  @if (!item.active) { <span class="chip off">Inactive</span> }
+                  <span class="usage">
+                    {{ item.ratingCount === 0 ? 'Not rated yet' : 'Used in ' + item.ratingCount + (item.ratingCount === 1 ? ' rating' : ' ratings') }}
+                  </span>
+                </div>
+                <div class="item-actions">
+                  <button type="button" class="btn-secondary btn-sm" [disabled]="isBusy()" (click)="startEdit(item)">Rename</button>
+                  <button type="button" class="btn-secondary btn-sm" [disabled]="isBusy()" (click)="toggleActive(item)">
+                    {{ item.active ? 'Deactivate' : 'Activate' }}
+                  </button>
+                  <button type="button" class="btn-danger btn-sm" [disabled]="isBusy() || item.ratingCount > 0"
+                    [attr.title]="item.ratingCount > 0 ? 'Already rated. Deactivate it instead.' : 'Delete'"
+                    (click)="toDelete.set(item)">Delete</button>
+                </div>
+              }
+            </li>
+          } @empty {
+            <li class="empty">No items yet.</li>
+          }
+        </ul>
+
+        <form class="add-row" (ngSubmit)="add(block.category)">
+          <input class="form-input" type="text" name="new-{{ block.category }}" [maxlength]="nameMax"
+            [ngModel]="newNames()[block.category]" (ngModelChange)="setNewName(block.category, $event)"
+            [attr.aria-label]="'New ' + block.label + ' item'" placeholder="Add an item, for example Communication">
+          <button type="submit" class="btn-primary" [disabled]="isBusy() || !newNames()[block.category].trim()">Add</button>
+        </form>
+      </section>
+    }
+
+    <p class="hint">
+      An item that teachers have already rated can't be deleted. Deactivate it instead: it disappears from the entry
+      screen and new cards, and the saved ratings are kept.
+    </p>
+  }
+</div>
+
+@if (toDelete(); as item) {
+  <app-confirm-dialog title="Delete criterion?" [message]="'Delete &quot;' + item.name + '&quot;? It has not been rated yet, so nothing else is affected.'"
+    confirmLabel="Delete" tone="danger" [busy]="isBusy()" (confirmed)="confirmDelete()" (cancelled)="toDelete.set(null)"></app-confirm-dialog>
+}

@@ -1,0 +1,232 @@
+<div class="page-container progress-page">
+  <div class="page-header no-print">
+    <h2>Holistic Progress Card</h2>
+    <div class="header-actions">
+      @if (hasLoaded()) {
+        <button type="button" class="btn-primary" (click)="print()">Print</button>
+      }
+    </div>
+  </div>
+
+  <div class="card search-card no-print">
+    <div class="toolbar">
+      <div class="search-wrap">
+        @if (studentId() !== null && selectedStudent()) {
+          <div class="selected-student">
+            <span class="fw-medium">{{ selectedStudent().name }}</span>
+            <button type="button" class="btn-secondary btn-sm" (click)="clearStudent()">Change</button>
+          </div>
+        } @else {
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+            <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
+              placeholder="Search student by name or roll number..." aria-label="Search students"
+              [disabled]="studentsLoading()">
+          </div>
+          @if (searchQuery().trim()) {
+            <ul class="results" role="listbox">
+              @for (s of matches(); track s.id) {
+                <li>
+                  <button type="button" class="result-item" (click)="selectStudent(s)">
+                    <span class="fw-medium">{{ s.name }}</span>
+                    <span class="text-muted">Roll {{ s.rollNo ?? '-' }}</span>
+                  </button>
+                </li>
+              } @empty {
+                <li class="no-result">No students match "{{ searchQuery() }}"</li>
+              }
+            </ul>
+          }
+        }
+      </div>
+      <div class="form-group filter">
+        <label for="pc-year">Academic Year</label>
+        <select id="pc-year" class="form-input" [ngModel]="yearId()" (ngModelChange)="onYearChange($event)">
+          @for (year of years(); track year.id) {
+            <option [ngValue]="year.id">{{ year.name }}{{ year.current ? ' (current)' : '' }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-group filter">
+        <label for="pc-term">Term</label>
+        <select id="pc-term" class="form-input" [ngModel]="term()" (ngModelChange)="onTermChange($event)">
+          @for (t of terms; track t) {
+            <option [ngValue]="t">Term {{ t }}</option>
+          }
+        </select>
+      </div>
+    </div>
+  </div>
+
+  @if (isLoading()) {
+    <div class="card no-print">
+      <div class="loader-container"><app-loader message="Loading progress card..."></app-loader></div>
+    </div>
+  } @else if (hasLoaded()) {
+    @if (!assessment() && !assessmentsFailed()) {
+      <div class="notice no-print" role="status">
+        No skills or remarks have been recorded for Term {{ term() }} yet.
+        <a routerLink="/progress/assess">Enter them in Skills &amp; Remarks</a>
+      </div>
+    }
+    @if (assessmentsFailed() || academicsFailed() || attendanceFailed()) {
+      <div class="alert alert-error no-print" role="alert">
+        Some sections could not be loaded:
+        @if (academicsFailed()) { exam results; }
+        @if (attendanceFailed()) { attendance; }
+        @if (assessmentsFailed()) { skills and remarks; }
+        refresh the page to try again.
+      </div>
+    }
+
+    <article class="sheet" aria-label="Holistic progress card">
+      <header class="sheet-header">
+        <h1>{{ academics()?.schoolName || schoolFallback }}</h1>
+        <p class="sheet-title">Holistic Progress Card &middot; {{ selectedYear()?.name }} &middot; Term {{ term() }}</p>
+      </header>
+
+      <dl class="sheet-details">
+        <div><dt>Student</dt><dd>{{ studentName() }}</dd></div>
+        <div><dt>Class</dt><dd>{{ className() || '-' }}</dd></div>
+        <div><dt>Roll No</dt><dd>{{ rollNo() }}</dd></div>
+        <div><dt>Father's Name</dt><dd>{{ academics()?.fatherName || '-' }}</dd></div>
+      </dl>
+
+      <section aria-label="Academics">
+        <h3>Academics</h3>
+        @if (academicsFailed()) {
+          <p class="muted">Exam results are not available.</p>
+        } @else if (mainExams().length === 0) {
+          <p class="muted">No exams have been held for this student in this academic year.</p>
+        } @else {
+          <div class="table-wrap">
+            <table class="sheet-table">
+              <thead>
+                <tr><th>Exam</th><th class="num">Marks</th><th class="num">%</th><th class="num">Grade</th><th class="num">Rank</th><th>Result</th></tr>
+              </thead>
+              <tbody>
+                @for (exam of mainExams(); track exam.examId) {
+                  <tr>
+                    <td>{{ exam.name }}</td>
+                    @if (isPending(exam)) {
+                      <td class="num muted" colspan="5">Marks pending</td>
+                    } @else {
+                      <td class="num">{{ exam.totalMarks }}/{{ exam.totalMax }}</td>
+                      <td class="num">{{ exam.percentage | number: '1.0-1' }}</td>
+                      <td class="num">{{ exam.grade || '-' }}</td>
+                      <td class="num">{{ exam.rank === null ? '-' : exam.rank + ' of ' + exam.classSize }}</td>
+                      <td [class.fail]="exam.result === 'FAIL'" [class.pass]="exam.result === 'PASS'">{{ exam.result }}</td>
+                    }
+                  </tr>
+                }
+              </tbody>
+              @if (academics(); as a) {
+                @if (a.overall.result !== 'INCOMPLETE') {
+                  <tfoot>
+                    <tr>
+                      <th>Overall</th>
+                      <th class="num">{{ a.overall.totalMarks }}/{{ a.overall.totalMax }}</th>
+                      <th class="num">{{ a.overall.percentage | number: '1.0-1' }}</th>
+                      <th class="num">{{ a.overall.grade || '-' }}</th>
+                      <th class="num">&nbsp;</th>
+                      <th [class.fail]="a.overall.result === 'FAIL'" [class.pass]="a.overall.result === 'PASS'">{{ a.overall.result }}</th>
+                    </tr>
+                  </tfoot>
+                }
+              }
+            </table>
+          </div>
+        }
+      </section>
+
+      <section aria-label="Attendance">
+        <h3>Attendance</h3>
+        @if (attendanceFailed()) {
+          <p class="muted">Attendance is not available.</p>
+        } @else if (attendance(); as att) {
+          @if (att.markedDays === 0) {
+            <p class="muted">No attendance has been recorded for this academic year yet.</p>
+          } @else {
+            <div class="attendance-grid">
+              <div class="stat">
+                <span class="label">Attendance</span>
+                <strong class="big">
+                  <app-attendance-trend [pct]="att.attendancePct" [trend]="attendanceTrend()" comparedWith="the previous month"></app-attendance-trend>
+                </strong>
+              </div>
+              <div class="stat"><span class="label">Present</span><strong>{{ att.present }}</strong></div>
+              <div class="stat"><span class="label">Absent</span><strong class="text-absent">{{ att.absent }}</strong></div>
+              <div class="stat"><span class="label">Late</span><strong>{{ att.late }}</strong></div>
+              <div class="stat"><span class="label">Working days</span><strong>{{ att.workingDays }}</strong></div>
+            </div>
+            <p class="note">The arrow compares the latest month with the month before it.</p>
+          }
+        }
+      </section>
+
+      @if (skillGroups().length > 0) {
+        <section aria-label="Life skills, values and participation" class="skills">
+          @for (group of skillGroups(); track group.label) {
+            <div class="skill-group">
+              <h3>
+                {{ group.label }}
+                @if (group.average !== null) {
+                  <span class="avg">Average {{ group.average | number: '1.0-1' }} / 5</span>
+                }
+              </h3>
+              <table class="sheet-table">
+                <tbody>
+                  @for (item of group.items; track item.name) {
+                    <tr>
+                      <td>{{ item.name }}</td>
+                      <td class="rating-cell">
+                        @if (item.rating !== null) {
+                          <span class="dots" role="img" [attr.aria-label]="item.rating + ' out of 5, ' + ratingLabels[item.rating]">
+                            @for (filled of dots(item.rating); track $index) {
+                              <span class="dot" [class.filled]="filled"></span>
+                            }
+                          </span>
+                          <span class="rating-text">{{ ratingLabels[item.rating] }}</span>
+                        } @else {
+                          <span class="muted">Not assessed</span>
+                        }
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+          <p class="note scale-key">
+            Rating key:
+            @for (r of scale; track r) { <span><strong>{{ r }}</strong> {{ ratingLabels[r] }}</span> }
+          </p>
+        </section>
+      }
+
+      <section aria-label="Teacher remark" class="remark-box">
+        <h3>Teacher's Remark</h3>
+        @if (assessment()?.remark; as remark) {
+          <p class="remark">{{ remark }}</p>
+          @if (assessment()?.updatedBy) {
+            <p class="note">
+              &mdash; {{ assessment()!.updatedBy }}@if (assessment()!.updatedAt) {, {{ assessment()!.updatedAt | date: 'dd MMM yyyy' }}}
+            </p>
+          }
+        } @else {
+          <p class="muted">No remark has been recorded for this term.</p>
+        }
+      </section>
+
+      <footer class="signatures">
+        <div class="signature">Class Teacher</div>
+        <div class="signature">Principal</div>
+        <div class="signature">Parent</div>
+      </footer>
+    </article>
+  } @else {
+    <div class="card no-print"><div class="empty-block">Search and select a student to view the progress card.</div></div>
+  }
+</div>

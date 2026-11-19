@@ -92,7 +92,12 @@
         <div class="kpi-value">
           @if (r.attendancePct !== null && r.attendancePct !== undefined) { {{ r.attendancePct | number: '1.0-1' }}% } @else { &mdash; }
         </div>
-        <div class="kpi-subtext">{{ r.daysAttendanceTaken }} of {{ r.workingDays }} working days recorded</div>
+        <div class="kpi-subtext">
+          {{ r.daysAttendanceTaken }} of {{ r.workingDays }} working days recorded
+          @if (latestTrend(); as t) {
+            <app-attendance-trend [pct]="null" [trend]="t" [showPct]="false"></app-attendance-trend>
+          }
+        </div>
       </div>
       <div class="kpi-card">
         <div class="kpi-title">Present</div>
@@ -144,6 +149,9 @@
                   @if (m.attendancePct !== null && m.attendancePct !== undefined) {
                     <span class="bar"><span class="bar-fill" [class.low]="isLow(m.attendancePct)" [style.width.%]="m.attendancePct"></span></span>
                     {{ m.attendancePct | number: '1.0-1' }}%
+                    @if (monthTrends().get(m.month); as t) {
+                      <app-attendance-trend [pct]="null" [trend]="t" [showPct]="false" comparedWith="the previous month"></app-attendance-trend>
+                    }
                   } @else { &mdash; }
                 </td>
               </tr>
