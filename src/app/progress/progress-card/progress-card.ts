@@ -1,28 +1,23 @@
-import { DatePipe, DecimalPipe } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { catchError, forkJoin, of } from 'rxjs';
 import { AcademicYear } from '../../academics/models/academic-year.model';
 import { AcademicYearService } from '../../academics/services/academic-year.service';
-import { trendFromMonths } from '../../attendance/attendance-trend.util';
-import { ExamService, ReportCardData, ReportCardExam } from '../../exams/exam.service';
+import { ExamService, ReportCardData } from '../../exams/exam.service';
 import { AttendanceRegisterService, StudentAttendanceResponse } from '../../reports/services/attendance-register.service';
-import { AttendanceTrendComponent } from '../../shared/component/attendance-trend.component';
 import { LoaderComponent } from '../../shared/component/loader.component';
 import { ToastService } from '../../shared/services/toast.service';
 import { todayIso } from '../../shared/utils/date.util';
 import { StudentService } from '../../students/student.service';
-import {
-  Criterion, RATINGS, RATING_LABELS, StudentAssessment, TERMS, averageRating, groupCriteria, ratingMap,
-} from '../progress.models';
+import { ProgressCardData, attendanceRange } from '../progress-card.data';
+import { ProgressCardSheet } from '../progress-card-sheet/progress-card-sheet';
+import { Criterion, StudentAssessment, TERMS } from '../progress.models';
 import { ProgressService } from '../progress.service';
-
-const DEFAULT_SCHOOL_NAME = 'Sana Misbah School';
 
 @Component({
   selector: 'app-progress-card',
-  imports: [FormsModule, DatePipe, DecimalPipe, RouterLink, LoaderComponent, AttendanceTrendComponent],
+  imports: [FormsModule, RouterLink, LoaderComponent, ProgressCardSheet],
   templateUrl: './progress-card.html',
   styleUrl: './progress-card.scss',
 })
@@ -36,9 +31,6 @@ export class ProgressCard implements OnInit {
   private route = inject(ActivatedRoute);
 
   readonly terms = TERMS;
-  readonly scale = [...RATINGS].reverse();
-  readonly ratingLabels = RATING_LABELS;
-  readonly schoolFallback = DEFAULT_SCHOOL_NAME;
 
   students = signal<any[]>([]);
   studentsLoading = signal(true);
@@ -73,24 +65,28 @@ export class ProgressCard implements OnInit {
   selectedStudent = computed(() => this.students().find(s => s.id === this.studentId()) ?? null);
   selectedYear = computed(() => this.years().find(y => y.id === this.yearId()) ?? null);
 
-  mainExams = computed<ReportCardExam[]>(() => (this.academics()?.exams ?? []).filter(e => e.examType !== 'IA'));
-
   assessment = computed(() => this.assessments().find(a => a.term === this.term()) ?? null);
 
-  skillGroups = computed(() => {
-    const ratings = ratingMap(this.assessment());
-    return groupCriteria(this.criteria()).map(group => ({
-      label: group.label,
-      average: averageRating(group.criteria, ratings),
-      items: group.criteria.map(c => ({ name: c.name, rating: ratings.get(c.id) ?? null })),
-    }));
+  cardData = computed<ProgressCardData>(() => {
+    const academics = this.academics();
+    const attendance = this.attendance();
+    const student = this.selectedStudent();
+    return {
+      studentId: this.studentId() ?? 0,
+      name: academics?.name ?? attendance?.name ?? student?.name ?? '',
+      rollNo: academics?.rollNo ?? attendance?.rollNo ?? student?.rollNo ?? null,
+      className: academics?.className ?? attendance?.className ?? '',
+      fatherName: academics?.fatherName ?? null,
+      schoolName: academics?.schoolName ?? null,
+      yearName: this.selectedYear()?.name ?? '',
+      term: this.term(),
+      academics,
+      attendance,
+      assessment: this.assessment(),
+      academicsFailed: this.academicsFailed(),
+      attendanceFailed: this.attendanceFailed(),
+    };
   });
-
-  attendanceTrend = computed(() => trendFromMonths(this.attendance()?.months ?? []).trend);
-
-  studentName = computed(() => this.academics()?.name ?? this.attendance()?.name ?? this.selectedStudent()?.name ?? '');
-  className = computed(() => this.academics()?.className ?? this.attendance()?.className ?? '');
-  rollNo = computed(() => this.academics()?.rollNo ?? this.attendance()?.rollNo ?? this.selectedStudent()?.rollNo ?? '-');
 
   ngOnInit(): void {
     this.studentService.getStudents().subscribe({
@@ -161,14 +157,13 @@ export class ProgressCard implements OnInit {
     this.attendanceFailed.set(false);
     this.assessmentsFailed.set(false);
 
-    const today = todayIso();
-    const to = year.endDate && year.endDate < today ? year.endDate : today;
+    const { from, to } = attendanceRange(year, todayIso());
 
     // Each part loads independently so one failing service does not blank the whole card.
     forkJoin({
       academics: this.examService.getReportCard(studentId, yearId).pipe(
         catchError(() => { this.academicsFailed.set(true); return of(null); })),
-      attendance: this.register.getStudent(studentId, year.startDate, to < year.startDate ? year.startDate : to).pipe(
+      attendance: this.register.getStudent(studentId, from, to).pipe(
         catchError(() => { this.attendanceFailed.set(true); return of(null); })),
       assessments: this.progress.getStudentAssessments(studentId, yearId).pipe(
         catchError(() => { this.assessmentsFailed.set(true); return of([] as StudentAssessment[]); })),
@@ -180,14 +175,6 @@ export class ProgressCard implements OnInit {
       this.isLoading.set(false);
       this.hasLoaded.set(true);
     });
-  }
-
-  isPending(exam: ReportCardExam): boolean {
-    return exam.result === 'INCOMPLETE';
-  }
-
-  dots(rating: number | null): boolean[] {
-    return RATINGS.map(r => rating !== null && r <= rating);
   }
 
   print(): void {

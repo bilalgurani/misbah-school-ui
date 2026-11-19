@@ -1,0 +1,56 @@
+@use '../../shared/styles/parts' as p;
+
+@include p.layout;
+@include p.buttons;
+@include p.form;
+@include p.toolbar;
+@include p.alert;
+
+.class-cards-page {
+  max-width: 900px;
+}
+
+.filter {
+  flex: 1 1 180px;
+  min-width: 0;
+}
+
+.alert {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.notice {
+  margin-bottom: 1rem;
+  padding: 0.875rem 1rem;
+  border-radius: var(--radius);
+  border: 1px solid color-mix(in oklch, var(--primary) 50%, transparent);
+  background: color-mix(in oklch, var(--primary) 15%, var(--card));
+  color: var(--foreground);
+  font-size: 0.9rem;
+
+  a {
+    color: inherit;
+    font-weight: 600;
+    margin-left: 0.25rem;
+  }
+}
+
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+@media print {
+  .class-cards-page {
+    padding: 0;
+    max-width: none;
+  }
+
+  .cards {
+    display: block;
+  }
+}

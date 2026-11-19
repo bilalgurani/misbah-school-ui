@@ -1,3 +1,6 @@
+import { ReportCardData } from '../exams/exam.service';
+import { StudentAttendanceResponse } from '../reports/services/attendance-register.service';
+
 export type CriterionCategory = 'LIFE_SKILLS' | 'VALUES' | 'PARTICIPATION';
 
 export interface Criterion {
@@ -34,6 +37,27 @@ export interface SaveAssessmentRequest {
   term: number;
   ratings: CriterionRating[];
   remark: string | null;
+}
+
+// One student's card as returned for a whole class. A part that could not be built is null with its flag set.
+export interface ClassCard {
+  studentId: number;
+  name: string;
+  rollNo: number | null;
+  academics: ReportCardData | null;
+  attendance: StudentAttendanceResponse | null;
+  assessment: StudentAssessment | null;
+  academicsFailed: boolean;
+  attendanceFailed: boolean;
+}
+
+export interface ClassCardsResponse {
+  classSectionId: number;
+  className: string;
+  academicYearId: number;
+  academicYear: string;
+  term: number;
+  cards: ClassCard[];
 }
 
 export interface CriteriaGroup {

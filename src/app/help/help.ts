@@ -116,6 +116,14 @@ export class Help {
       ],
     },
     {
+      title: 'Print progress cards for a whole class',
+      steps: [
+        'Open Exams > Class Cards and choose the academic year, the term and the class.',
+        'Wait for the cards to appear. Students whose skills or remark are not filled in yet are listed above the cards so you can complete them first.',
+        'Press Print. Every student gets one card on its own A4 page, in roll number order. Choose "Save as PDF" in the print window to share them instead.',
+      ],
+    },
+    {
       title: 'Set up an exam',
       adminOnly: true,
       steps: [

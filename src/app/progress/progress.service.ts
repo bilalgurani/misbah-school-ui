@@ -2,7 +2,9 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { Criterion, CriterionCategory, ManagedCriterion, SaveAssessmentRequest, StudentAssessment } from './progress.models';
+import {
+  ClassCardsResponse, Criterion, CriterionCategory, ManagedCriterion, SaveAssessmentRequest, StudentAssessment,
+} from './progress.models';
 
 @Injectable({ providedIn: 'root' })
 export class ProgressService {
@@ -43,6 +45,15 @@ export class ProgressService {
   getStudentAssessments(studentId: number, academicYearId: number): Observable<StudentAssessment[]> {
     const params = new HttpParams().set('academicYearId', academicYearId);
     return this.http.get<StudentAssessment[]>(`${this.baseUrl}/assessments/student/${studentId}`, { params });
+  }
+
+  // Every student's card for a class in a single request.
+  getClassCards(classSectionId: number, academicYearId: number, term: number): Observable<ClassCardsResponse> {
+    const params = new HttpParams()
+      .set('classSectionId', classSectionId)
+      .set('academicYearId', academicYearId)
+      .set('term', term);
+    return this.http.get<ClassCardsResponse>(`${this.baseUrl}/class-cards`, { params });
   }
 
   saveAssessment(request: SaveAssessmentRequest): Observable<StudentAssessment> {

@@ -1,0 +1,91 @@
+<div class="page-container class-cards-page">
+  <div class="page-header no-print">
+    <h2>Class Progress Cards</h2>
+    <div class="header-actions">
+      <a routerLink="/progress/card" class="btn-secondary">Single student</a>
+      <button type="button" class="btn-primary" [disabled]="isLoading() || cards().length === 0" (click)="print()">
+        Print {{ cards().length === 1 ? '1 card' : cards().length + ' cards' }}
+      </button>
+    </div>
+  </div>
+
+  <div class="card no-print">
+    <div class="toolbar">
+      <div class="form-group filter">
+        <label for="cc-year">Academic Year</label>
+        <select id="cc-year" class="form-input" [ngModel]="yearId()" (ngModelChange)="onYearChange($event)"
+          [disabled]="isSetupLoading()">
+          @for (year of years(); track year.id) {
+            <option [ngValue]="year.id">{{ year.name }}{{ year.current ? ' (current)' : '' }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-group filter">
+        <label for="cc-term">Term</label>
+        <select id="cc-term" class="form-input" [ngModel]="term()" (ngModelChange)="onTermChange($event)">
+          @for (t of terms; track t) {
+            <option [ngValue]="t">Term {{ t }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-group filter">
+        <label for="cc-section">Class / Section</label>
+        <select id="cc-section" class="form-input" [ngModel]="sectionId()" (ngModelChange)="onSectionChange($event)"
+          [disabled]="isSetupLoading()">
+          <option [ngValue]="null">Select class</option>
+          @for (s of sections(); track s.id) {
+            <option [ngValue]="s.id">{{ s.displayName }}</option>
+          }
+        </select>
+      </div>
+    </div>
+  </div>
+
+  @if (sectionId() === null) {
+    <div class="card no-print"><div class="empty-block">Choose a class to prepare all of its progress cards.</div></div>
+  } @else {
+    @if (isLoading()) {
+      <div class="card no-print"><div class="loader-container"><app-loader message="Preparing the class cards..."></app-loader></div></div>
+    }
+
+    @if (loadFailed()) {
+      <div class="alert alert-error no-print" role="alert">
+        The class could not be loaded.
+        <button type="button" class="btn-secondary btn-sm" (click)="load()">Retry</button>
+      </div>
+    }
+
+    @if (hasLoaded() && cards().length === 0) {
+      <div class="card no-print"><div class="empty-block">No students found in this class.</div></div>
+    }
+
+    @if (hasLoaded() && cards().length > 0) {
+      @if (pendingNames().length > 0) {
+        <div class="notice no-print" role="status">
+          <strong>{{ pendingNames().length }} {{ pendingNames().length === 1 ? 'student has' : 'students have' }} no skills or remark for Term {{ term() }}:</strong>
+          {{ shown(pendingNames()) }}.
+          <a routerLink="/progress/assess">Enter them in Skills &amp; Remarks</a>
+        </div>
+      }
+      @if (partialNames().length > 0) {
+        <div class="notice no-print" role="status">
+          <strong>{{ partialNames().length }} {{ partialNames().length === 1 ? 'card is' : 'cards are' }} only partly filled in:</strong>
+          {{ shown(partialNames()) }}.
+        </div>
+      }
+      @if (failedCount() > 0) {
+        <div class="alert alert-error no-print" role="alert">
+          Exam results or attendance could not be loaded for {{ failedCount() }}
+          {{ failedCount() === 1 ? 'student' : 'students' }}. Those cards show a message in that section.
+          <button type="button" class="btn-secondary btn-sm" (click)="load()">Reload</button>
+        </div>
+      }
+    }
+
+    <div class="cards">
+      @for (card of cards(); track card.studentId) {
+        <app-progress-card-sheet [data]="card" [criteria]="criteria()"></app-progress-card-sheet>
+      }
+    </div>
+  }
+</div>
