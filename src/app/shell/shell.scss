@@ -175,6 +175,11 @@ $text-active: var(--foreground);
       color: var(--sidebar-accent);
     }
 
+    :host-context(.dark) &:hover {
+      background-color: var(--sidebar-accent);
+      color: var(--sidebar-accent-foreground);
+    }
+
     &.active-link {
       background-color: var(--sidebar-primary);
       color: var(--sidebar-primary-foreground);
@@ -335,7 +340,13 @@ $text-active: var(--foreground);
     padding: 6px;
     margin: 0;
 
-    a {
+    a,
+    .theme-toggle {
+      width: 100%;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
       display: flex;
       align-items: center;
       gap: 10px;

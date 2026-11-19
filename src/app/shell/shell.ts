@@ -2,6 +2,7 @@ import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { HostListener } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
+import { ThemeService } from '../shared/services/theme.service';
 
 @Component({
   imports: [RouterOutlet, RouterLinkActive, RouterLink],
@@ -13,6 +14,7 @@ export class Shell implements OnInit {
   isSidebarOpen = signal<boolean>(false);
 
   public authService = inject(AuthService);
+  public themeService = inject(ThemeService);
   private router = inject(Router); 
   isUserMenuOpen = false;
 

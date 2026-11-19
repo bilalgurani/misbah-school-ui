@@ -1,5 +1,6 @@
-import { Component, ElementRef, OnDestroy, effect, input, viewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, effect, inject, input, viewChild } from '@angular/core';
 import type { Chart, ChartConfiguration, ChartType } from 'chart.js';
+import { ThemeService } from '../services/theme.service';
 
 // Colours that read well on the app's light background and stay distinguishable for colour-blind users.
 export const CHART_COLORS = {
@@ -64,13 +65,22 @@ export class ChartComponent implements OnDestroy {
       const type = this.type();
       const data = this.data();
       const options = this.options();
+      this.theme.theme();
       void this.render(type, data, options);
     });
   }
 
+  private readonly theme = inject(ThemeService);
+
   private async render(type: ChartType, data: ChartConfiguration['data'], options: ChartConfiguration['options']) {
     const { Chart } = await import('chart.js/auto');
     if (this.destroyed) return;
+
+    // Canvas ignores CSS, so the theme's text and grid colours are copied into Chart.js defaults.
+    const styles = getComputedStyle(document.documentElement);
+    Chart.defaults.color = styles.getPropertyValue('--muted-foreground').trim() || Chart.defaults.color;
+    Chart.defaults.borderColor = styles.getPropertyValue('--border').trim() || Chart.defaults.borderColor;
+    Chart.defaults.elements.arc.borderColor = styles.getPropertyValue('--card').trim() || '#fff';
 
     // Chart.js mutates what it is given, so hand it copies. Options may hold callbacks, which structuredClone rejects.
     const chartData = structuredClone(data);

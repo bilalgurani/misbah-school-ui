@@ -15,7 +15,6 @@
 }
 
 $sidebar-width: 250px;
-$bg-main: #f8fafc;
 
 *,
 *::before,
@@ -70,7 +69,12 @@ select {
 body {
   font-family: 'Roboto', sans-serif;
   min-height: 100vh;
-  background-color: $bg-main;
+  background-color: var(--page-bg);
+  color: var(--foreground);
+}
+
+.dark .svg-icon {
+  filter: invert(1);
 }
 
 .control {
@@ -79,7 +83,8 @@ body {
   border-radius: 6px;
   font-size: 14px;
   font-family: inherit;
-  background: #fff;
+  background: var(--card);
+  color: var(--card-foreground);
 }
 
 .btn {
@@ -102,17 +107,17 @@ body {
   color: var(--primary-foreground);
 }
 .btn-success {
-  background: #2e7d32;
-  color: #fff;
+  background: var(--success);
+  color: var(--background);
 }
 .btn-danger {
-  background: #c62828;
-  color: #fff;
+  background: var(--destructive);
+  color: var(--background);
 }
 .btn-outline {
   background: transparent;
-  color: #424242;
-  border-color: #c4c4c4;
+  color: var(--foreground);
+  border-color: color-mix(in oklch, var(--foreground) 25%, transparent);
 }
 
 .custom-toast {
@@ -162,7 +167,8 @@ body {
 }
 
 .modal-card {
-  background: #ffffff;
+  background: var(--card);
+  color: var(--card-foreground);
   width: 100%;
   max-width: 550px;
   border-radius: 12px;
@@ -175,11 +181,11 @@ body {
 
 .modal-header {
   padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: #f8fafc;
+  background-color: var(--muted);
 
   .modal-avatar-title {
     display: flex;
@@ -190,8 +196,8 @@ body {
       width: 48px;
       height: 48px;
       border-radius: 50%;
-      background-color: #3b82f6;
-      color: #fff;
+      background-color: var(--primary);
+      color: var(--primary-foreground);
       font-size: 1.25rem;
       font-weight: 600;
       display: flex;
@@ -202,7 +208,7 @@ body {
     h3 {
       margin: 0;
       font-size: 1.15rem;
-      color: #1e293b;
+      color: var(--card-foreground);
     }
   }
 
@@ -210,11 +216,11 @@ body {
     background: none;
     border: none;
     font-size: 1.75rem;
-    color: #64748b;
+    color: var(--muted-foreground);
     cursor: pointer;
     padding: 0;
     line-height: 1;
-    &:hover { color: #0f172a; }
+    &:hover { color: var(--foreground); }
   }
 }
 
@@ -239,13 +245,13 @@ body {
         font-size: 0.75rem;
         text-transform: uppercase;
         letter-spacing: 0.05em;
-        color: #64748b;
+        color: var(--muted-foreground);
         font-weight: 600;
       }
 
       .value {
         font-size: 0.95rem;
-        color: #334155;
+        color: var(--foreground);
         font-weight: 500;
       }
     }
@@ -254,16 +260,16 @@ body {
 
 .modal-footer {
   padding: 1rem 1.5rem;
-  border-top: 1px solid #e2e8f0;
-  background-color: #f8fafc;
+  border-top: 1px solid var(--border);
+  background-color: var(--muted);
   display: flex;
   justify-content: flex-end;
   gap: 0.75rem;
 }
 
 .badge-active {
-  background-color: #d1fae5;
-  color: #065f46;
+  background-color: color-mix(in oklch, var(--success) 15%, transparent);
+  color: var(--success);
   padding: 2px 8px;
   border-radius: 4px;
   font-size: 0.75rem;
