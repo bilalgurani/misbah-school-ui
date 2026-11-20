@@ -1,0 +1,11 @@
+{
+  "schoolName": "Example Public School",
+  "shortName": "Example School",
+  "portalTitle": "Example School Portal",
+  "apiUrl": "https://example-school-api.up.railway.app/api",
+  "logo": "school/logo.jpeg",
+  "banner": "school/banner.jpeg",
+  "loginBackground": "school/login-bg.jpg",
+  "icon": "school/icon.png",
+  "lowAttendancePct": 75
+}

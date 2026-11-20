@@ -15,6 +15,7 @@ import { ProgressService } from '../../progress/progress.service';
 import { attendanceRange } from '../../progress/progress-card.data';
 import { AttendanceRegisterService, StudentAttendanceResponse } from '../../reports/services/attendance-register.service';
 import { todayIso } from '../../shared/utils/date.util';
+import { SchoolConfigService } from '../../school/school-config.service';
 
 interface MatrixRow {
   subjectId: number;
@@ -58,6 +59,7 @@ export class ReportCard implements OnInit, OnDestroy {
   private attendanceApi = inject(AttendanceApiService);
   private progressService = inject(ProgressService);
   private register = inject(AttendanceRegisterService);
+  protected school = inject(SchoolConfigService);
 
   // Attendance for the single student shown; null when it can't be read (the card then just leaves it out).
   attendance = signal<StudentAttendanceResponse | null>(null);

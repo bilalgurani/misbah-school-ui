@@ -6,6 +6,7 @@
     "start": "ng serve",
     "start:local-prod-api": "ng serve --configuration local-prod-api",
     "build": "ng build",
+    "prebuild": "node scripts/use-school.mjs",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },

@@ -21,8 +21,8 @@ $danger-bg: color-mix(in oklch, var(--destructive, #dc2626) 12%, transparent);
     content: '';
     position: absolute;
     inset: 0;
-    background: 
-      url('../../../assets/images/misbah-future-1.jpg') center/cover no-repeat;
+    // --login-bg is set at startup from the school config
+    background: var(--login-bg) center/cover no-repeat;
     z-index: 1;
     transform: scale(1.02);
     filter: blur(2px);

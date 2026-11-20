@@ -7,9 +7,8 @@ import { ClassSection } from '../../../attendance/models/attendance.models';
 import { AttendanceApiService } from '../../../attendance/services/attendance-api.service';
 import { LoaderComponent } from '../../../shared/component/loader.component';
 import { ToastService } from '../../../shared/services/toast.service';
+import { SchoolConfigService } from '../../../school/school-config.service';
 import { AttendanceRegisterService, MonthlyAttendanceResponse } from '../../services/attendance-register.service';
-
-const LOW_THRESHOLD = 75;
 
 const currentMonth = (): string => {
   const d = new Date();
@@ -41,9 +40,12 @@ export class MonthlyAttendanceReport implements OnInit, OnDestroy {
   private api = inject(AttendanceApiService);
   private reportService = inject(AttendanceRegisterService);
   private toast = inject(ToastService);
+  private school = inject(SchoolConfigService);
   private request?: Subscription;
 
-  readonly lowThreshold = LOW_THRESHOLD;
+  get lowThreshold(): number {
+    return this.school.lowAttendancePct();
+  }
 
   sections = signal<ClassSection[]>([]);
   sectionsLoading = signal<boolean>(true);
@@ -96,7 +98,7 @@ export class MonthlyAttendanceReport implements OnInit, OnDestroy {
   }
 
   isLow(pct: number | null): boolean {
-    return pct !== null && pct !== undefined && pct < LOW_THRESHOLD;
+    return pct !== null && pct !== undefined && pct < this.lowThreshold;
   }
 
   generate(): void {

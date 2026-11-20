@@ -3,8 +3,6 @@ import { ReportCardData } from '../exams/exam.service';
 import { StudentAttendanceResponse } from '../reports/services/attendance-register.service';
 import { StudentAssessment } from './progress.models';
 
-export const DEFAULT_SCHOOL_NAME = 'Sana Misbah School';
-
 /** Everything one printed progress card needs. A part that failed to load is null with its flag set. */
 export interface ProgressCardData {
   studentId: number;

@@ -19,7 +19,7 @@
       <section class="rc-attendance" aria-label="Attendance">
         <span class="label">Attendance</span>
         <p>
-          <strong [class.fail]="att.attendancePct !== null && att.attendancePct < 75">{{ att.attendancePct | number: '1.0-1' }}%</strong>
+          <strong [class.fail]="att.attendancePct !== null && att.attendancePct < school.lowAttendancePct()">{{ att.attendancePct | number: '1.0-1' }}%</strong>
           &middot; Present {{ att.present }} &middot; Absent {{ att.absent }} &middot; Late {{ att.late }}
           &middot; {{ att.workingDays }} working days so far
         </p>

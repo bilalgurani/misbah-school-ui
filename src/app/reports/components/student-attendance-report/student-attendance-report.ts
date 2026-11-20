@@ -12,8 +12,7 @@ import { StudentService } from '../../../students/student.service';
 import { AttendanceRegisterService, StudentAttendanceResponse } from '../../services/attendance-register.service';
 import { AttendanceTrendComponent } from '../../../shared/component/attendance-trend.component';
 import { AttendanceTrend, computeTrend, trendFromMonths } from '../../../attendance/attendance-trend.util';
-
-const LOW_THRESHOLD = 75;
+import { SchoolConfigService } from '../../../school/school-config.service';
 const MAX_OPTIONS = 50;
 
 interface StudentOption {
@@ -42,11 +41,14 @@ export class StudentAttendanceReport implements OnInit, OnDestroy {
   private reportService = inject(AttendanceRegisterService);
   private route = inject(ActivatedRoute);
   private toast = inject(ToastService);
+  protected readonly school = inject(SchoolConfigService);
   private request?: Subscription;
   private routeSub?: Subscription;
   private pendingStudentId: number | null = null;
 
-  readonly lowThreshold = LOW_THRESHOLD;
+  get lowThreshold(): number {
+    return this.school.lowAttendancePct();
+  }
 
   students = signal<StudentOption[]>([]);
   studentsLoading = signal<boolean>(true);
@@ -189,7 +191,7 @@ export class StudentAttendanceReport implements OnInit, OnDestroy {
   }
 
   isLow(pct: number | null | undefined): boolean {
-    return pct !== null && pct !== undefined && pct < LOW_THRESHOLD;
+    return pct !== null && pct !== undefined && pct < this.lowThreshold;
   }
 
   monthDate(month: string): Date {

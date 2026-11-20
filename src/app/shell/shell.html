@@ -11,10 +11,10 @@
     <div class="sidenav-content">
       <div class="sidenav-header">
         <div class="brand-logo">
-          <img src="/assets/images/sana-misbah-logo.jpeg" alt="Sana Misbah Public School Logo" class="brand-logo-img" />
+          <img [src]="school.logo()" [alt]="school.schoolName() + ' logo'" class="brand-logo-img" />
         </div>
         <div class="brand-text">
-          <span class="brand-name">Sana Misbah School</span>
+          <span class="brand-name">{{ school.shortName() }}</span>
           <span class="brand-tag">School Management</span>
         </div>
         <!-- Close Mobile Drawer Button -->
@@ -80,7 +80,7 @@
         </button>
 
         <div class="page-title">
-          <img src="assets/images/sana-misbah-banner.jpeg" alt="Sana Group Misbah Public School Nargund" class="header-banner-img" />
+          <img [src]="school.banner()" [alt]="school.schoolName()" class="header-banner-img" />
         </div>
       </div>
 

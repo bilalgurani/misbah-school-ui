@@ -2,6 +2,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { SchoolConfigService } from '../../school/school-config.service';
 import { AuthService } from '../auth.service';
 
 @Component({
@@ -15,6 +16,7 @@ export class Login {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
+  protected school = inject(SchoolConfigService);
 
   isLoading = signal(false);
   errorMessage = signal<string | null>(null);

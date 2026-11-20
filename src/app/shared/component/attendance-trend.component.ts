@@ -1,6 +1,7 @@
 import { DecimalPipe } from '@angular/common';
-import { Component, computed, input } from '@angular/core';
-import { AttendanceTrend, LOW_ATTENDANCE_PCT } from '../../attendance/attendance-trend.util';
+import { Component, computed, inject, input } from '@angular/core';
+import { AttendanceTrend } from '../../attendance/attendance-trend.util';
+import { SchoolConfigService } from '../../school/school-config.service';
 
 /** Attendance percentage with a green up / red down arrow showing the change from the previous period. */
 @Component({
@@ -55,6 +56,7 @@ import { AttendanceTrend, LOW_ATTENDANCE_PCT } from '../../attendance/attendance
   `,
 })
 export class AttendanceTrendComponent {
+  private readonly school = inject(SchoolConfigService);
   readonly pct = input<number | null | undefined>(null);
   readonly trend = input<AttendanceTrend | null | undefined>(null);
   // Text for the tooltip describing what the arrow is compared against.
@@ -65,7 +67,7 @@ export class AttendanceTrendComponent {
 
   readonly isLow = computed(() => {
     const value = this.pct();
-    return value !== null && value !== undefined && value < LOW_ATTENDANCE_PCT;
+    return value !== null && value !== undefined && value < this.school.lowAttendancePct();
   });
 
   readonly absDelta = computed(() => Math.abs(this.trend()?.delta ?? 0));

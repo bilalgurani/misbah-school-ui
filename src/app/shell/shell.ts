@@ -4,6 +4,7 @@ import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router
 import { HostListener } from '@angular/core';
 import { filter } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
+import { SchoolConfigService } from '../school/school-config.service';
 import { ThemeService } from '../shared/services/theme.service';
 import { TermsDialog } from '../terms/terms-dialog';
 import { TermsService, TermsStatus } from '../terms/terms.service';
@@ -20,6 +21,7 @@ export class Shell implements OnInit {
 
   public authService = inject(AuthService);
   public themeService = inject(ThemeService);
+  public school = inject(SchoolConfigService);
   private termsService = inject(TermsService);
   private router = inject(Router); 
   isUserMenuOpen = false;

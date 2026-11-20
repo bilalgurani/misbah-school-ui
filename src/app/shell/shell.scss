@@ -337,6 +337,7 @@ $text-active: var(--foreground);
     display: flex;
     align-items: center;
     flex: 1; /* Allows the center space to expand */
+    min-width: 0;
     gap: 12px;
 
     .hamburger-btn {
@@ -364,13 +365,17 @@ $text-active: var(--foreground);
 
     .page-title {
       flex: 1;
+      min-width: 0;
       display: flex;
       justify-content: center;
       align-items: center;
 
+      // Stays inside the 60px phone header whatever shape the school's banner is.
       .header-banner-img {
-        max-height: 80px;
+        max-height: 44px;
+        max-width: 100%;
         width: auto;
+        height: auto;
         object-fit: contain;
         display: block;
       }

@@ -1,0 +1,11 @@
+{
+  "schoolName": "AFS English Medium School",
+  "shortName": "AFS School",
+  "portalTitle": "AFS School Portal",
+  "apiUrl": "https://afs-school-api.up.railway.app/api",
+  "logo": "school/afs-logo.jpeg",
+  "banner": "school/afs-banner.png",
+  "loginBackground": "school/afs-login-bg.jpg",
+  "icon": "school/afs-icon.png",
+  "lowAttendancePct": 75
+}

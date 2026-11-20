@@ -1,0 +1,9 @@
+{
+  "schoolName": "Sana Misbah Public School",
+  "shortName": "Sana Misbah School",
+  "portalTitle": "Misbah School Portal",
+  "logo": "school/logo.jpeg",
+  "banner": "school/banner.jpeg",
+  "loginBackground": "school/login-bg.jpg",
+  "lowAttendancePct": 75
+}

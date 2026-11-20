@@ -6,9 +6,9 @@
     <!-- Brand / Header Section -->
     <div class="brand-header">
       <div class="school-logo">
-        <img src="/assets/images/sana-misbah-logo.jpeg" alt="Sana Misbah Public School Logo" class="brand-logo-img" />
+        <img [src]="school.logo()" [alt]="school.schoolName() + ' logo'" class="brand-logo-img" />
       </div>
-      <h2>Misbah School Portal</h2>
+      <h2>{{ school.portalTitle() }}</h2>
       <p class="subtitle">Sign in to access your dashboard</p>
     </div>
 

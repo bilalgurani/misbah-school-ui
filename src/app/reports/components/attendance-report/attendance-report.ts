@@ -8,7 +8,7 @@ import { createPaging } from '../../../shared/utils/paging.util';
 import { ToastService } from '../../../shared/services/toast.service';
 import { AbsenteeRow, AttendanceReport } from '../../models/attendance-report.model';
 import { attendanceReportToCsv } from '../../services/attendance-report.csv';
-import { LOW_ATTENDANCE_THRESHOLD } from '../../services/attendance-report.builder';
+import { SchoolConfigService } from '../../../school/school-config.service';
 import { AttendanceReportService } from '../../services/attendance-report.service';
 
 // Local calendar date (toISOString would shift the day in timezones ahead of UTC).
@@ -26,10 +26,14 @@ const todayLocal = (): string => {
 export class AttendanceReportComponent implements OnInit, OnDestroy {
   private reportService = inject(AttendanceReportService);
   private toast = inject(ToastService);
+  protected readonly school = inject(SchoolConfigService);
   private request?: Subscription;
 
   readonly maxDate = todayLocal();
-  readonly lowThreshold = LOW_ATTENDANCE_THRESHOLD;
+
+  get lowThreshold(): number {
+    return this.school.lowAttendancePct();
+  }
 
   selectedDate = signal<string>(todayLocal());
   report = signal<AttendanceReport | null>(null);
@@ -106,7 +110,7 @@ export class AttendanceReportComponent implements OnInit, OnDestroy {
     const report = this.report();
     if (!report) return;
 
-    const blob = new Blob(['\uFEFF' + attendanceReportToCsv(report)], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob(['\uFEFF' + attendanceReportToCsv(report, this.school.shortName())], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;

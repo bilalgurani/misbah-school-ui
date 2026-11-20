@@ -1,9 +1,10 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { Component, computed, input } from '@angular/core';
+import { Component, computed, inject, input } from '@angular/core';
 import { trendFromMonths } from '../../attendance/attendance-trend.util';
 import { ReportCardExam } from '../../exams/exam.service';
+import { SchoolConfigService } from '../../school/school-config.service';
 import { AttendanceTrendComponent } from '../../shared/component/attendance-trend.component';
-import { DEFAULT_SCHOOL_NAME, ProgressCardData } from '../progress-card.data';
+import { ProgressCardData } from '../progress-card.data';
 import {
   Criterion, RATINGS, RATING_LABELS, averageRating, groupCriteria, ratingMap,
 } from '../progress.models';
@@ -21,7 +22,7 @@ export class ProgressCardSheet {
 
   readonly scale = [...RATINGS].reverse();
   readonly ratingLabels = RATING_LABELS;
-  readonly schoolFallback = DEFAULT_SCHOOL_NAME;
+  readonly schoolFallback = inject(SchoolConfigService).shortName;
 
   mainExams = computed<ReportCardExam[]>(() => (this.data().academics?.exams ?? []).filter(e => e.examType !== 'IA'));
 

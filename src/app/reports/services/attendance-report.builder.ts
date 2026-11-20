@@ -9,8 +9,8 @@ import {
   StaffReport,
 } from '../models/attendance-report.model';
 
-// Classes whose attendance falls below this percentage are flagged for management attention.
-export const LOW_ATTENDANCE_THRESHOLD = 80;
+// Default when a school has not set its own cut-off: classes below this percentage are flagged.
+export const LOW_ATTENDANCE_THRESHOLD = 75;
 
 const pct = (part: number, whole: number): number | null =>
   whole > 0 ? (part / whole) * 100 : null;
@@ -27,6 +27,7 @@ export function buildAttendanceReport(
   totalTeachers: number,
   onLeave: OnLeaveEntry[] = [],
   markers: AttendanceMarker[] = [],
+  lowThreshold: number = LOW_ATTENDANCE_THRESHOLD,
 ): AttendanceReport {
   const markerBySection = new Map(markers.map(m => [m.classSectionId, m]));
   const genderByStudent = new Map<number, string>();
@@ -129,7 +130,7 @@ export function buildAttendanceReport(
     bestClass: ranked[0] ?? null,
     lowestClass: ranked.length > 1 ? ranked[ranked.length - 1] : null,
     lowAttendanceClasses: ranked
-      .filter(c => (c.attendancePct ?? 100) < LOW_ATTENDANCE_THRESHOLD)
+      .filter(c => (c.attendancePct ?? 100) < lowThreshold)
       .reverse(),
     absentees,
     staff: buildStaffReport(teacherRecords, totalTeachers, onLeave),

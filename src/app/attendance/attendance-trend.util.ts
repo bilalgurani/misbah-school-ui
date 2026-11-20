@@ -13,8 +13,6 @@ export interface StudentAttendanceStat {
   fromPreviousMonth: boolean;
 }
 
-export const LOW_ATTENDANCE_PCT = 75;
-
 // Changes smaller than this many points are shown as steady rather than as a rise or a drop.
 const STEADY_BAND = 1;
 

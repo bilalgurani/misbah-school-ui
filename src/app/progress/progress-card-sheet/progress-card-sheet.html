@@ -1,7 +1,7 @@
 @let d = data();
 <article class="sheet" aria-label="Holistic progress card">
   <header class="sheet-header">
-    <h1>{{ d.schoolName || schoolFallback }}</h1>
+    <h1>{{ d.schoolName || schoolFallback() }}</h1>
     <p class="sheet-title">Holistic Progress Card &middot; {{ d.yearName }} &middot; Term {{ d.term }}</p>
   </header>
 

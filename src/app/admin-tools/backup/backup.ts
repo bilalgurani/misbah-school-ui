@@ -12,7 +12,7 @@ function pad(n: number): string {
 
 function fallbackName(): string {
   const d = new Date();
-  return `misbah-school-backup-${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}.sql`;
+  return `school-backup-${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}.sql`;
 }
 
 function filenameFrom(header: string | null): string {

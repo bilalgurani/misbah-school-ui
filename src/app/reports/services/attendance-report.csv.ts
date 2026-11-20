@@ -11,9 +11,9 @@ const line = (...values: (string | number | null | undefined)[]): string => valu
 
 const fixed = (value: number | null): string => (value === null ? 'N/A' : value.toFixed(1));
 
-export function attendanceReportToCsv(r: AttendanceReport): string {
+export function attendanceReportToCsv(r: AttendanceReport, schoolName = 'School'): string {
   const rows: string[] = [
-    line('Sana Misbah School - Daily Attendance Report'),
+    line(`${schoolName} - Daily Attendance Report`),
     line('Date', r.date),
     line('Generated at', r.generatedAt.toLocaleString()),
     '',

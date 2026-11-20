@@ -5,6 +5,7 @@ import { AttendanceApiService } from '../../attendance/services/attendance-api.s
 import { AttendanceMarker, ClassSection } from '../../attendance/models/attendance.models';
 import { LeaveService, OnLeaveEntry } from '../../leave/leave.service';
 import { AttendanceReport, SectionAttendanceData } from '../models/attendance-report.model';
+import { SchoolConfigService } from '../../school/school-config.service';
 import { buildAttendanceReport } from './attendance-report.builder';
 
 const MAX_PARALLEL_SECTION_REQUESTS = 5;
@@ -13,6 +14,7 @@ const MAX_PARALLEL_SECTION_REQUESTS = 5;
 export class AttendanceReportService {
   private api = inject(AttendanceApiService);
   private leaveService = inject(LeaveService);
+  private school = inject(SchoolConfigService);
 
   getDailyReport(date: string): Observable<AttendanceReport> {
     return this.api.getClassSections().pipe(
@@ -27,7 +29,7 @@ export class AttendanceReportService {
         }),
       ),
       map(({ sections, teacherRecords, teachers, onLeave, markers }) =>
-        buildAttendanceReport(date, sections, teacherRecords, teachers.length, onLeave, markers),
+        buildAttendanceReport(date, sections, teacherRecords, teachers.length, onLeave, markers, this.school.lowAttendancePct()),
       ),
     );
   }

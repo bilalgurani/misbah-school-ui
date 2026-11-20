@@ -7,6 +7,7 @@ import { DashboardService } from './services/dashboard-api.service';
 import { DashboardCharts } from './components/dashboard-charts/dashboard-charts';
 import { ToastService } from '../shared/services/toast.service';
 import { AuthService } from '../auth/auth.service';
+import { SchoolConfigService } from '../school/school-config.service';
 import { CalendarService, WorkingDaysSummary } from '../calendar/holidays/calendar.service';
 
 function greetingFor(hour: number): string {
@@ -35,6 +36,7 @@ export class Dashboard implements OnInit {
   private calendarService = inject(CalendarService);
   private toast = inject(ToastService);
   protected auth = inject(AuthService);
+  protected school = inject(SchoolConfigService);
 
   protected readonly greeting = greetingFor(new Date().getHours());
 
