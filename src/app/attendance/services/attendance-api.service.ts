@@ -34,8 +34,8 @@ export class AttendanceApiService {
     return this.http.get<AttendanceMarker[]>(`${this.baseUrl}/attendance/markers`, { params });
   }
 
-  saveAttendance(request: MarkAttendanceRequest): Observable<void> {
-    return this.http.post<void>(`${this.baseUrl}/attendance`, request);
+  saveAttendance(request: MarkAttendanceRequest): Observable<AttendanceMarker> {
+    return this.http.post<AttendanceMarker>(`${this.baseUrl}/attendance`, request);
   }
 
   clearAttendance(classSectionId: number, date: string): Observable<{ removed: number }> {

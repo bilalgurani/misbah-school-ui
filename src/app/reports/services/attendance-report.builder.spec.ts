@@ -47,8 +47,8 @@ describe('buildAttendanceReport', () => {
 
   it('shows who took attendance only for classes that are marked', () => {
     const markers = [
-      { classSectionId: 1, markedBy: 'Asif', markedAt: '2026-11-14T05:12:00Z' },
-      { classSectionId: 2, markedBy: 'Rahul', markedAt: null },
+      { classSectionId: 1, markedBy: 'Asif', markedAt: '2026-11-14T05:12:00Z', version: 'v1' },
+      { classSectionId: 2, markedBy: 'Rahul', markedAt: null, version: 'legacy' },
     ];
 
     const r = buildAttendanceReport('2026-11-14', sections, [], 0, [], markers);

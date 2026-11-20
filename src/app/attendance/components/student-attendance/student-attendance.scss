@@ -1,3 +1,8 @@
+@use '../../../shared/styles/parts' as p;
+
+// Standard button look, used by the "attendance changed" dialog.
+@include p.buttons;
+
 /* Variables mapped to CSS Custom Properties */
 $brand-color: var(--primary);
 $border-color: var(--border);
@@ -149,6 +154,26 @@ $danger-bg: color-mix(in oklch, var(--absent) 15%, transparent);
     }
 
     &.absent strong { color: $danger-color; }
+  }
+}
+
+.conflict-card {
+  max-width: 480px;
+
+  .modal-body p {
+    margin: 0 0 0.75rem;
+    font-size: 0.95rem;
+    line-height: 1.5;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .modal-footer {
+    @media (max-width: 519px) {
+      flex-direction: column-reverse;
+    }
   }
 }
 

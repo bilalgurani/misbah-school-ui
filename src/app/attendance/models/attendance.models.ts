@@ -24,8 +24,10 @@ export interface AttendanceRecordDto {
 /** Who last saved a class's attendance for a day. markedAt is null for records saved before times were kept. */
 export interface AttendanceMarker {
     classSectionId: number;
-    markedBy: string;
+    markedBy: string | null;
     markedAt: string | null;
+    // Identifies the saved state; 'none' when nothing is saved.
+    version: string;
 }
 
 export interface StudentAttendanceItem {
@@ -48,6 +50,10 @@ export interface MarkAttendanceRequest {
     classSectionId: number;
   date: string; // YYYY-MM-DD for Spring Boot @DateTimeFormat
   entries: StudentAttendanceEntry[];
+  // The saved version the screen was showing ('none' when nothing was saved); lets the server spot a newer save.
+  expectedVersion?: string;
+  // Admin only: save even though someone saved after the screen loaded.
+  overwrite?: boolean;
 }
 
 export interface LocalStudentUI {

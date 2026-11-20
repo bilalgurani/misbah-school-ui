@@ -4,6 +4,7 @@ import { AttendanceApiService } from "../../services/attendance-api.service";
 import { ClassSection, LocalStudentUI, MarkAttendanceRequest, AttendanceMarker } from "../../models/attendance.models";
 import { ToastService } from "../../../shared/services/toast.service";
 import { ActivatedRoute } from "@angular/router";
+import { catchError, of } from "rxjs";
 import { LoaderComponent } from "../../../shared/component/loader.component";
 import { AbsenceAlert } from "../../../messaging/absence-alert/absence-alert";
 import { AttendanceTrendComponent } from "../../../shared/component/attendance-trend.component";
@@ -42,6 +43,9 @@ export class StudentAttendance implements OnInit {
   savedOnServer = signal<boolean>(false);
   // Who last saved this class's attendance for the chosen day; null when nothing is saved.
   marker = signal<AttendanceMarker | null>(null);
+  // The saved version the marks on screen are based on: undefined while loading, null when it couldn't be read.
+  loadedVersion = signal<string | null | undefined>(undefined);
+  conflict = signal<{ markedBy: string | null; markedAt: string | null } | null>(null);
   confirmingClear = signal<boolean>(false);
 
 
@@ -109,8 +113,22 @@ selectedSectionName = computed(() => {
     this.attendanceSaved.set(false);
     this.savedOnServer.set(false);
     this.marker.set(null);
+    this.loadedVersion.set(undefined);
     this.loadTrend(sectionId, date);
 
+    // The saved version is read BEFORE the marks, so a save that lands in between makes our version older than the
+    // data we show, which the server then reports as a conflict instead of silently overwriting.
+    this.api.getMarkers(date).pipe(catchError(() => of(null))).subscribe(markers => {
+      if (sectionId !== this.selectedSectionId() || date !== this.selectedDate()) return;
+      const current = markers?.find(m => m.classSectionId === sectionId) ?? null;
+      this.marker.set(current);
+      // null means "couldn't find out", in which case the server skips the check rather than blocking the save.
+      this.loadedVersion.set(markers === null ? null : current?.version ?? 'none');
+      this.loadRecords(sectionId, date);
+    });
+  }
+
+  private loadRecords(sectionId: number, date: string) {
     // 1. Try loading existing attendance record first
     this.api.getAttendance(sectionId, date).subscribe({
       next: (records) => {
@@ -125,7 +143,6 @@ selectedSectionName = computed(() => {
           this.students.set(mapped);
           this.attendanceSaved.set(true);
           this.savedOnServer.set(records.some(r => !!r.status));
-          if (this.savedOnServer()) this.loadMarker(sectionId, date);
           this.isLoading.set(false);
         } else {
           // 2. Fall back to raw student roster if attendance isn't marked yet
@@ -135,17 +152,6 @@ selectedSectionName = computed(() => {
       error: () => {
         this.loadDefaultRoster(sectionId);
       }
-    });
-  }
-
-  // Purely informational: if it can't be loaded the screen just doesn't show the "Taken by" line.
-  private loadMarker(sectionId: number, date: string) {
-    this.api.getMarkers(date).subscribe({
-      next: markers => {
-        if (sectionId !== this.selectedSectionId() || date !== this.selectedDate()) return;
-        this.marker.set(markers.find(m => m.classSectionId === sectionId) ?? null);
-      },
-      error: () => undefined,
     });
   }
 
@@ -197,7 +203,7 @@ selectedSectionName = computed(() => {
   return list.some(s => !s.status || (s.status !== 'PRESENT' && s.status !== 'ABSENT'));
 });
 
-submitAttendance() {
+submitAttendance(overwrite = false) {
   
   const sectionId = this.selectedSectionId();
   const date = this.selectedDate();
@@ -215,29 +221,45 @@ submitAttendance() {
 
   if (!sectionId || !date) return;
 
+  const version = this.loadedVersion();
   const payload: MarkAttendanceRequest = {
     classSectionId: sectionId,
     date: date,
     entries: this.students().map(s => ({
       studentId: s.id,
       status: s.status
-    }))
+    })),
+    ...(typeof version === 'string' ? { expectedVersion: version } : {}),
+    ...(overwrite ? { overwrite: true } : {}),
   };
 
   this.isSubmitting.set(true);
   this.api.saveAttendance(payload).subscribe({
-    next: () => {
+    next: (saved) => {
       this.isSubmitting.set(false);
+      this.conflict.set(null);
       this.attendanceSaved.set(true);
       this.savedOnServer.set(true);
-      this.loadMarker(sectionId, date);
+      // Keep working from what the server now holds, so a second save isn't mistaken for a conflict.
+      this.marker.set(saved ?? null);
+      this.loadedVersion.set(saved?.version ?? null);
       this.toast.show('Attendance submitted successfully!');
     },
     error: (err) => {
       this.isSubmitting.set(false);
+      if (err?.status === 409 && err?.error?.code === 'ATTENDANCE_CHANGED') {
+        this.conflict.set({ markedBy: err.error.markedBy ?? null, markedAt: err.error.markedAt ?? null });
+        return;
+      }
       this.toast.showError(err, 'Failed to save attendance');
     }
   });
+}
+
+// Shows the marks that were saved meanwhile, so nothing is overwritten unseen.
+reviewSavedMarks() {
+  this.conflict.set(null);
+  this.fetchAttendanceOrStudents();
 }
 
 clearAttendance() {

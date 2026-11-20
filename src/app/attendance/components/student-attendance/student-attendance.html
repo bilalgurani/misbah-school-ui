@@ -139,7 +139,7 @@
       <app-absence-alert [classSectionId]="selectedSectionId()!" [date]="selectedDate()" [absentCount]="absentCount()"
         [absentees]="absentees()" [className]="selectedSectionName()"></app-absence-alert>
     }
-    <button [disabled]="students().length === 0 || isSubmitting() || isLoading() || this.isAttendanceIncomplete()" 
+    <button [disabled]="students().length === 0 || isSubmitting() || isLoading() || loadedVersion() === undefined || this.isAttendanceIncomplete()" 
       class="submit-btn" (click)="submitAttendance()">Save & Submit Attendance</button>
     @if (authService.isAdmin() && savedOnServer()) {
       <button type="button" class="clear-attendance-btn" [disabled]="isSubmitting()" (click)="confirmingClear.set(true)">
@@ -147,6 +147,31 @@
       </button>
     }
   </footer>
+}
+@if (conflict(); as c) {
+  <div class="modal-backdrop">
+    <div class="modal-card conflict-card" role="alertdialog" aria-modal="true" aria-labelledby="conflict-title">
+      <div class="modal-header">
+        <h3 id="conflict-title">Attendance was just saved by someone else</h3>
+      </div>
+      <div class="modal-body">
+        @if (c.markedBy) {
+          <p><strong>{{ c.markedBy }}</strong> saved attendance for Class {{ selectedSectionName() }}
+            @if (c.markedAt) { at {{ c.markedAt | date: 'h:mm a' }} }
+            after you opened this page.</p>
+        } @else {
+          <p>Attendance for Class {{ selectedSectionName() }} was changed or cleared after you opened this page.</p>
+        }
+        <p>Your marks have not been saved. Review what is saved now, or {{ authService.isAdmin() ? 'replace it with yours.' : 'ask an admin if it needs replacing.' }}</p>
+      </div>
+      <div class="modal-footer">
+        @if (authService.isAdmin()) {
+          <button type="button" class="btn-secondary" [disabled]="isSubmitting()" (click)="submitAttendance(true)">Overwrite with mine</button>
+        }
+        <button type="button" class="btn-primary" [disabled]="isSubmitting()" (click)="reviewSavedMarks()">Review saved marks</button>
+      </div>
+    </div>
+  </div>
 }
 @if (confirmingClear()) {
   <app-confirm-dialog title="Clear attendance?"
