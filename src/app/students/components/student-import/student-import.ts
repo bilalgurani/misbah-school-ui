@@ -53,9 +53,9 @@ function normalizeDate(value: string): string | null {
 
 function normalizeGender(value: string): string | null {
   const text = value.trim().toLowerCase();
-  if (text === 'male') return 'Male';
-  if (text === 'female') return 'Female';
-  if (text === 'other') return 'Other';
+  if (text === 'male' || text === 'm' || text === 'boy') return 'Male';
+  if (text === 'female' || text === 'f' || text === 'girl') return 'Female';
+  if (text === 'other' || text === 'o') return 'Other';
   return null;
 }
 

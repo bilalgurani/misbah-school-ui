@@ -409,3 +409,60 @@ $bg-alt: var(--muted);
   color: $text-sub;
   font-size: 0.85rem;
 }
+
+/* Edit all */
+.bulk-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+
+  @media (min-width: 768px) {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.bulk-note {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: $text-sub;
+}
+
+.bulk-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.bulk-count {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: $text-sub;
+}
+
+.cell-input {
+  width: 100%;
+  min-height: 40px;
+  padding: 0.375rem 0.625rem;
+  border: 1px solid $border-color;
+  border-radius: var(--radius);
+  background: var(--background);
+  color: $text-main;
+  font-size: 0.95rem;
+  font-family: inherit;
+  box-sizing: border-box;
+
+  &.narrow {
+    max-width: 120px;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--ring);
+    box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 20%, transparent);
+  }
+}

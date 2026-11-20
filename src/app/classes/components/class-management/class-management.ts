@@ -39,6 +39,97 @@ export class ClassManagement implements OnInit {
 
   seats = signal<Map<number, SectionSeats>>(new Map());
 
+  // "Edit all": every class and section in editable rows, saved together.
+  bulkMode = signal<boolean>(false);
+  isBulkSaving = signal<boolean>(false);
+  levelDrafts: { id: number; name: string; displayOrder: number | string }[] = [];
+  sectionDrafts: { id: number; levelName: string; division: string; capacity: number | string | null }[] = [];
+
+  openBulk(): void {
+    this.levelDrafts = [...this.levels()]
+      .sort((a, b) => a.displayOrder - b.displayOrder || a.name.localeCompare(b.name))
+      .map(l => ({ id: l.id, name: l.name, displayOrder: l.displayOrder }));
+    this.sectionDrafts = this.sections().map(s => ({
+      id: s.id, levelName: s.levelName, division: s.division, capacity: this.seatsFor(s.id)?.capacity ?? null,
+    }));
+    this.bulkMode.set(true);
+  }
+
+  cancelBulk(): void {
+    this.bulkMode.set(false);
+    this.isBulkSaving.set(false);
+  }
+
+  // Swaps the order numbers of two neighbouring classes, so a class can be moved up or down in one click.
+  moveLevel(index: number, step: -1 | 1): void {
+    const other = index + step;
+    if (other < 0 || other >= this.levelDrafts.length) return;
+    const a = this.levelDrafts[index];
+    const b = this.levelDrafts[other];
+    [a.displayOrder, b.displayOrder] = [b.displayOrder, a.displayOrder];
+    this.levelDrafts[index] = b;
+    this.levelDrafts[other] = a;
+  }
+
+  private changedLevels() {
+    const saved = new Map(this.levels().map(l => [l.id, l]));
+    return this.levelDrafts.filter(d => {
+      const s = saved.get(d.id);
+      return !!s && (d.name.trim() !== s.name || Number(d.displayOrder) !== s.displayOrder);
+    });
+  }
+
+  private changedSections() {
+    const saved = new Map(this.sections().map(s => [s.id, s]));
+    return this.sectionDrafts.filter(d => {
+      const s = saved.get(d.id);
+      const capacity = this.parseCapacity(d.capacity);
+      return !!s && (d.division.trim() !== s.division || capacity !== (this.seatsFor(d.id)?.capacity ?? null));
+    });
+  }
+
+  bulkChangeCount(): number {
+    return this.changedLevels().length + this.changedSections().length;
+  }
+
+  saveBulk(): void {
+    const levels = this.changedLevels();
+    const sections = this.changedSections();
+    if (levels.length === 0 && sections.length === 0) {
+      this.toast.show('Nothing has been changed.');
+      return;
+    }
+    for (const l of levels) {
+      const order = Number(l.displayOrder);
+      if (!l.name.trim()) { this.toast.show('Every class needs a name.', 'error'); return; }
+      if (!Number.isInteger(order) || order < 1) { this.toast.show('Display order must be a whole number of 1 or more.', 'error'); return; }
+    }
+    const sectionItems: { id: number; division: string; capacity: number | null }[] = [];
+    for (const s of sections) {
+      const capacity = this.parseCapacity(s.capacity);
+      if (!s.division.trim()) { this.toast.show('Every section needs a name.', 'error'); return; }
+      if (capacity === undefined) { this.toast.show('Seats must be a whole number of 1 or more, or empty for no limit.', 'error'); return; }
+      sectionItems.push({ id: s.id, division: s.division.trim(), capacity });
+    }
+
+    this.isBulkSaving.set(true);
+    // Classes first (one call), then sections (one call). Each call is all or nothing.
+    const classCall: Observable<unknown> = levels.length
+      ? this.api.updateLevelsBulk(levels.map(l => ({ id: l.id, name: l.name.trim(), displayOrder: Number(l.displayOrder) })))
+      : of(null);
+    classCall.pipe(switchMap(() => sectionItems.length ? this.api.updateSectionsBulk(sectionItems) : of(null))).subscribe({
+      next: () => {
+        this.toast.show(`Saved ${levels.length + sectionItems.length} change${levels.length + sectionItems.length === 1 ? '' : 's'}.`);
+        this.cancelBulk();
+        this.load();
+      },
+      error: (err) => {
+        this.isBulkSaving.set(false);
+        this.toast.showError(err, 'Failed to save the changes. Nothing in the failed step was saved.');
+      }
+    });
+  }
+
   deleteTarget = signal<DeleteTarget | null>(null);
   isDeleting = signal<boolean>(false);
 

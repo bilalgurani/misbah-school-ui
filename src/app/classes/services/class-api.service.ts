@@ -22,6 +22,16 @@ export class ClassApiService {
     return this.http.put<ClassLevel>(`${this.levelsUrl}/${id}`, request);
   }
 
+  // Admin only. Saves every changed class in one call, all or nothing.
+  updateLevelsBulk(items: { id: number; name: string; displayOrder: number }[]): Observable<ClassLevel[]> {
+    return this.http.put<ClassLevel[]>(`${this.levelsUrl}/bulk`, { items });
+  }
+
+  // Admin only. Saves every changed section (name and seat limit) in one call, all or nothing.
+  updateSectionsBulk(items: { id: number; division: string; capacity: number | null }[]): Observable<void> {
+    return this.http.put<void>(`${this.sectionsUrl}/bulk`, { items });
+  }
+
   deleteLevel(id: number): Observable<void> {
     return this.http.delete<void>(`${this.levelsUrl}/${id}`);
   }

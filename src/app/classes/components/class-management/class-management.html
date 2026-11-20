@@ -2,14 +2,89 @@
   <div class="page-header">
     <h2>Classes & Sections</h2>
     <div class="header-actions">
-      <button type="button" class="btn-secondary" [disabled]="levels().length === 0" (click)="openSectionForm()">+ Add Section</button>
-      <button type="button" class="btn-primary" (click)="openLevelForm()">+ Add Class</button>
+      @if (!bulkMode()) {
+        <button type="button" class="btn-secondary" [disabled]="levels().length === 0 || isLoading()" (click)="openBulk()">Edit all</button>
+      }
+      <button type="button" class="btn-secondary" [disabled]="levels().length === 0 || bulkMode()" (click)="openSectionForm()">+ Add Section</button>
+      <button type="button" class="btn-primary" [disabled]="bulkMode()" (click)="openLevelForm()">+ Add Class</button>
     </div>
   </div>
 
   @if (isLoading()) {
     <div class="card">
       <app-loader message="Loading classes..."></app-loader>
+    </div>
+  } @else if (bulkMode()) {
+    <!-- EDIT ALL: every class and section in one view, saved together -->
+    <div class="card bulk-bar">
+      <p class="bulk-note">
+        Change anything below, then press <strong>Save all</strong>. All changes are sent together.
+        Use the arrows to swap the order of two classes. Classes with order 1 to 3 count as Pre-Primary on the dashboard.
+      </p>
+      <div class="bulk-actions">
+        <span class="bulk-count">{{ bulkChangeCount() }} changed</span>
+        <button type="button" class="btn-secondary" [disabled]="isBulkSaving()" (click)="cancelBulk()">Cancel</button>
+        <button type="button" class="btn-primary" [disabled]="isBulkSaving() || bulkChangeCount() === 0" (click)="saveBulk()">
+          {{ isBulkSaving() ? 'Saving...' : 'Save all' }}
+        </button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Classes</div>
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr><th>Order</th><th>Class Name</th><th>Move</th></tr>
+          </thead>
+          <tbody>
+            @for (d of levelDrafts; track d.id; let i = $index) {
+              <tr>
+                <td data-label="Order">
+                  <input type="number" min="1" step="1" class="form-input cell-input narrow" [name]="'order-' + d.id"
+                         [(ngModel)]="d.displayOrder" [attr.aria-label]="'Display order of ' + d.name">
+                </td>
+                <td data-label="Class Name">
+                  <input type="text" class="form-input cell-input" maxlength="50" [name]="'level-' + d.id"
+                         [(ngModel)]="d.name" [attr.aria-label]="'Name of class ' + d.name" autocomplete="off">
+                </td>
+                <td data-label="Move" class="actions">
+                  <button type="button" class="btn-secondary" [disabled]="i === 0" (click)="moveLevel(i, -1)" aria-label="Move up">&#9650;</button>
+                  <button type="button" class="btn-secondary" [disabled]="i === levelDrafts.length - 1" (click)="moveLevel(i, 1)" aria-label="Move down">&#9660;</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Sections</div>
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr><th>Class</th><th>Section</th><th>Seat Limit</th></tr>
+          </thead>
+          <tbody>
+            @for (d of sectionDrafts; track d.id) {
+              <tr>
+                <td data-label="Class" class="fw-medium">{{ d.levelName }}</td>
+                <td data-label="Section">
+                  <input type="text" class="form-input cell-input narrow" maxlength="20" [name]="'division-' + d.id"
+                         [(ngModel)]="d.division" [attr.aria-label]="'Section name in class ' + d.levelName" autocomplete="off">
+                </td>
+                <td data-label="Seat Limit">
+                  <input type="number" min="1" step="1" class="form-input cell-input narrow" placeholder="No limit" [name]="'capacity-' + d.id"
+                         [(ngModel)]="d.capacity" [attr.aria-label]="'Seat limit of ' + d.levelName + ' ' + d.division">
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="3" class="empty-state">No sections yet.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
     </div>
   } @else {
     <!-- CLASSES -->
