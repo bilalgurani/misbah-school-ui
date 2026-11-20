@@ -188,13 +188,129 @@ $text-active: var(--foreground);
   }
 }
 
-.nav-section-title {
-  font-size: 0.75rem;
-  font-weight: 700;
+/* Menu groups: one open at a time, so the menu stays short on a phone */
+.nav-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nav-group-btn {
+  width: 100%;
+  border: none;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  span {
+    flex: 1;
+  }
+
+  .chevron {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+    flex: none;
+    transition: transform 0.2s ease;
+
+    &.open {
+      transform: rotate(180deg);
+    }
+  }
+
+  // The group holding the page you are on is marked even while it is closed.
+  &.has-active:not(.active-link) {
+    color: var(--sidebar-primary);
+    font-weight: 600;
+  }
+}
+
+.nav-sub {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0 0 6px 22px;
+  padding-left: 12px;
+  border-left: 2px solid var(--sidebar-border);
+}
+
+.nav-sublink {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
   color: var(--sidebar-foreground);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin: 1.25rem 0 0.35rem 0.75rem;
+  transition: background-color 0.15s ease, color 0.15s ease;
+
+  &:hover {
+    background-color: var(--sidebar-accent-foreground);
+    color: var(--sidebar-accent);
+  }
+
+  :host-context(.dark) &:hover {
+    background-color: var(--sidebar-accent);
+    color: var(--sidebar-accent-foreground);
+  }
+
+  &.active-link {
+    background-color: var(--sidebar-primary);
+    color: var(--sidebar-primary-foreground);
+    font-weight: 600;
+  }
+}
+
+/* Phone tab bar */
+.bottom-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 90;
+  display: flex;
+  background: var(--card);
+  border-top: 1px solid $border-color;
+  padding-bottom: env(safe-area-inset-bottom);
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.06);
+
+  @media print {
+    display: none;
+  }
+
+  .bottom-link {
+    flex: 1;
+    min-height: 56px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    border: none;
+    background: transparent;
+    color: var(--muted-foreground);
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+
+    svg {
+      width: 24px;
+      height: 24px;
+      fill: currentColor;
+    }
+
+    &.active {
+      color: var(--foreground);
+
+      svg {
+        color: var(--sidebar-primary);
+      }
+    }
+  }
 }
 
 /* Layout Shell Header & Content */
@@ -264,6 +380,8 @@ $text-active: var(--foreground);
 
 .page-body {
   padding: 1rem;
+  // Room for the phone tab bar so it never covers the last rows or the Save buttons.
+  padding-bottom: calc(5rem + env(safe-area-inset-bottom));
   flex: 1;
 }
 
@@ -441,5 +559,9 @@ $text-active: var(--foreground);
 
   .page-body {
     padding: 32px;
+  }
+
+  .bottom-nav {
+    display: none;
   }
 }
