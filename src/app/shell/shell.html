@@ -355,6 +355,12 @@
               </li>
             }
             <li>
+              <button type="button" class="theme-toggle" (click)="openTerms()">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
+                <span>Terms &amp; Privacy</span>
+              </button>
+            </li>
+            <li>
               <a [routerLink]="['/help']" (click)="closeMenu()">
                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z"/></svg>
                 <span>Help & Support</span>
@@ -380,3 +386,12 @@
     </div>
   </main>
 </div>
+
+@if (termsStatus(); as terms) {
+  @if (terms.required) {
+    <app-terms-dialog [required]="true" [status]="terms" (accepted)="onTermsAccepted($event)"
+      (signedOut)="onLogout()"></app-terms-dialog>
+  } @else if (viewingTerms()) {
+    <app-terms-dialog [status]="terms" (closed)="viewingTerms.set(false)"></app-terms-dialog>
+  }
+}

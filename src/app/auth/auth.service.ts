@@ -71,7 +71,8 @@ export class AuthService {
   isLoggedIn = signal<boolean>(this.hasValidToken());
 
   // Reactive Computed property for template reactivity (@if (auth.isAuthenticated()))
-  isAuthenticated = computed(() => !!this.currentUser() && !!this.getToken());
+  // Must stay free of side effects: computed() signals can't write other signals (NG0600).
+  isAuthenticated = computed(() => !!this.currentUser() && this.hasValidToken());
   isAdmin = computed(() => this.currentRole() === 'ADMIN');
   isTeacher = computed(() => this.currentRole() === 'TEACHER');
 

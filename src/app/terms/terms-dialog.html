@@ -1,0 +1,63 @@
+<div class="modal-backdrop terms-backdrop" (click)="required() ? null : closed.emit()">
+  <div class="modal-card terms-card" role="dialog" aria-modal="true" aria-labelledby="terms-title" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3 id="terms-title">{{ required() ? 'Welcome. Please review and accept' : 'Terms and Privacy' }}</h3>
+      @if (!required()) {
+        <button type="button" class="close-btn" (click)="closed.emit()" aria-label="Close dialog">&times;</button>
+      }
+    </div>
+
+    <div class="modal-body terms-body" tabindex="0" aria-label="Terms and data consent">
+      @if (required()) {
+        <p class="lead">Before the school starts using this system, an administrator needs to accept the Terms and confirm consent to collect and use data.</p>
+      }
+      @for (section of sections; track section.heading) {
+        <section>
+          <h4>{{ section.heading }}</h4>
+          @for (p of section.paragraphs ?? []; track p) {
+            <p>{{ p }}</p>
+          }
+          @if (section.bullets) {
+            <ul>
+              @for (b of section.bullets; track b) {
+                <li>{{ b }}</li>
+              }
+            </ul>
+          }
+        </section>
+      }
+    </div>
+
+    @if (required()) {
+      <div class="consent">
+        <label class="check">
+          <input type="checkbox" [checked]="agreedTerms()" (change)="agreedTerms.set($any($event.target).checked)">
+          <span>{{ labels.terms }}</span>
+        </label>
+        <label class="check">
+          <input type="checkbox" [checked]="agreedConsent()" (change)="agreedConsent.set($any($event.target).checked)">
+          <span>{{ labels.consent }}</span>
+        </label>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" [disabled]="isSaving()" (click)="signedOut.emit()">Sign out</button>
+        <button type="button" class="btn-primary" [disabled]="!agreedTerms() || !agreedConsent() || isSaving()" (click)="accept()">
+          {{ isSaving() ? 'Saving...' : 'Accept & continue' }}
+        </button>
+      </div>
+    } @else {
+      <div class="modal-footer">
+        @if (status(); as s) {
+          <span class="record">
+            @if (s.accepted) {
+              Accepted by <strong>{{ s.acceptedBy }}</strong> on {{ s.acceptedAt | date: 'dd MMM yyyy, h:mm a' }} (version {{ s.version }})
+            } @else {
+              Not accepted yet
+            }
+          </span>
+        }
+        <button type="button" class="btn-primary" (click)="closed.emit()">Close</button>
+      </div>
+    }
+  </div>
+</div>

@@ -3,9 +3,11 @@ import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/rou
 import { HostListener } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
 import { ThemeService } from '../shared/services/theme.service';
+import { TermsDialog } from '../terms/terms-dialog';
+import { TermsService, TermsStatus } from '../terms/terms.service';
 
 @Component({
-  imports: [RouterOutlet, RouterLinkActive, RouterLink],
+  imports: [RouterOutlet, RouterLinkActive, RouterLink, TermsDialog],
   selector: 'app-shell',
   styleUrl: './shell.scss',
   templateUrl: './shell.html',
@@ -15,8 +17,12 @@ export class Shell implements OnInit {
 
   public authService = inject(AuthService);
   public themeService = inject(ThemeService);
+  private termsService = inject(TermsService);
   private router = inject(Router); 
   isUserMenuOpen = false;
+
+  termsStatus = signal<TermsStatus | null>(null);
+  viewingTerms = signal(false);
 
   // Initials are drawn locally so usernames never go to an outside avatar service.
   userInitials = computed(() => (this.authService.currentUser() || 'U').trim().slice(0, 2).toUpperCase());
@@ -39,6 +45,20 @@ export class Shell implements OnInit {
         }
       }
     });
+    // If this check fails the app stays usable; the consent screen only appears once the status is known.
+    this.termsService.getStatus().subscribe({
+      next: status => this.termsStatus.set(status),
+      error: () => undefined,
+    });
+  }
+
+  onTermsAccepted(status: TermsStatus): void {
+    this.termsStatus.set(status);
+  }
+
+  openTerms(): void {
+    this.closeMenu();
+    this.viewingTerms.set(true);
   }
 
   toggleUserMenu(): void {
