@@ -13,6 +13,9 @@ export interface ClassReportRow {
   displayName: string;
   marked: boolean;
   failed: boolean;
+  // Who last saved this class's attendance, when it is marked.
+  takenBy: string | null;
+  takenAt: string | null;
   enrolled: number;
   present: number;
   late: number;

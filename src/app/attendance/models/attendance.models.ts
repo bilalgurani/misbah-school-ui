@@ -21,6 +21,13 @@ export interface AttendanceRecordDto {
     rollNo: number;
 }
 
+/** Who last saved a class's attendance for a day. markedAt is null for records saved before times were kept. */
+export interface AttendanceMarker {
+    classSectionId: number;
+    markedBy: string;
+    markedAt: string | null;
+}
+
 export interface StudentAttendanceItem {
     id: number;
     studentId: number;

@@ -1,7 +1,7 @@
 import { Injectable, inject } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { Observable } from "rxjs";
-import { AttendanceRecordDto, ClassSection, MarkAttendanceRequest, MarkTeacherAttendanceRequest, StudentSummaryDto, TeacherAttendanceRecordDto, TeacherSummaryDto } from "../models/attendance.models";
+import { AttendanceMarker, AttendanceRecordDto, ClassSection, MarkAttendanceRequest, MarkTeacherAttendanceRequest, StudentSummaryDto, TeacherAttendanceRecordDto, TeacherSummaryDto } from "../models/attendance.models";
 import { environment } from "../../../environments/environment";
 
 @Injectable({
@@ -27,6 +27,11 @@ export class AttendanceApiService {
       .set('classSectionId', classSectionId)
       .set('date', date);
     return this.http.get<AttendanceRecordDto[]>(`${this.baseUrl}/attendance`, { params });
+  }
+
+  getMarkers(date: string): Observable<AttendanceMarker[]> {
+    const params = new HttpParams().set('date', date);
+    return this.http.get<AttendanceMarker[]>(`${this.baseUrl}/attendance/markers`, { params });
   }
 
   saveAttendance(request: MarkAttendanceRequest): Observable<void> {

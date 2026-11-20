@@ -1,7 +1,7 @@
 import { Component, computed, inject, OnInit, signal } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { AttendanceApiService } from "../../services/attendance-api.service";
-import { ClassSection, LocalStudentUI, MarkAttendanceRequest } from "../../models/attendance.models";
+import { ClassSection, LocalStudentUI, MarkAttendanceRequest, AttendanceMarker } from "../../models/attendance.models";
 import { ToastService } from "../../../shared/services/toast.service";
 import { ActivatedRoute } from "@angular/router";
 import { LoaderComponent } from "../../../shared/component/loader.component";
@@ -11,9 +11,10 @@ import { AttendanceTrendService, StudentStatMap } from "../../services/attendanc
 import { toMonthKey } from "../../attendance-trend.util";
 import { AuthService } from "../../../auth/auth.service";
 import { ConfirmDialogComponent } from "../../../shared/component/confirm-dialog.component";
+import { DatePipe } from "@angular/common";
 
 @Component({
-  imports: [FormsModule, AbsenceAlert, LoaderComponent, AttendanceTrendComponent, ConfirmDialogComponent],
+  imports: [FormsModule, DatePipe, AbsenceAlert, LoaderComponent, AttendanceTrendComponent, ConfirmDialogComponent],
   selector: 'app-student-attendance',
   styleUrl: './student-attendance.scss',
   templateUrl: './student-attendance.html',
@@ -39,6 +40,8 @@ export class StudentAttendance implements OnInit {
   isSubmitting = signal<boolean>(false);
   attendanceSaved = signal<boolean>(false);
   savedOnServer = signal<boolean>(false);
+  // Who last saved this class's attendance for the chosen day; null when nothing is saved.
+  marker = signal<AttendanceMarker | null>(null);
   confirmingClear = signal<boolean>(false);
 
 
@@ -105,6 +108,7 @@ selectedSectionName = computed(() => {
     this.isLoading.set(true);
     this.attendanceSaved.set(false);
     this.savedOnServer.set(false);
+    this.marker.set(null);
     this.loadTrend(sectionId, date);
 
     // 1. Try loading existing attendance record first
@@ -121,6 +125,7 @@ selectedSectionName = computed(() => {
           this.students.set(mapped);
           this.attendanceSaved.set(true);
           this.savedOnServer.set(records.some(r => !!r.status));
+          if (this.savedOnServer()) this.loadMarker(sectionId, date);
           this.isLoading.set(false);
         } else {
           // 2. Fall back to raw student roster if attendance isn't marked yet
@@ -130,6 +135,17 @@ selectedSectionName = computed(() => {
       error: () => {
         this.loadDefaultRoster(sectionId);
       }
+    });
+  }
+
+  // Purely informational: if it can't be loaded the screen just doesn't show the "Taken by" line.
+  private loadMarker(sectionId: number, date: string) {
+    this.api.getMarkers(date).subscribe({
+      next: markers => {
+        if (sectionId !== this.selectedSectionId() || date !== this.selectedDate()) return;
+        this.marker.set(markers.find(m => m.classSectionId === sectionId) ?? null);
+      },
+      error: () => undefined,
     });
   }
 
@@ -214,6 +230,7 @@ submitAttendance() {
       this.isSubmitting.set(false);
       this.attendanceSaved.set(true);
       this.savedOnServer.set(true);
+      this.loadMarker(sectionId, date);
       this.toast.show('Attendance submitted successfully!');
     },
     error: (err) => {

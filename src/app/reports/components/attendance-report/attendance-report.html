@@ -203,6 +203,7 @@
               <th class="num">Late</th>
               <th class="num">Absent</th>
               <th class="num">Attendance</th>
+              <th>Taken by</th>
               <th>Status</th>
             </tr>
           </thead>
@@ -220,6 +221,11 @@
                     {{ c.attendancePct | number: '1.0-1' }}%
                   } @else { — }
                 </td>
+                <td data-label="Taken by">
+                  @if (c.takenBy) {
+                    {{ c.takenBy }}@if (c.takenAt) { <span class="taken-at">{{ c.takenAt | date: 'h:mm a' }}</span> }
+                  } @else { — }
+                </td>
                 <td data-label="Status">
                   @if (c.failed) { <span class="badge badge-absent">Load failed</span> }
                   @else if (!c.marked) { <span class="badge badge-pending">Pending</span> }
@@ -228,7 +234,7 @@
                 </td>
               </tr>
             } @empty {
-              <tr><td colspan="7" class="empty-state">No class sections found.</td></tr>
+              <tr><td colspan="8" class="empty-state">No class sections found.</td></tr>
             }
           </tbody>
         </table>

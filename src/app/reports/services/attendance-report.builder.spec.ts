@@ -45,6 +45,18 @@ describe('buildAttendanceReport', () => {
     expect(r.lowAttendanceClasses.length).toBe(1);
   });
 
+  it('shows who took attendance only for classes that are marked', () => {
+    const markers = [
+      { classSectionId: 1, markedBy: 'Asif', markedAt: '2026-11-14T05:12:00Z' },
+      { classSectionId: 2, markedBy: 'Rahul', markedAt: null },
+    ];
+
+    const r = buildAttendanceReport('2026-11-14', sections, [], 0, [], markers);
+
+    expect(r.classRows[0]).toMatchObject({ takenBy: 'Asif', takenAt: '2026-11-14T05:12:00Z' });
+    expect(r.classRows[1]).toMatchObject({ takenBy: null, takenAt: null });
+  });
+
   it('splits attendance by gender and lists absentees in roll order', () => {
     const r = buildAttendanceReport('2026-11-14', sections, [], 0);
 

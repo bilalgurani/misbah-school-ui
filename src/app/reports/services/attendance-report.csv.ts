@@ -31,7 +31,7 @@ export function attendanceReportToCsv(r: AttendanceReport): string {
     ...r.genders.map(g => line(g.label, g.total, g.attended, g.absent, fixed(g.attendancePct))),
     '',
     line('CLASS-WISE'),
-    line('Class', 'Status', 'On roll', 'Present', 'Late', 'Absent', 'Attendance %'),
+    line('Class', 'Status', 'On roll', 'Present', 'Late', 'Absent', 'Attendance %', 'Taken by'),
     ...r.classRows.map(c =>
       line(
         c.displayName,
@@ -41,6 +41,7 @@ export function attendanceReportToCsv(r: AttendanceReport): string {
         c.late,
         c.absent,
         fixed(c.attendancePct),
+        c.takenBy ?? '',
       ),
     ),
     '',

@@ -152,6 +152,28 @@ $danger-bg: color-mix(in oklch, var(--absent) 15%, transparent);
   }
 }
 
+/* Who took the attendance */
+.taken-by {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--card-foreground);
+  font-size: 14px;
+
+  svg {
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+    color: var(--muted-foreground);
+    flex: none;
+  }
+}
+
 /* Toolbar, Search & Bulk Actions */
 .table-toolbar {
   display: flex;

@@ -1,4 +1,4 @@
-import { TeacherAttendanceRecordDto } from '../../attendance/models/attendance.models';
+import { AttendanceMarker, TeacherAttendanceRecordDto } from '../../attendance/models/attendance.models';
 import { OnLeaveEntry } from '../../leave/leave.service';
 import {
   AbsenteeRow,
@@ -26,7 +26,9 @@ export function buildAttendanceReport(
   teacherRecords: TeacherAttendanceRecordDto[] | null,
   totalTeachers: number,
   onLeave: OnLeaveEntry[] = [],
+  markers: AttendanceMarker[] = [],
 ): AttendanceReport {
+  const markerBySection = new Map(markers.map(m => [m.classSectionId, m]));
   const genderByStudent = new Map<number, string>();
   sections.forEach(s => s.roster.forEach(st => genderByStudent.set(st.id, normalize(st.gender))));
 
@@ -74,6 +76,8 @@ export function buildAttendanceReport(
       displayName: section.displayName,
       marked,
       failed,
+      takenBy: marked ? markerBySection.get(section.id)?.markedBy ?? null : null,
+      takenAt: marked ? markerBySection.get(section.id)?.markedAt ?? null : null,
       enrolled: marked ? records.length : roster.length,
       present,
       late,

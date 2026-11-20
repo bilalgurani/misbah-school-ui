@@ -354,6 +354,12 @@
   font-weight: 600;
 }
 
+.taken-at {
+  margin-left: 0.35rem;
+  color: var(--muted-foreground);
+  font-size: 0.8em;
+}
+
 .bar {
   display: inline-block;
   vertical-align: middle;

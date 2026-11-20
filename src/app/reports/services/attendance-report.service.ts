@@ -2,7 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, catchError, forkJoin, from, map, mergeMap, of, switchMap, throwError, toArray } from 'rxjs';
 import { AttendanceApiService } from '../../attendance/services/attendance-api.service';
-import { ClassSection } from '../../attendance/models/attendance.models';
+import { AttendanceMarker, ClassSection } from '../../attendance/models/attendance.models';
 import { LeaveService, OnLeaveEntry } from '../../leave/leave.service';
 import { AttendanceReport, SectionAttendanceData } from '../models/attendance-report.model';
 import { buildAttendanceReport } from './attendance-report.builder';
@@ -22,10 +22,12 @@ export class AttendanceReportService {
           teacherRecords: this.api.getTeacherAttendance(date).pipe(catchError(() => of(null))),
           teachers: this.api.getAllTeachers().pipe(catchError(() => of([]))),
           onLeave: this.leaveService.getOnLeave(date, date).pipe(catchError(() => of([] as OnLeaveEntry[]))),
+          // The "Taken by" column is optional: the report still builds without it.
+          markers: this.api.getMarkers(date).pipe(catchError(() => of([] as AttendanceMarker[]))),
         }),
       ),
-      map(({ sections, teacherRecords, teachers, onLeave }) =>
-        buildAttendanceReport(date, sections, teacherRecords, teachers.length, onLeave),
+      map(({ sections, teacherRecords, teachers, onLeave, markers }) =>
+        buildAttendanceReport(date, sections, teacherRecords, teachers.length, onLeave, markers),
       ),
     );
   }
