@@ -6,11 +6,11 @@ import { Component, computed, input, output } from '@angular/core';
   template: `
     @if (total() > 0) {
       <div class="pager">
-        <span class="range">Showing {{ start() }}&ndash;{{ end() }} of {{ total() }}</span>
+        <span class="range">Showing {{ start() }}&ndash;{{ end() }} of {{ total() }}{{ unit() ? ' ' + unit() : '' }}</span>
         <div class="controls">
           <label class="size">
-            <span>Rows per page</span>
-            <select [value]="pageSize()" (change)="pageSizeChange.emit(+$any($event.target).value)" aria-label="Rows per page">
+            <span>Per page</span>
+            <select [value]="pageSize()" (change)="pageSizeChange.emit(+$any($event.target).value)" aria-label="Items per page">
               @for (size of pageSizes(); track size) {
                 <option [value]="size" [selected]="size === pageSize()">{{ size }}</option>
               }
@@ -103,6 +103,8 @@ export class PagerComponent {
   page = input.required<number>();
   pageSize = input.required<number>();
   pageSizes = input<number[]>([10, 25, 50, 100]);
+  /** What is being counted, shown after the total, for example "classes". */
+  unit = input<string>('');
 
   pageChange = output<number>();
   pageSizeChange = output<number>();

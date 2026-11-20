@@ -1,46 +1,299 @@
+<!-- One report card. Used for a single student and, repeated, for a whole class. -->
+<ng-template #sheet let-c let-att="attendance">
+  @let d = derive(c);
+  <article class="report-card" aria-label="Report card">
+    <header class="rc-header">
+      <h1>{{ c.schoolName }}</h1>
+      <p class="rc-title">Progress Report Card &middot; {{ c.academicYear }}</p>
+    </header>
+
+    <dl class="rc-details">
+      <div><dt>Student</dt><dd>{{ c.name }}</dd></div>
+      <div><dt>Class</dt><dd>{{ c.className }}</dd></div>
+      <div><dt>Roll No</dt><dd>{{ c.rollNo ?? '-' }}</dd></div>
+      <div><dt>Father's Name</dt><dd>{{ c.fatherName || '-' }}</dd></div>
+      <div><dt>Academic Year</dt><dd>{{ c.academicYear }}</dd></div>
+    </dl>
+
+    @if (att && att.markedDays > 0) {
+      <section class="rc-attendance" aria-label="Attendance">
+        <span class="label">Attendance</span>
+        <p>
+          <strong [class.fail]="att.attendancePct !== null && att.attendancePct < 75">{{ att.attendancePct | number: '1.0-1' }}%</strong>
+          &middot; Present {{ att.present }} &middot; Absent {{ att.absent }} &middot; Late {{ att.late }}
+          &middot; {{ att.workingDays }} working days so far
+        </p>
+      </section>
+    }
+    @if (d.mainExams.length > 0) {
+    <div class="rc-table-wrap">
+      <table class="rc-table">
+        <thead>
+          <tr>
+            <th rowspan="2" class="subject-col">Subject</th>
+            @for (exam of d.mainExams; track exam.examId) {
+              <th colspan="2" class="group-head">
+                {{ exam.name }}
+                @if (exam.startDate) {
+                  <span class="exam-date">{{ exam.startDate | date: 'MMM yyyy' }}</span>
+                }
+              </th>
+            }
+          </tr>
+          <tr>
+            @for (exam of d.mainExams; track exam.examId) {
+              <th class="num">Marks</th>
+              <th class="num">Grade</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of d.matrix; track row.subjectId) {
+            <tr>
+              <td class="subject-col">{{ row.name }}</td>
+              @for (cell of row.cells; track $index) {
+                @if (!cell) {
+                  <td class="num muted">-</td>
+                  <td class="num muted">-</td>
+                } @else if (cell.absent) {
+                  <td class="num"><strong class="text-absent">AB</strong></td>
+                  <td class="num muted">-</td>
+                } @else if (cell.marks === null) {
+                  <td class="num muted pending">Pending</td>
+                  <td class="num muted">-</td>
+                } @else {
+                  <td class="num" [class.fail]="isFail(cell)">
+                    {{ cell.marks }}/{{ cell.maxMarks }}
+                    @if (cell.iaMax > 0) {
+                      <small class="breakdown">IA {{ cell.iaMarks ?? '-' }} + written {{ cell.writtenMarks ?? '-' }}</small>
+                    }
+                  </td>
+                  <td class="num" [class.fail]="isFail(cell)">{{ cell.grade || '-' }}</td>
+                }
+              }
+            </tr>
+          }
+        </tbody>
+        <tfoot>
+          <tr class="summary-row">
+            <th class="subject-col">Total</th>
+            @for (exam of d.mainExams; track exam.examId) {
+              <td colspan="2" class="num">
+                @if (isPending(exam)) { <span class="muted">-</span> } @else { {{ exam.totalMarks }}/{{ exam.totalMax }} }
+              </td>
+            }
+          </tr>
+          <tr class="summary-row">
+            <th class="subject-col">Percentage</th>
+            @for (exam of d.mainExams; track exam.examId) {
+              <td colspan="2" class="num">
+                @if (isPending(exam)) { <span class="muted">-</span> } @else { {{ exam.percentage | number: '1.0-2' }}% }
+              </td>
+            }
+          </tr>
+          <tr class="summary-row">
+            <th class="subject-col">Grade</th>
+            @for (exam of d.mainExams; track exam.examId) {
+              <td colspan="2" class="num">
+                @if (isPending(exam)) { <span class="muted">-</span> } @else { {{ exam.grade || '-' }} }
+              </td>
+            }
+          </tr>
+          <tr class="summary-row">
+            <th class="subject-col">Result</th>
+            @for (exam of d.mainExams; track exam.examId) {
+              <td colspan="2" class="num">
+                @if (isPending(exam)) {
+                  <span class="pending">Marks pending</span>
+                } @else {
+                  <strong [class.fail]="exam.result === 'FAIL'" [class.pass]="exam.result === 'PASS'">{{ exam.result }}</strong>
+                }
+              </td>
+            }
+          </tr>
+          <tr class="summary-row">
+            <th class="subject-col">Rank</th>
+            @for (exam of d.mainExams; track exam.examId) {
+              <td colspan="2" class="num">
+                @if (isPending(exam) || exam.rank === null) { <span class="muted">-</span> } @else { {{ exam.rank }} of {{ exam.classSize }} }
+              </td>
+            }
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+    }
+
+    @if (d.iaExams.length > 0) {
+      <section class="rc-ia" aria-label="Internal assessments">
+        <h3>Internal assessments</h3>
+        <div class="rc-table-wrap">
+          <table class="rc-table">
+            <thead>
+              <tr>
+                <th class="subject-col">Test</th>
+                @for (s of d.iaSubjects; track s.subjectId) {
+                  <th class="num">{{ s.name }}</th>
+                }
+                <th class="num">Total</th>
+                <th class="num">%</th>
+                <th class="num">Grade</th>
+                <th class="num">Result</th>
+                <th class="num">Rank</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of d.iaRows; track row.exam.examId) {
+                <tr>
+                  <td class="subject-col">{{ row.exam.name }}</td>
+                  @for (cell of row.cells; track $index) {
+                    @if (!cell || (cell.marks === null && !cell.absent)) {
+                      <td class="num muted">-</td>
+                    } @else if (cell.absent) {
+                      <td class="num"><strong class="text-absent">AB</strong></td>
+                    } @else {
+                      <td class="num" [class.fail]="isFail(cell)">{{ cell.marks }}/{{ cell.maxMarks }}</td>
+                    }
+                  }
+                  <td class="num">
+                    @if (isPending(row.exam)) { <span class="pending">Marks pending</span> } @else { {{ row.exam.totalMarks }}/{{ row.exam.totalMax }} }
+                  </td>
+                  @if (isPending(row.exam)) {
+                    <td class="num muted">-</td>
+                    <td class="num muted">-</td>
+                    <td class="num muted">-</td>
+                    <td class="num muted">-</td>
+                  } @else {
+                    <td class="num">{{ row.exam.percentage | number: '1.0-1' }}%</td>
+                    <td class="num">{{ row.exam.grade || '-' }}</td>
+                    <td class="num">
+                      <strong [class.fail]="row.exam.result === 'FAIL'" [class.pass]="row.exam.result === 'PASS'">{{ row.exam.result }}</strong>
+                    </td>
+                    <td class="num">
+                      @if (row.exam.rank === null) { <span class="muted">-</span> } @else { {{ row.exam.rank }} of {{ row.exam.classSize }} }
+                    </td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+    }
+
+    @if (d.improve.length > 0) {
+      <section class="rc-improve" aria-label="Subjects to improve">
+        <span class="label">Subjects to improve</span>
+        <ul>
+          @for (item of d.improve; track item.subject) {
+            <li><strong>{{ item.subject }}</strong> &ndash; {{ item.detail }}</li>
+          }
+        </ul>
+        <p class="improve-note">Below the pass marks, or absent. A student passes only when every subject is at or above its pass marks.</p>
+      </section>
+    }
+
+    @if (d.mainExams.length > 0) {
+    <section class="rc-overall" aria-label="Overall result">
+      <h3>Overall</h3>
+      @if (c.overall.result === 'INCOMPLETE') {
+        <p class="pending">Marks pending</p>
+      } @else {
+        <div class="overall-grid">
+          <div><span class="label">Total</span><strong>{{ c.overall.totalMarks }}/{{ c.overall.totalMax }}</strong></div>
+          <div><span class="label">Percentage</span><strong>{{ c.overall.percentage | number: '1.0-2' }}%</strong></div>
+          <div><span class="label">Grade</span><strong>{{ c.overall.grade || '-' }}</strong></div>
+          <div>
+            <span class="label">Result</span>
+            <strong [class.fail]="c.overall.result === 'FAIL'" [class.pass]="c.overall.result === 'PASS'">{{ c.overall.result }}</strong>
+          </div>
+        </div>
+      }
+      <p class="overall-note">Overall is calculated from main exams only (IA marks are included in each subject).</p>
+    </section>
+    }
+
+    @if (d.gradeScale.length > 0) {
+      <section class="rc-scale" aria-label="Grade scale">
+        <span class="label">Grade scale</span>
+        <ul>
+          @for (g of d.gradeScale; track g.grade) {
+            <li><strong>{{ g.grade }}</strong> {{ g.minPercentage }}% and above</li>
+          }
+        </ul>
+      </section>
+    }
+
+    <footer class="rc-signatures">
+      <div class="signature">Class Teacher</div>
+      <div class="signature">Principal</div>
+      <div class="signature">Parent</div>
+    </footer>
+  </article>
+</ng-template>
+
 <div class="page-container report-page">
   <div class="page-header no-print">
     <h2>Report Card</h2>
     <div class="header-actions">
-      @if (card() && card()!.exams.length > 0) {
+      @if (mode() === 'student' && card() && card()!.exams.length > 0) {
         <button type="button" class="btn-primary" (click)="print()">Print</button>
+      }
+      @if (mode() === 'class' && classCards().length > 0) {
+        <button type="button" class="btn-primary" (click)="print()">Print all {{ classCards().length }} cards</button>
       }
     </div>
   </div>
 
   <div class="card search-card no-print">
+    <div class="mode-switch" role="tablist" aria-label="Report card view">
+      <button type="button" role="tab" [attr.aria-selected]="mode() === 'student'" [class.active]="mode() === 'student'" (click)="setMode('student')">One student</button>
+      <button type="button" role="tab" [attr.aria-selected]="mode() === 'class'" [class.active]="mode() === 'class'" (click)="setMode('class')">Whole class</button>
+    </div>
     <div class="toolbar">
-      <div class="search-wrap">
-        @if (studentId() !== null && selectedName()) {
-          <div class="selected-student">
-            <span class="fw-medium">{{ selectedName() }}</span>
-            <button type="button" class="btn-secondary btn-sm" (click)="clearStudent()">Change</button>
-          </div>
-        } @else {
-          <div class="search-box">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-              <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-            </svg>
-            <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
-              placeholder="Search student by name or roll number..." aria-label="Search students"
-              [disabled]="studentsLoading()">
-          </div>
-          @if (searchQuery().trim()) {
-            <ul class="results" role="listbox">
-              @for (s of matches(); track s.id) {
-                <li>
-                  <button type="button" class="result-item" (click)="selectStudent(s)">
-                    <span class="fw-medium">{{ s.name }}</span>
-                    <span class="text-muted">Roll {{ s.rollNo ?? '-' }}</span>
-                  </button>
-                </li>
-              } @empty {
-                <li class="no-result">No students match "{{ searchQuery() }}"</li>
-              }
-            </ul>
+      @if (mode() === 'student') {
+        <div class="search-wrap">
+          @if (studentId() !== null && selectedName()) {
+            <div class="selected-student">
+              <span class="fw-medium">{{ selectedName() }}</span>
+              <button type="button" class="btn-secondary btn-sm" (click)="clearStudent()">Change</button>
+            </div>
+          } @else {
+            <div class="search-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+              </svg>
+              <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
+                placeholder="Search student by name or roll number..." aria-label="Search students"
+                [disabled]="studentsLoading()">
+            </div>
+            @if (searchQuery().trim()) {
+              <ul class="results" role="listbox">
+                @for (s of matches(); track s.id) {
+                  <li>
+                    <button type="button" class="result-item" (click)="selectStudent(s)">
+                      <span class="fw-medium">{{ s.name }}</span>
+                      <span class="text-muted">Roll {{ s.rollNo ?? '-' }}</span>
+                    </button>
+                  </li>
+                } @empty {
+                  <li class="no-result">No students match "{{ searchQuery() }}"</li>
+                }
+              </ul>
+            }
           }
-        }
-      </div>
+        </div>
+      } @else {
+        <div class="form-group year-filter">
+          <label for="rc-class">Class / Section</label>
+          <select id="rc-class" class="form-input" [ngModel]="sectionId()" (ngModelChange)="onSectionChange($event)">
+            <option [ngValue]="null">Select class</option>
+            @for (s of sections(); track s.id) {
+              <option [ngValue]="s.id">{{ s.displayName }}</option>
+            }
+          </select>
+        </div>
+      }
       <div class="form-group year-filter">
         <label for="rc-year">Academic Year</label>
         <select id="rc-year" class="form-input" [ngModel]="yearId()" (ngModelChange)="onYearChange($event)">
@@ -53,206 +306,43 @@
     </div>
   </div>
 
-  @if (isLoading()) {
-    <div class="card no-print">
-      <div class="loader-container"><app-loader message="Loading report card..."></app-loader></div>
-    </div>
-  } @else if (card(); as c) {
-    @if (c.exams.length === 0) {
-      <div class="card no-print"><div class="empty-block">No exams have been held for this student in {{ c.academicYear }}.</div></div>
+  @if (mode() === 'student') {
+    @if (isLoading()) {
+      <div class="card no-print">
+        <div class="loader-container"><app-loader message="Loading report card..."></app-loader></div>
+      </div>
+    } @else if (card(); as c) {
+      @if (c.exams.length === 0) {
+        <div class="card no-print"><div class="empty-block">No exams have been held for this student in {{ c.academicYear }}.</div></div>
+      } @else {
+        <ng-container *ngTemplateOutlet="sheet; context: { $implicit: c, attendance: attendance() }"></ng-container>
+      }
+    } @else if (loadFailed()) {
+      <div class="alert alert-error no-print" role="alert">The report card could not be loaded.</div>
     } @else {
-      <article class="report-card" aria-label="Report card">
-        <header class="rc-header">
-          <h1>{{ c.schoolName }}</h1>
-          <p class="rc-title">Progress Report Card &middot; {{ c.academicYear }}</p>
-        </header>
-
-        <dl class="rc-details">
-          <div><dt>Student</dt><dd>{{ c.name }}</dd></div>
-          <div><dt>Class</dt><dd>{{ c.className }}</dd></div>
-          <div><dt>Roll No</dt><dd>{{ c.rollNo ?? '-' }}</dd></div>
-          <div><dt>Father's Name</dt><dd>{{ c.fatherName || '-' }}</dd></div>
-          <div><dt>Academic Year</dt><dd>{{ c.academicYear }}</dd></div>
-        </dl>
-
-        @if (mainExams().length > 0) {
-        <div class="rc-table-wrap">
-          <table class="rc-table">
-            <thead>
-              <tr>
-                <th rowspan="2" class="subject-col">Subject</th>
-                @for (exam of mainExams(); track exam.examId) {
-                  <th colspan="2" class="group-head">
-                    {{ exam.name }}
-                    @if (exam.startDate) {
-                      <span class="exam-date">{{ exam.startDate | date: 'MMM yyyy' }}</span>
-                    }
-                  </th>
-                }
-              </tr>
-              <tr>
-                @for (exam of mainExams(); track exam.examId) {
-                  <th class="num">Marks</th>
-                  <th class="num">Grade</th>
-                }
-              </tr>
-            </thead>
-            <tbody>
-              @for (row of matrix(); track row.subjectId) {
-                <tr>
-                  <td class="subject-col">{{ row.name }}</td>
-                  @for (cell of row.cells; track $index) {
-                    @if (!cell) {
-                      <td class="num muted">-</td>
-                      <td class="num muted">-</td>
-                    } @else if (cell.absent) {
-                      <td class="num"><strong class="text-absent">AB</strong></td>
-                      <td class="num muted">-</td>
-                    } @else if (cell.marks === null) {
-                      <td class="num muted pending">Pending</td>
-                      <td class="num muted">-</td>
-                    } @else {
-                      <td class="num" [class.fail]="isFail(cell)">
-                        {{ cell.marks }}/{{ cell.maxMarks }}
-                        @if (cell.iaMax > 0) {
-                          <small class="breakdown">IA {{ cell.iaMarks ?? '-' }} + written {{ cell.writtenMarks ?? '-' }}</small>
-                        }
-                      </td>
-                      <td class="num" [class.fail]="isFail(cell)">{{ cell.grade || '-' }}</td>
-                    }
-                  }
-                </tr>
-              }
-            </tbody>
-            <tfoot>
-              <tr class="summary-row">
-                <th class="subject-col">Total</th>
-                @for (exam of mainExams(); track exam.examId) {
-                  <td colspan="2" class="num">
-                    @if (isPending(exam)) { <span class="muted">-</span> } @else { {{ exam.totalMarks }}/{{ exam.totalMax }} }
-                  </td>
-                }
-              </tr>
-              <tr class="summary-row">
-                <th class="subject-col">Percentage</th>
-                @for (exam of mainExams(); track exam.examId) {
-                  <td colspan="2" class="num">
-                    @if (isPending(exam)) { <span class="muted">-</span> } @else { {{ exam.percentage | number: '1.0-2' }}% }
-                  </td>
-                }
-              </tr>
-              <tr class="summary-row">
-                <th class="subject-col">Grade</th>
-                @for (exam of mainExams(); track exam.examId) {
-                  <td colspan="2" class="num">
-                    @if (isPending(exam)) { <span class="muted">-</span> } @else { {{ exam.grade || '-' }} }
-                  </td>
-                }
-              </tr>
-              <tr class="summary-row">
-                <th class="subject-col">Result</th>
-                @for (exam of mainExams(); track exam.examId) {
-                  <td colspan="2" class="num">
-                    @if (isPending(exam)) {
-                      <span class="pending">Marks pending</span>
-                    } @else {
-                      <strong [class.fail]="exam.result === 'FAIL'" [class.pass]="exam.result === 'PASS'">{{ exam.result }}</strong>
-                    }
-                  </td>
-                }
-              </tr>
-              <tr class="summary-row">
-                <th class="subject-col">Rank</th>
-                @for (exam of mainExams(); track exam.examId) {
-                  <td colspan="2" class="num">
-                    @if (isPending(exam) || exam.rank === null) { <span class="muted">-</span> } @else { {{ exam.rank }} of {{ exam.classSize }} }
-                  </td>
-                }
-              </tr>
-            </tfoot>
-          </table>
-        </div>
-        }
-
-        @if (iaExams().length > 0) {
-          <section class="rc-ia" aria-label="Internal assessments">
-            <h3>Internal assessments</h3>
-            <div class="rc-table-wrap">
-              <table class="rc-table">
-                <thead>
-                  <tr>
-                    <th class="subject-col">Test</th>
-                    @for (s of iaSubjects(); track s.subjectId) {
-                      <th class="num">{{ s.name }}</th>
-                    }
-                    <th class="num">Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (row of iaRows(); track row.exam.examId) {
-                    <tr>
-                      <td class="subject-col">{{ row.exam.name }}</td>
-                      @for (cell of row.cells; track $index) {
-                        @if (!cell || (cell.marks === null && !cell.absent)) {
-                          <td class="num muted">-</td>
-                        } @else if (cell.absent) {
-                          <td class="num"><strong class="text-absent">AB</strong></td>
-                        } @else {
-                          <td class="num" [class.fail]="isFail(cell)">{{ cell.marks }}/{{ cell.maxMarks }}</td>
-                        }
-                      }
-                      <td class="num">
-                        @if (isPending(row.exam)) { <span class="pending">Marks pending</span> } @else { {{ row.exam.totalMarks }}/{{ row.exam.totalMax }} }
-                      </td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            </div>
-          </section>
-        }
-
-        @if (mainExams().length > 0) {
-        <section class="rc-overall" aria-label="Overall result">
-          <h3>Overall</h3>
-          @if (c.overall.result === 'INCOMPLETE') {
-            <p class="pending">Marks pending</p>
-          } @else {
-            <div class="overall-grid">
-              <div><span class="label">Total</span><strong>{{ c.overall.totalMarks }}/{{ c.overall.totalMax }}</strong></div>
-              <div><span class="label">Percentage</span><strong>{{ c.overall.percentage | number: '1.0-2' }}%</strong></div>
-              <div><span class="label">Grade</span><strong>{{ c.overall.grade || '-' }}</strong></div>
-              <div>
-                <span class="label">Result</span>
-                <strong [class.fail]="c.overall.result === 'FAIL'" [class.pass]="c.overall.result === 'PASS'">{{ c.overall.result }}</strong>
-              </div>
-            </div>
-          }
-          <p class="overall-note">Overall is calculated from main exams only (IA marks are included in each subject).</p>
-        </section>
-        }
-
-        @if (gradeScale().length > 0) {
-          <section class="rc-scale" aria-label="Grade scale">
-            <span class="label">Grade scale</span>
-            <ul>
-              @for (g of gradeScale(); track g.grade) {
-                <li><strong>{{ g.grade }}</strong> {{ g.minPercentage }}% and above</li>
-              }
-            </ul>
-          </section>
-        }
-
-        <footer class="rc-signatures">
-          <div class="signature">Class Teacher</div>
-          <div class="signature">Principal</div>
-          <div class="signature">Parent</div>
-        </footer>
-      </article>
+      <div class="card no-print"><div class="empty-block">Search and select a student to view the report card.</div></div>
     }
-  } @else if (loadFailed()) {
-    <div class="alert alert-error no-print" role="alert">The report card could not be loaded.</div>
   } @else {
-    <div class="card no-print"><div class="empty-block">Search and select a student to view the report card.</div></div>
+    @if (sectionId() === null) {
+      <div class="card no-print"><div class="empty-block">Choose a class to prepare the report cards of all its students.</div></div>
+    } @else if (classLoading()) {
+      <div class="card no-print"><div class="loader-container"><app-loader message="Preparing the class report cards..."></app-loader></div></div>
+    } @else if (classFailed()) {
+      <div class="alert alert-error no-print" role="alert">The class report cards could not be loaded.</div>
+    } @else if (classCards().length === 0) {
+      <div class="card no-print"><div class="empty-block">No exam marks have been entered for this class in the chosen year.</div></div>
+    } @else {
+      <p class="class-note no-print" role="status">
+        {{ classCards().length }} report card{{ classCards().length === 1 ? '' : 's' }} ready. Each student prints on a separate page.
+        @if (classWithoutMarks().length > 0) {
+          No marks yet for: {{ classWithoutMarks().join(', ') }}.
+        }
+      </p>
+      @for (item of classCards(); track item.card.studentId) {
+        <div class="rc-sheet">
+          <ng-container *ngTemplateOutlet="sheet; context: { $implicit: item.card, attendance: item.attendance }"></ng-container>
+        </div>
+      }
+    }
   }
 </div>

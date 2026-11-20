@@ -3,8 +3,10 @@ import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { LoaderComponent } from '../../../shared/component/loader.component';
+import { PagerComponent } from '../../../shared/component/pager.component';
+import { createPaging } from '../../../shared/utils/paging.util';
 import { ToastService } from '../../../shared/services/toast.service';
-import { AttendanceReport } from '../../models/attendance-report.model';
+import { AbsenteeRow, AttendanceReport } from '../../models/attendance-report.model';
 import { attendanceReportToCsv } from '../../services/attendance-report.csv';
 import { LOW_ATTENDANCE_THRESHOLD } from '../../services/attendance-report.builder';
 import { AttendanceReportService } from '../../services/attendance-report.service';
@@ -17,7 +19,7 @@ const todayLocal = (): string => {
 
 @Component({
   selector: 'app-attendance-report',
-  imports: [FormsModule, DatePipe, DecimalPipe, LoaderComponent],
+  imports: [FormsModule, DatePipe, DecimalPipe, LoaderComponent, PagerComponent],
   templateUrl: './attendance-report.html',
   styleUrl: './attendance-report.scss',
 })
@@ -36,6 +38,27 @@ export class AttendanceReportComponent implements OnInit, OnDestroy {
 
   absentStudents = computed(() => this.report()?.absentees.filter(a => a.status === 'ABSENT') ?? []);
   lateStudents = computed(() => this.report()?.absentees.filter(a => a.status === 'LATE') ?? []);
+
+  // Absent and late students grouped by class, in class order. Classes with nobody absent or late are left out.
+  absenteeGroups = computed(() => {
+    const report = this.report();
+    if (!report) return [];
+    const byClass = new Map<string, { className: string; absent: AbsenteeRow[]; late: AbsenteeRow[] }>();
+    for (const row of report.classRows) {
+      byClass.set(row.displayName, { className: row.displayName, absent: [], late: [] });
+    }
+    for (const a of report.absentees) {
+      const group = byClass.get(a.className);
+      if (group) (a.status === 'ABSENT' ? group.absent : group.late).push(a);
+    }
+    return [...byClass.values()].filter(g => g.absent.length + g.late.length > 0);
+  });
+
+  // The screen shows a few classes at a time. Printing switches to showing every class.
+  paging = createPaging(() => this.absenteeGroups(), () => this.report(), 5);
+  printingAll = signal<boolean>(false);
+  readonly pageSizes = [3, 5, 10, 25];
+  visibleGroups = computed(() => (this.printingAll() ? this.absenteeGroups() : this.paging.paged()));
 
   ngOnInit(): void {
     this.generate();
@@ -71,7 +94,12 @@ export class AttendanceReportComponent implements OnInit, OnDestroy {
   }
 
   print(): void {
-    window.print();
+    // Show every class on paper, not just the page being looked at, then go back to the paged view.
+    this.printingAll.set(true);
+    setTimeout(() => {
+      window.print();
+      this.printingAll.set(false);
+    }, 50);
   }
 
   downloadCsv(): void {

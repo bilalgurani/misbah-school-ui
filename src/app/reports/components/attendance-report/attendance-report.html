@@ -241,48 +241,49 @@
       </div>
     </section>
 
-    <!-- Student follow-up lists -->
+    <!-- Student follow-up list, class by class -->
     <section class="panel">
-      <h3>Absent Students ({{ absentStudents().length }})</h3>
-      @if (absentStudents().length > 0) {
-        <div class="table-responsive">
-          <table class="data-table">
-            <thead><tr><th>Class</th><th>Roll No</th><th>Student</th></tr></thead>
-            <tbody>
-              @for (a of absentStudents(); track a.studentId) {
-                <tr>
-                  <td data-label="Class">{{ a.className }}</td>
-                  <td data-label="Roll No">{{ a.rollNo }}</td>
-                  <td data-label="Student" class="fw-medium">{{ a.name }}</td>
-                </tr>
-              }
-            </tbody>
-          </table>
+      <h3>Absent &amp; Late Students ({{ absentStudents().length }} absent, {{ lateStudents().length }} late)</h3>
+      @if (absenteeGroups().length > 0) {
+        @for (g of visibleGroups(); track g.className) {
+          <div class="class-group">
+            <h4>
+              {{ g.className }}
+              <span class="group-counts">
+                {{ g.absent.length }} absent@if (g.late.length > 0) {, {{ g.late.length }} late}
+              </span>
+            </h4>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead><tr><th>Roll No</th><th>Student</th><th>Status</th></tr></thead>
+                <tbody>
+                  @for (a of g.absent; track a.studentId) {
+                    <tr>
+                      <td data-label="Roll No">{{ a.rollNo }}</td>
+                      <td data-label="Student" class="fw-medium">{{ a.name }}</td>
+                      <td data-label="Status"><span class="badge badge-absent">Absent</span></td>
+                    </tr>
+                  }
+                  @for (a of g.late; track a.studentId) {
+                    <tr>
+                      <td data-label="Roll No">{{ a.rollNo }}</td>
+                      <td data-label="Student" class="fw-medium">{{ a.name }}</td>
+                      <td data-label="Status"><span class="badge badge-pending">Late</span></td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        }
+        <div class="no-print">
+          <app-pager [total]="absenteeGroups().length" unit="classes" [pageSizes]="pageSizes" [page]="paging.page()"
+            [pageSize]="paging.pageSize()" (pageChange)="paging.goTo($event)" (pageSizeChange)="paging.setPageSize($event)"></app-pager>
         </div>
       } @else {
         <p class="empty-state">No absentees in the marked classes.</p>
       }
     </section>
-
-    @if (lateStudents().length > 0) {
-      <section class="panel">
-        <h3>Late Arrivals ({{ lateStudents().length }})</h3>
-        <div class="table-responsive">
-          <table class="data-table">
-            <thead><tr><th>Class</th><th>Roll No</th><th>Student</th></tr></thead>
-            <tbody>
-              @for (a of lateStudents(); track a.studentId) {
-                <tr>
-                  <td data-label="Class">{{ a.className }}</td>
-                  <td data-label="Roll No">{{ a.rollNo }}</td>
-                  <td data-label="Student" class="fw-medium">{{ a.name }}</td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      </section>
-    }
 
     @if (r.pendingSections.length > 0) {
       <section class="panel">
