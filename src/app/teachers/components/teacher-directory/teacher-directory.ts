@@ -9,6 +9,8 @@ import { AuthService } from '../../../auth/auth.service';
 import { ConfirmDialogComponent } from '../../../shared/component/confirm-dialog.component';
 import { downloadCsv, toCsv } from '../../../shared/utils/csv.util';
 import { todayIso } from '../../../shared/utils/date.util';
+import { PagerComponent } from '../../../shared/component/pager.component';
+import { createPaging } from '../../../shared/utils/paging.util';
 interface FullTeacherDto {
   id: string;
   name: string;
@@ -23,7 +25,7 @@ interface FullTeacherDto {
 }
 
 @Component({
-  imports: [CommonModule, RouterModule, FormsModule, LoaderComponent, ConfirmDialogComponent],
+  imports: [CommonModule, RouterModule, FormsModule, LoaderComponent, ConfirmDialogComponent, PagerComponent],
   selector: 'app-teacher-directory',
   styleUrl: './teacher-directory.scss',
   templateUrl: './teacher-directory.html',
@@ -52,6 +54,9 @@ export class TeacherDirectory {
       t.email.toLowerCase().includes(query)
     );
   });
+
+  // The table shows one page at a time; search and Export CSV still use the whole filtered list.
+  paging = createPaging(() => this.filteredTeachers(), () => this.searchQuery());
 
   ngOnInit(): void {
     this.loadTeachers();

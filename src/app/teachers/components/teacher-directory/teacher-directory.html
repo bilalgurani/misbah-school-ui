@@ -39,7 +39,7 @@
             </tr>
           </thead>
           <tbody>
-            @for (teacher of filteredTeachers(); track teacher.id) {
+            @for (teacher of paging.paged(); track teacher.id) {
               <tr>
                 <td data-label="Teacher Name" class="fw-medium">{{ teacher.name }}</td>
                 <td data-label="Subject">{{ teacher.subject }}</td>
@@ -80,6 +80,8 @@
           </tbody>
         </table>
       </div>
+      <app-pager [total]="filteredTeachers().length" [page]="paging.page()" [pageSize]="paging.pageSize()"
+        (pageChange)="paging.goTo($event)" (pageSizeChange)="paging.setPageSize($event)"></app-pager>
     }
   </div>
 </div>

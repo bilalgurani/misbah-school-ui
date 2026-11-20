@@ -14,6 +14,8 @@ import { todayIso } from '../../../shared/utils/date.util';
 import { AttendanceTrendComponent } from '../../../shared/component/attendance-trend.component';
 import { ChangeSectionModal } from '../change-section-modal/change-section-modal';
 import { AttendanceTrendService, StudentStatMap } from '../../../attendance/services/attendance-trend.service';
+import { PagerComponent } from '../../../shared/component/pager.component';
+import { createPaging } from '../../../shared/utils/paging.util';
 interface FullStudentDto {
   id: number;
   name: string;
@@ -39,7 +41,7 @@ interface FullStudentDto {
 }
 
 @Component({
-  imports: [FormsModule, RouterModule, LoaderComponent, ExitStudentModal, ConfirmDialogComponent, AttendanceTrendComponent, ChangeSectionModal],
+  imports: [FormsModule, RouterModule, LoaderComponent, ExitStudentModal, ConfirmDialogComponent, AttendanceTrendComponent, ChangeSectionModal, PagerComponent],
   selector: 'app-student-directory',
   styleUrl: './student-directory.scss',
   templateUrl: './student-directory.html',
@@ -129,6 +131,9 @@ export class StudentDirectory {
       (s.rollNo && s.rollNo.toString().toLowerCase().includes(query))
     );
   });
+
+  // The table shows one page at a time; search and Export CSV still use the whole filtered list.
+  paging = createPaging(() => this.filteredStudents(), () => this.searchQuery());
 
   ngOnInit(): void {
     this.loadStudents();
