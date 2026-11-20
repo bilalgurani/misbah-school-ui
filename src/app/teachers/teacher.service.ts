@@ -22,6 +22,11 @@ export class TeacherService {
     return this.http.post<any>(this.apiUrl, teacherData);
   }
 
+  // Adds all the teachers or none. A 400 answer carries { errors: [{ row, message }] } with rows counted from 1.
+  createTeachers(items: any[]): Observable<{ created: number }> {
+    return this.http.post<{ created: number }>(`${this.apiUrl}/bulk`, { items });
+  }
+
   updateTeacher(id: string | number, teacherData: any): Observable<any> {
     return this.http.put<any>(`${this.apiUrl}/${id}`, teacherData);
   }

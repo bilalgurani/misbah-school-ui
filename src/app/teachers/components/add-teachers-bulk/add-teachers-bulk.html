@@ -1,0 +1,85 @@
+<div class="form-container">
+  <div class="page-header">
+    <a routerLink="/teachers" class="back-link">
+      <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+        <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+      </svg>
+      <span>Back to Directory</span>
+    </a>
+    <h2>Add Several Teachers</h2>
+    <p class="subtitle">
+      Fill one row per teacher, or paste a block copied from Excel or Google Sheets (columns in the same order as below).
+      Empty rows are ignored. Everything is saved together, so if any row has a problem nothing is saved.
+      Logins are created separately afterwards with Register user.
+      <a routerLink="/teachers/add">Add just one teacher instead</a>
+    </p>
+  </div>
+
+  <div class="card">
+    <div class="table-wrap">
+      <table class="grid">
+        <thead>
+          <tr>
+            <th class="num">#</th>
+            <th>Name <span class="required">*</span></th>
+            <th>Phone <span class="required">*</span></th>
+            <th>Subject / Role <span class="required">*</span></th>
+            <th>Date of Joining <span class="required">*</span></th>
+            <th>Email</th>
+            <th>Qualification</th>
+            <th>Date of Birth</th>
+            <th>Status</th>
+            <th><span class="sr-only">Remove</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of rows; track row; let i = $index) {
+            <tr [class.has-error]="row.error">
+              <td class="num">{{ i + 1 }}</td>
+              <td><input type="text" maxlength="100" placeholder="Full name" [(ngModel)]="row.name" (ngModelChange)="touched()"
+                  (paste)="onPaste($event, i, 'name')" [attr.aria-label]="'Name, row ' + (i + 1)" autocomplete="off"></td>
+              <td><input type="tel" inputmode="numeric" maxlength="10" placeholder="10 digits" [(ngModel)]="row.mobileNo" (ngModelChange)="touched()"
+                  (paste)="onPaste($event, i, 'mobileNo')" [attr.aria-label]="'Phone, row ' + (i + 1)"></td>
+              <td><input type="text" maxlength="100" placeholder="e.g. Maths, HM" [(ngModel)]="row.subjectSpecialization" (ngModelChange)="touched()"
+                  (paste)="onPaste($event, i, 'subjectSpecialization')" [attr.aria-label]="'Subject or role, row ' + (i + 1)"></td>
+              <td><input type="date" [(ngModel)]="row.dateOfJoining" (ngModelChange)="touched()"
+                  (paste)="onPaste($event, i, 'dateOfJoining')" [attr.aria-label]="'Date of joining, row ' + (i + 1)"></td>
+              <td><input type="email" maxlength="100" placeholder="name@school.com" [(ngModel)]="row.email" (ngModelChange)="touched()"
+                  (paste)="onPaste($event, i, 'email')" [attr.aria-label]="'Email, row ' + (i + 1)"></td>
+              <td><input type="text" maxlength="100" placeholder="e.g. B.Ed" [(ngModel)]="row.qualification" (ngModelChange)="touched()"
+                  (paste)="onPaste($event, i, 'qualification')" [attr.aria-label]="'Qualification, row ' + (i + 1)"></td>
+              <td><input type="date" [max]="today" [(ngModel)]="row.dob" (ngModelChange)="touched()"
+                  (paste)="onPaste($event, i, 'dob')" [attr.aria-label]="'Date of birth, row ' + (i + 1)"></td>
+              <td>
+                <select [(ngModel)]="row.employmentStatus" (ngModelChange)="touched()" [attr.aria-label]="'Status, row ' + (i + 1)">
+                  <option value="ACTIVE">ACTIVE</option>
+                  <option value="INACTIVE">INACTIVE</option>
+                </select>
+              </td>
+              <td>
+                <button type="button" class="remove-btn" (click)="removeRow(i)" [attr.aria-label]="'Remove row ' + (i + 1)">&times;</button>
+              </td>
+            </tr>
+            @if (row.error) {
+              <tr class="error-row"><td></td><td colspan="9" role="alert">Row {{ i + 1 }}: {{ row.error }}</td></tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="grid-actions">
+      <button type="button" class="btn-secondary" [disabled]="rows.length >= maxRows" (click)="addRows(1)">+ Add row</button>
+      <button type="button" class="btn-secondary" [disabled]="rows.length >= maxRows" (click)="addRows(5)">+ Add 5 rows</button>
+      <button type="button" class="btn-secondary" (click)="clearAll()">Clear all</button>
+      <span class="count">{{ filledCount() }} teacher{{ filledCount() === 1 ? '' : 's' }} ready (up to {{ maxRows }} at a time)</span>
+    </div>
+
+    <div class="form-actions">
+      <a routerLink="/teachers" class="btn-secondary">Cancel</a>
+      <button type="button" class="btn-primary" [disabled]="isSaving() || filledCount() === 0" (click)="save()">
+        {{ isSaving() ? 'Saving...' : 'Save all ' + filledCount() + ' teacher' + (filledCount() === 1 ? '' : 's') }}
+      </button>
+    </div>
+  </div>
+</div>

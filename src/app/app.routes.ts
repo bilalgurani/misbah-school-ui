@@ -4,6 +4,7 @@ import { StudentAttendance } from './attendance/components/student-attendance/st
 import { TeacherAttendance } from './attendance/components/teacher-attendance/teacher-attendance';
 import { AddStudent } from './students/components/add-student/add-student';
 import { AddTeacher } from './teachers/components/add-teacher/add-teacher';
+import { AddTeachersBulk } from './teachers/components/add-teachers-bulk/add-teachers-bulk';
 import { StudentDirectory } from './students/components/student-directory/student-directory';
 import { TeacherDirectory } from './teachers/components/teacher-directory/teacher-directory';
 import { Dashboard } from './dashboard/dashboard';
@@ -60,6 +61,7 @@ export const routes: Routes = [
       { path: 'teachers', component: TeacherDirectory, canActivate: [AuthGuards.roleGuard('ADMIN')] },
       { path: 'teacher-attendance', component: TeacherAttendance, canActivate: [AuthGuards.roleGuard('ADMIN')] },
       { path: 'teachers/add', component: AddTeacher, canActivate: [AuthGuards.roleGuard('ADMIN')] },
+      { path: 'teachers/add-many', component: AddTeachersBulk, canActivate: [AuthGuards.roleGuard('ADMIN')] },
       { path: 'teachers/edit/:id', component: AddTeacher, canActivate: [AuthGuards.roleGuard('ADMIN')] },
 
       { path: 'financials', loadComponent: () => import('./financial/financial-ledger/financial-ledger').then(m => m.FinancialLedger), canActivate: [AuthGuards.roleGuard('ADMIN')] },

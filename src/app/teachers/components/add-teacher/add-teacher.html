@@ -7,6 +7,9 @@
       <span>Back to Directory</span>
     </a>
     <h2>@if (isEditMode()) { Edit Teacher Profile } @else { Onboard New Teacher }</h2>
+    @if (!isEditMode()) {
+      <p class="bulk-link">Adding many? <a routerLink="/teachers/add-many">Add several teachers at once</a></p>
+    }
   </div>
 
   @if (isLoadingData()) {

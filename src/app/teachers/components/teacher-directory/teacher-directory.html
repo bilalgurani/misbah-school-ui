@@ -5,6 +5,7 @@
       <button type="button" class="btn-primary" style="border:none;cursor:pointer;font-family:inherit"
         (click)="exportCsv()" [disabled]="isLoading()">Export CSV</button>
       @if (authService.isAdmin()) {
+        <a routerLink="/teachers/add-many" class="btn-primary">+ Add Several</a>
         <a routerLink="/teachers/add" class="btn-primary">+ Add Teacher</a>
       }
     </div>
