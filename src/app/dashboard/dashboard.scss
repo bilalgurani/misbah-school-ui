@@ -169,7 +169,6 @@ $border-color: var(--border);
   border-radius: var(--radius);
   background: $bg-card;
   box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.1);
-  border: 1px solid var(--border);
   
   /* Smooth transition for border and card lift */
   transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), 
