@@ -51,8 +51,8 @@ $border-color: var(--border);
   margin-bottom: 1.5rem;
   padding: 0.875rem 1.25rem;
   background: $bg-card;
-  border: 1px solid $border-color;
   border-radius: var(--radius);
+  box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.1);
 
   .year-item {
     display: flex;
@@ -159,7 +159,7 @@ $border-color: var(--border);
   }
 
   @media (min-width: 1024px) {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 1.5rem;
   }
 }
@@ -168,9 +168,8 @@ $border-color: var(--border);
   padding: 1.25rem;
   border-radius: var(--radius);
   background: $bg-card;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.1);
   border: 1px solid var(--border);
-  border-left: 5px solid var(--chart-1);
   
   /* Smooth transition for border and card lift */
   transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), 

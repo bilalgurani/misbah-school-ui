@@ -12,11 +12,10 @@
 .chart-card {
   background: var(--card);
   color: var(--card-foreground);
-  border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 1.25rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   min-width: 0;
+  box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.1);
 
   &.wide {
     grid-column: 1 / -1;
