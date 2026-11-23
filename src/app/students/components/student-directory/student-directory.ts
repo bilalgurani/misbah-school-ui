@@ -69,6 +69,88 @@ export class StudentDirectory {
   studentToDelete = signal<any | null>(null);
   isDeleting = signal<boolean>(false);
 
+  // Bulk selection (admin only). Ids stay selected while paging, searching or filtering.
+  selectedIds = signal<ReadonlySet<number>>(new Set());
+  bulkDeleteOpen = signal<boolean>(false);
+  isBulkDeleting = signal<boolean>(false);
+
+  selectedCount = computed(() => this.selectedIds().size);
+  pageAllSelected = computed(() => {
+    const page = this.paging.paged();
+    const selected = this.selectedIds();
+    return page.length > 0 && page.every(s => selected.has(s.id));
+  });
+  allMatchingSelected = computed(() => {
+    const all = this.filteredStudents();
+    const selected = this.selectedIds();
+    return all.length > 0 && all.every(s => selected.has(s.id));
+  });
+
+  isSelected(id: number): boolean {
+    return this.selectedIds().has(id);
+  }
+
+  toggleSelected(id: number): void {
+    this.selectedIds.update(set => {
+      const next = new Set(set);
+      if (!next.delete(id)) next.add(id);
+      return next;
+    });
+  }
+
+  togglePage(): void {
+    const ids = this.paging.paged().map(s => s.id);
+    const selectAll = !this.pageAllSelected();
+    this.selectedIds.update(set => {
+      const next = new Set(set);
+      ids.forEach(id => selectAll ? next.add(id) : next.delete(id));
+      return next;
+    });
+  }
+
+  selectAllMatching(): void {
+    this.selectedIds.set(new Set(this.filteredStudents().map(s => s.id)));
+  }
+
+  clearSelection(): void {
+    this.selectedIds.set(new Set());
+  }
+
+  requestBulkDelete(): void {
+    if (this.selectedCount() > 0) this.bulkDeleteOpen.set(true);
+  }
+
+  cancelBulkDelete(): void {
+    if (!this.isBulkDeleting()) this.bulkDeleteOpen.set(false);
+  }
+
+  bulkDelete(): void {
+    const ids = [...this.selectedIds()];
+    if (ids.length === 0) return;
+
+    this.isBulkDeleting.set(true);
+    this.studentService.deleteStudents(ids).subscribe({
+      next: (res) => {
+        this.isBulkDeleting.set(false);
+        this.bulkDeleteOpen.set(false);
+        const blocked = res.blockedIds ?? [];
+        // Students kept because they have records stay selected so it is clear which ones were not deleted.
+        this.selectedIds.set(new Set(blocked));
+        if (blocked.length > 0) {
+          this.toast.show(`Deleted ${res.deleted}. ${blocked.length} not deleted because they have attendance, fee or exit records.`, 'error');
+        } else {
+          this.toast.show(`Deleted ${res.deleted} student(s).`);
+        }
+        this.loadStudents();
+      },
+      error: (err) => {
+        this.isBulkDeleting.set(false);
+        this.bulkDeleteOpen.set(false);
+        this.toast.showError(err, 'Failed to delete the selected students');
+      }
+    });
+  }
+
   studentToMove = signal<any | null>(null);
 
   onMoveClosed(moved: boolean): void {

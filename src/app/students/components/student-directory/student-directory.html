@@ -27,6 +27,18 @@
         }
       </select>
     </div>
+
+    @if (authService.isAdmin() && selectedCount() > 0) {
+      <div class="bulk-bar" role="status">
+        <span><strong>{{ selectedCount() }}</strong> selected</span>
+        @if (!allMatchingSelected() && filteredStudents().length > selectedCount()) {
+          <button type="button" class="link-btn" (click)="selectAllMatching()">Select all {{ filteredStudents().length }}</button>
+        }
+        <button type="button" class="link-btn" (click)="clearSelection()">Clear</button>
+        <button type="button" class="bulk-delete-btn" (click)="requestBulkDelete()">Delete selected</button>
+      </div>
+    }
+
     @if (isLoading()) {
       <div class="loader-container">
         <app-loader></app-loader>
@@ -36,6 +48,12 @@
         <table class="data-table">
           <thead>
             <tr>
+              @if (authService.isAdmin()) {
+                <th class="select-col">
+                  <input type="checkbox" [checked]="pageAllSelected()" (change)="togglePage()"
+                    aria-label="Select all students on this page">
+                </th>
+              }
               <th>Roll No</th>
               <th>Student Name</th>
               <th>Gender</th>
@@ -50,13 +68,18 @@
             @for (student of paging.paged(); track student.id; let i = $index) {
               @if (i === 0 || paging.paged()[i - 1].classSectionId !== student.classSectionId) {
                 <tr class="group-row">
-                  <td colspan="8">
-                    <strong>{{ student.classSectionId }}</strong>
+                  <td colspan="9"><strong>{{ student.classSectionId }}</strong>
                     <span class="group-count">{{ sectionCounts().get('' + student.classSectionId) }} students</span>
                   </td>
                 </tr>
               }
-              <tr>
+              <tr [class.row-selected]="isSelected(student.id)">
+                @if (authService.isAdmin()) {
+                  <td data-label="Select" class="select-col">
+                    <input type="checkbox" [checked]="isSelected(student.id)" (change)="toggleSelected(student.id)"
+                      [attr.aria-label]="'Select ' + student.name">
+                  </td>
+                }
                 <td data-label="Roll No"><span class="badge">{{ student.rollNo }}</span></td>
                 <td data-label="Student Name" class="fw-medium">{{ student.name }}</td>
                 <td data-label="Gender"><span class="gender-chip" [class.male]="student.gender === 'M'" [class.female]="student.gender === 'F'">{{ student.gender === 'M' ? 'Male' : (student.gender === 'F' ? 'Female' : 'Other') }}</span></td>
@@ -232,6 +255,17 @@
     [busy]="isReadmitting()"
     (confirmed)="readmitStudent()"
     (cancelled)="cancelReadmit()">
+  </app-confirm-dialog>
+}
+
+@if (bulkDeleteOpen()) {
+  <app-confirm-dialog
+    title="Delete Selected Students"
+    [message]="'Delete ' + selectedCount() + ' selected student(s)? Students that already have attendance, fee or exit records will be kept and reported. This cannot be undone from the app.'"
+    confirmLabel="Delete"
+    [busy]="isBulkDeleting()"
+    (confirmed)="bulkDelete()"
+    (cancelled)="cancelBulkDelete()">
   </app-confirm-dialog>
 }
 

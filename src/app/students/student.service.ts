@@ -36,6 +36,10 @@ export class StudentService {
     return this.http.delete<any>(`${this.apiUrl}/${id}`);
   }
 
+  deleteStudents(ids: number[]): Observable<{ deleted: number; blockedIds: number[] }> {
+    return this.http.post<{ deleted: number; blockedIds: number[] }>(`${this.apiUrl}/bulk-delete`, { ids });
+  }
+
   readmitStudent(id: string | number): Observable<void> {
     return this.http.post<void>(`${this.apiUrl}/${id}/readmit`, {});
   }
