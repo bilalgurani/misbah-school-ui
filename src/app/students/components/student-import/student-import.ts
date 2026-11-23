@@ -82,7 +82,7 @@ export class StudentImport implements OnInit {
   isImporting = signal<boolean>(false);
   confirmOpen = signal<boolean>(false);
   validated = signal<boolean>(false);
-  summary = signal<{ total: number; valid: number; imported: number; failed: number; dryRun: boolean } | null>(null);
+  summary = signal<{ total: number; valid: number; imported: number; skipped: number; failed: number; dryRun: boolean } | null>(null);
 
   clientValidCount = computed(() => this.rows().filter(r => r.clientErrors.length === 0).length);
   clientInvalidCount = computed(() => this.rows().length - this.clientValidCount());
@@ -93,6 +93,7 @@ export class StudentImport implements OnInit {
       (r.serverStatus === null || r.serverStatus === 'OK')));
 
   importedCount = computed(() => this.rows().filter(r => r.serverStatus === 'IMPORTED').length);
+  skippedCount = computed(() => this.rows().filter(r => r.serverStatus === 'SKIPPED').length);
 
   failedRows = computed(() =>
     this.rows().filter(r => r.clientErrors.length > 0 || r.serverStatus === 'ERROR'));
@@ -258,7 +259,8 @@ export class StudentImport implements OnInit {
   }
 
   validateWithServer(): void {
-    const candidates = this.rows().filter(r => r.clientErrors.length === 0 && r.serverStatus !== 'IMPORTED');
+    const candidates = this.rows().filter(r =>
+      r.clientErrors.length === 0 && r.serverStatus !== 'IMPORTED' && r.serverStatus !== 'SKIPPED');
     if (candidates.length === 0) {
       this.toast.show('There are no valid rows to validate.', 'error');
       return;
@@ -270,8 +272,8 @@ export class StudentImport implements OnInit {
         this.isValidating.set(false);
         this.applyResults(res);
         this.validated.set(true);
-        this.summary.set({ total: res.total, valid: res.valid, imported: res.imported, failed: res.failed, dryRun: true });
-        this.toast.show(`Validation finished: ${res.valid} valid, ${res.failed} with errors.`, res.failed > 0 ? 'error' : 'success');
+        this.summary.set({ total: res.total, valid: res.valid, imported: res.imported, skipped: res.skipped ?? 0, failed: res.failed, dryRun: true });
+        this.toast.show(`Validation finished: ${res.valid} new, ${res.skipped ?? 0} already exist, ${res.failed} with errors.`, res.failed > 0 ? 'error' : 'success');
       },
       error: (err) => {
         this.isValidating.set(false);
@@ -302,8 +304,8 @@ export class StudentImport implements OnInit {
         this.isImporting.set(false);
         this.confirmOpen.set(false);
         this.applyResults(res);
-        this.summary.set({ total: res.total, valid: res.valid, imported: res.imported, failed: res.failed, dryRun: false });
-        this.toast.show(`Imported ${res.imported} student(s), ${res.failed} failed.`, res.failed > 0 ? 'error' : 'success');
+        this.summary.set({ total: res.total, valid: res.valid, imported: res.imported, skipped: res.skipped ?? 0, failed: res.failed, dryRun: false });
+        this.toast.show(`Imported ${res.imported} student(s), ${res.skipped ?? 0} already existed, ${res.failed} failed.`, res.failed > 0 ? 'error' : 'success');
       },
       error: (err) => {
         this.isImporting.set(false);

@@ -72,6 +72,9 @@
           @if (importedCount() > 0) {
             <span class="badge badge-info">{{ importedCount() }} imported</span>
           }
+          @if (skippedCount() > 0) {
+            <span class="badge">{{ skippedCount() }} already exist (skipped)</span>
+          }
         </div>
         <div class="actions-row">
           <button type="button" class="btn-secondary" (click)="validateWithServer()"
@@ -90,9 +93,9 @@
         @if (summary(); as s) {
           <div class="alert" [class.alert-success]="s.failed === 0" [class.alert-error]="s.failed > 0" role="status">
             @if (s.dryRun) {
-              <strong>Validation result:</strong> {{ s.total }} checked, {{ s.valid }} valid, {{ s.failed }} with errors.
+              <strong>Validation result:</strong> {{ s.total }} checked, {{ s.valid }} new, {{ s.skipped }} already exist (will be skipped), {{ s.failed }} with errors.
             } @else {
-              <strong>Import result:</strong> {{ s.total }} processed, {{ s.imported }} imported, {{ s.failed }} failed.
+              <strong>Import result:</strong> {{ s.total }} processed, {{ s.imported }} imported, {{ s.skipped }} already existed (skipped), {{ s.failed }} failed.
             }
           </div>
         }
@@ -130,6 +133,8 @@
                 <td data-label="Status" class="status-cell">
                   @if (r.serverStatus === 'IMPORTED') {
                     <span class="badge badge-info">Imported</span>
+                  } @else if (r.serverStatus === 'SKIPPED') {
+                    <span class="badge">Already exists - skipped</span>
                   } @else if (r.clientErrors.length > 0 || r.serverStatus === 'ERROR') {
                     <span class="badge badge-danger">Error</span>
                     <span class="error-text">{{ errorText(r) }}</span>

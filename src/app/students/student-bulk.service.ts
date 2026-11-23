@@ -25,7 +25,7 @@ export interface BulkStudentRow {
 
 export interface BulkRowResult {
   rowNumber: number;
-  status: 'OK' | 'IMPORTED' | 'ERROR';
+  status: 'OK' | 'IMPORTED' | 'SKIPPED' | 'ERROR';
   studentId: number | null;
   errors: string[];
 }
@@ -34,6 +34,7 @@ export interface BulkImportResponse {
   total: number;
   valid: number;
   imported: number;
+  skipped: number;
   failed: number;
   results: BulkRowResult[];
 }
