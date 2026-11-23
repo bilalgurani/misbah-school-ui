@@ -19,9 +19,14 @@
         </svg>
         <input type="text" [(ngModel)]="searchQuery" placeholder="Search by name or roll number..." aria-label="Search students">
       </div>
+      <select class="section-select" [ngModel]="sectionFilter()" (ngModelChange)="sectionFilter.set($event)"
+        aria-label="Filter by class and section">
+        <option value="">All classes &amp; sections</option>
+        @for (cs of classSections(); track cs.id) {
+          <option [value]="cs.displayName">{{ cs.displayName }}</option>
+        }
+      </select>
     </div>
-
-    <!-- Loader / Content Switching -->
     @if (isLoading()) {
       <div class="loader-container">
         <app-loader></app-loader>
@@ -42,7 +47,15 @@
             </tr>
           </thead>
           <tbody>
-            @for (student of paging.paged(); track student.id) {
+            @for (student of paging.paged(); track student.id; let i = $index) {
+              @if (i === 0 || paging.paged()[i - 1].classSectionId !== student.classSectionId) {
+                <tr class="group-row">
+                  <td colspan="8">
+                    <strong>{{ student.classSectionId }}</strong>
+                    <span class="group-count">{{ sectionCounts().get('' + student.classSectionId) }} students</span>
+                  </td>
+                </tr>
+              }
               <tr>
                 <td data-label="Roll No"><span class="badge">{{ student.rollNo }}</span></td>
                 <td data-label="Student Name" class="fw-medium">{{ student.name }}</td>

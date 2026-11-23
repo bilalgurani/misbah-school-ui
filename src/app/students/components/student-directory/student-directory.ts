@@ -123,17 +123,39 @@ export class StudentDirectory {
     }
   }
 
+  // The list is shown class by class: sections in school order, then roll number, then name.
+  sectionFilter = signal<string>('');
+
+  private sectionOrder = computed(() => new Map(this.classSections().map((s, i) => [s.displayName, i])));
+
   filteredStudents = computed(() => {
     const query = this.searchQuery().toLowerCase().trim();
-    if (!query) return this.students();
-    return this.students().filter(s =>
-      s.name.toLowerCase().includes(query) ||
-      (s.rollNo && s.rollNo.toString().toLowerCase().includes(query))
-    );
+    const section = this.sectionFilter();
+    const order = this.sectionOrder();
+    const rank = (s: any) => order.get(String(s.classSectionId)) ?? Number.MAX_SAFE_INTEGER;
+    return this.students()
+      .filter(s => !section || String(s.classSectionId) === section)
+      .filter(s => !query ||
+        s.name.toLowerCase().includes(query) ||
+        (s.rollNo && s.rollNo.toString().toLowerCase().includes(query)))
+      .sort((a, b) =>
+        rank(a) - rank(b) ||
+        String(a.classSectionId).localeCompare(String(b.classSectionId)) ||
+        (a.rollNo ?? Number.MAX_SAFE_INTEGER) - (b.rollNo ?? Number.MAX_SAFE_INTEGER) ||
+        a.name.localeCompare(b.name));
+  });
+
+  sectionCounts = computed(() => {
+    const counts = new Map<string, number>();
+    for (const s of this.filteredStudents()) {
+      const key = String(s.classSectionId);
+      counts.set(key, (counts.get(key) ?? 0) + 1);
+    }
+    return counts;
   });
 
   // The table shows one page at a time; search and Export CSV still use the whole filtered list.
-  paging = createPaging(() => this.filteredStudents(), () => this.searchQuery());
+  paging = createPaging(() => this.filteredStudents(), () => this.searchQuery() + '|' + this.sectionFilter());
 
   ngOnInit(): void {
     this.loadStudents();

@@ -83,6 +83,25 @@ $bg-alt: var(--muted);
 .toolbar {
   padding: 1rem;
   border-bottom: 1px solid $border-color;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+
+  .section-select {
+    min-height: 44px;
+    padding: 0.5rem 0.875rem;
+    border: 1px solid var(--border);
+    background-color: var(--background);
+    color: var(--foreground);
+    border-radius: var(--radius);
+    font-size: 0.9rem;
+    width: 100%;
+
+    @media (min-width: 640px) {
+      width: auto;
+      min-width: 220px;
+    }
+  }
 
   .search-box {
     position: relative;
@@ -245,6 +264,25 @@ $bg-alt: var(--muted);
     padding: 3rem 1rem;
   }
 
+  tbody tr.group-row {
+    background: var(--muted);
+
+    &:hover {
+      background: var(--muted);
+    }
+
+    td {
+      padding: 0.6rem 1rem;
+      font-size: 0.85rem;
+    }
+
+    .group-count {
+      margin-left: 0.5rem;
+      color: $text-sub;
+      font-size: 0.75rem;
+    }
+  }
+
   /* Mobile Card View (< 640px) */
   @media (max-width: 639px) {
     thead {
@@ -284,6 +322,23 @@ $bg-alt: var(--muted);
         color: $text-light;
         font-size: 0.75rem;
         text-transform: uppercase;
+      }
+    }
+
+    tbody tr.group-row {
+      margin: 1rem 0.875rem 0;
+      padding: 0;
+      box-shadow: none;
+
+      td {
+        justify-content: flex-start;
+        gap: 0.5rem;
+        padding: 0.6rem 0.75rem;
+        border-bottom: none;
+
+        &::before {
+          content: none;
+        }
       }
     }
   }
