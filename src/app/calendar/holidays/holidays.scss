@@ -1,3 +1,7 @@
+@use '../../shared/styles/parts' as p;
+
+@include p.kpi;
+
 .directory-container {
   padding: clamp(1rem, 3vw, 1.5rem);
   max-width: 1200px;
@@ -47,6 +51,11 @@
   &.summary-card {
     padding: 1rem 1.25rem;
   }
+
+  // Lets the cards' soft shadow show instead of being clipped at the edge.
+  &.summary-card {
+    overflow: visible;
+  }
 }
 
 .summary-head {
@@ -67,48 +76,16 @@
 .kpi-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 0.75rem;
+  gap: 1rem;
   margin-bottom: 1rem;
 
-  @media (min-width: 700px) {
+  @media (min-width: 1000px) {
     grid-template-columns: repeat(3, 1fr);
   }
 
-  @media (min-width: 1000px) {
+  @media (min-width: 1400px) {
     grid-template-columns: repeat(6, 1fr);
   }
-}
-
-.kpi-card {
-  padding: 0.875rem 1rem;
-  border-radius: var(--radius);
-  background: var(--background);
-  border: 1px solid var(--border);
-  border-left: 5px solid var(--chart-3);
-
-  &.danger {
-    border-left-color: var(--destructive);
-  }
-}
-
-.kpi-title {
-  font-size: 0.7rem;
-  font-weight: 700;
-  color: var(--muted-foreground);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.kpi-value {
-  font-size: clamp(1.4rem, 2.5vw, 1.9rem);
-  font-weight: 800;
-  margin: 0.3rem 0;
-  line-height: 1;
-}
-
-.kpi-subtext {
-  font-size: 0.75rem;
-  color: var(--muted-foreground);
 }
 
 .explain {

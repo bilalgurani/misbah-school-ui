@@ -1,4 +1,6 @@
+// Same as environment.ts: the dev server proxies /api to the production backend (see proxy.conf.js).
 export const environment = {
   production: false,
-  apiUrl: 'https://school-misbah.up.railway.app/api'
+  mockDashboard: true,
+  apiUrl: '/api'
 };

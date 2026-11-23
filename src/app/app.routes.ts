@@ -20,6 +20,7 @@ import { StudentHistoryTab } from './academics/components/student-history-tab/st
 import { ExitRecords } from './academics/components/exit-records/exit-records';
 import { ClassManagement } from './classes/components/class-management/class-management';
 import { AttendanceReportComponent } from './reports/components/attendance-report/attendance-report';
+import { environment } from '../environments/environment';
 
 export const routes: Routes = [
   // Public Route
@@ -39,7 +40,9 @@ export const routes: Routes = [
       { path: 'change-password', component: ChangePassword },
       { path: 'profile', loadComponent: () => import('./profile/profile').then(m => m.Profile) },
       { path: 'help', loadComponent: () => import('./help/help').then(m => m.Help) },
-      { path: 'dashboard', component: Dashboard },
+      !environment.production && environment.mockDashboard
+        ? { path: 'dashboard', loadChildren: () => import('./dashboard/dashboard-sample.routes').then(m => m.dashboardSampleRoutes) }
+        : { path: 'dashboard', component: Dashboard },
       { path: 'reset-password', component: UserManagement, canActivate: [AuthGuards.roleGuard('ADMIN')] },
       { path: 'admin', component: Dashboard, canActivate: [AuthGuards.roleGuard('ADMIN')] },
 

@@ -31,6 +31,22 @@ ng serve
 
 Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
 
+### Local UI with the production backend
+
+`npm run dev` (or `npm start`) serves the UI on localhost and forwards `/api` to the production backend through the dev
+server proxy ([proxy.conf.js](proxy.conf.js)), so no backend or CORS change is needed. Open
+[http://localhost:4200/login](http://localhost:4200/login) and sign in with your production account.
+This affects real data: anything saved on pages other than the dashboard changes live records.
+
+To use a backend on your own machine instead, set `apiUrl` in `src/environments/environment.ts` to
+`http://localhost:8080/api`. Production builds are not affected by any of this.
+
+### Dashboard screenshots
+
+In local development, `/dashboard` shows sample data in all six cards, all four charts, the
+academic-year strip, and the pending attendance details. Only dashboard data is mocked. Set
+`mockDashboard` to `false` in `src/environments/environment.ts` to see live numbers.
+
 ## Code scaffolding
 
 Angular CLI includes powerful code scaffolding tools. To generate a new component, run:

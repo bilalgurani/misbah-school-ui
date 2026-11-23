@@ -1,6 +1,6 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { LoaderComponent } from '../shared/component/loader.component';
 import { DashboardStats } from './models/dashboard.models';
 import { DashboardService } from './services/dashboard-api.service';
@@ -38,6 +38,7 @@ export class Dashboard implements OnInit {
   protected auth = inject(AuthService);
   protected school = inject(SchoolConfigService);
 
+  protected readonly isMockDashboard = inject(ActivatedRoute).snapshot.data['mockDashboard'] === true;
   protected readonly greeting = greetingFor(new Date().getHours());
 
   ngOnInit(): void {
@@ -63,6 +64,12 @@ export class Dashboard implements OnInit {
         this.isLoading.set(false);
       }
     });
+  }
+
+  // Share of the school year's working days that have passed, kept within 0-100 for the progress bar.
+  protected yearProgress(y: WorkingDaysSummary): number {
+    if (y.workingDaysTotal <= 0) return 0;
+    return Math.min(100, Math.max(0, Math.round((y.workingDaysElapsed / y.workingDaysTotal) * 100)));
   }
 
   openPendingModal(): void {

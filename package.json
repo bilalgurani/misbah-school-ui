@@ -4,6 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "dev": "ng serve --configuration local-prod-api",
     "start:local-prod-api": "ng serve --configuration local-prod-api",
     "build": "ng build",
     "prebuild": "node scripts/use-school.mjs",

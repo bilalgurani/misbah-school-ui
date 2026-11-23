@@ -479,6 +479,50 @@ $danger: var(--destructive);
   }
 }
 
+// The dashboard's headline card. Each page keeps its own .kpi-grid, which decides how many cards sit in a row.
+@mixin kpi {
+  .kpi-card {
+    padding: 1.25rem;
+    border-radius: var(--radius);
+    background: var(--card);
+    box-shadow: var(--shadow-card);
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+                background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+    // Something needs attention: a soft red tint and a red figure.
+    &.danger,
+    &.low {
+      background: color-mix(in oklch, var(--destructive) 8%, var(--card));
+
+      .kpi-value {
+        color: $danger;
+      }
+    }
+  }
+
+  .kpi-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: $text-light;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .kpi-value {
+    font-size: clamp(1.85rem, 3vw, 2.25rem);
+    font-weight: 800;
+    color: var(--foreground);
+    margin: 0.35rem 0;
+    line-height: 1;
+  }
+
+  .kpi-subtext {
+    font-size: 0.75rem;
+    color: $text-light;
+  }
+}
+
 @mixin pager {
   .pager {
     display: flex;

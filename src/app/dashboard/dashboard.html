@@ -3,7 +3,9 @@
     <div class="header-text">
       <p class="welcome">{{ greeting }}, {{ auth.currentUser() || 'there' }}</p>
       <h1 class="title">School Overview</h1>
-      <p class="subtitle">Real-time stats and metrics for {{ school.shortName() }}</p>
+      <p class="subtitle">
+        {{ isMockDashboard ? 'Demo data for ' : 'Real-time stats and metrics for ' }}{{ school.shortName() }}
+      </p>
     </div>
     <button class="btn btn-refresh" (click)="fetchDashboardStats()" [disabled]="isLoading()">
       <span [class.spin]="isLoading()">&#x21bb;</span>
@@ -13,26 +15,42 @@
 
   @if (yearSummary(); as y) {
     <section class="year-strip" aria-label="School year">
-      <div class="year-item">
+      <div class="year-head">
         <span class="year-label">Academic year</span>
-        <strong>{{ y.academicYear }}</strong>
+        <strong class="year-name">{{ y.academicYear }}</strong>
+        <span class="year-range">{{ y.startDate | date: 'd MMM yyyy' }} &ndash; {{ y.endDate | date: 'd MMM yyyy' }}</span>
       </div>
-      <div class="year-item">
-        <span class="year-label">School year</span>
-        <strong>{{ y.startDate | date: 'dd MMM yyyy' }} to {{ y.endDate | date: 'dd MMM yyyy' }}</strong>
+
+      <div class="year-progress">
+        <div class="year-progress-text">
+          <span class="year-label">Working days so far</span>
+          <span class="year-progress-count"><strong>{{ y.workingDaysElapsed }}</strong> of {{ y.workingDaysTotal }}</span>
+        </div>
+        <div class="year-bar" role="progressbar" aria-label="Working days completed"
+          [attr.aria-valuenow]="yearProgress(y)" aria-valuemin="0" aria-valuemax="100">
+          <span class="year-bar-fill" [style.width.%]="yearProgress(y)"></span>
+        </div>
       </div>
-      <div class="year-item">
-        <span class="year-label">Attendance started</span>
-        <strong>{{ y.trackingStartDate | date: 'dd MMM yyyy' }}</strong>
-      </div>
-      <div class="year-item">
-        <span class="year-label">Working days so far</span>
-        <strong>{{ y.workingDaysElapsed }} <span class="year-sub">(attendance taken on {{ y.daysAttendanceTaken }})</span></strong>
-      </div>
+
+      <dl class="year-stats">
+        <div class="year-stat">
+          <dt class="year-label">Attendance started</dt>
+          <dd>{{ y.trackingStartDate | date: 'd MMM yyyy' }}</dd>
+        </div>
+        <div class="year-stat">
+          <dt class="year-label">Attendance taken</dt>
+          <dd>{{ y.daysAttendanceTaken }} {{ y.daysAttendanceTaken === 1 ? 'day' : 'days' }}</dd>
+        </div>
+      </dl>
+
       @if (y.daysAttendanceMissing > 0) {
-        <a routerLink="/calendar/holidays" class="year-warn">
-          {{ y.daysAttendanceMissing }} working {{ y.daysAttendanceMissing === 1 ? 'day has' : 'days have' }} no attendance. See which
-        </a>
+        @if (isMockDashboard) {
+          <span class="year-warn">{{ y.daysAttendanceMissing }} working {{ y.daysAttendanceMissing === 1 ? 'day has' : 'days have' }} no attendance.</span>
+        } @else {
+          <a routerLink="/calendar/holidays" class="year-warn">
+            {{ y.daysAttendanceMissing }} working {{ y.daysAttendanceMissing === 1 ? 'day has' : 'days have' }} no attendance. See which
+          </a>
+        }
       }
     </section>
   }
@@ -125,7 +143,7 @@
                 <th>Class</th>
                 <th>Section</th>
                 <th>Active Students</th>
-                <th>Action</th>
+                @if (!isMockDashboard) { <th>Action</th> }
               </tr>
             </thead>
             <tbody>
@@ -134,20 +152,22 @@
                   <td data-label="Class" class="fw-medium">{{ item.className }}</td>
                   <td data-label="Section"><span class="badge">{{ item.sectionName }}</span></td>
                   <td data-label="Active Students">{{ item.totalStudents }} students</td>
-                  <td data-label="Action">
-                    <a 
-                      [routerLink]="['/student-attendance']" 
-                      [queryParams]="{ classSectionId: item.classSectionId }"
-                      class="btn-sm-primary"
-                      (click)="closePendingModal()"
-                    >
-                      Mark Now
-                    </a>
-                  </td>
+                  @if (!isMockDashboard) {
+                    <td data-label="Action">
+                      <a
+                        [routerLink]="['/student-attendance']"
+                        [queryParams]="{ classSectionId: item.classSectionId }"
+                        class="btn-sm-primary"
+                        (click)="closePendingModal()"
+                      >
+                        Mark Now
+                      </a>
+                    </td>
+                  }
                 </tr>
               } @empty {
                 <tr>
-                  <td colspan="4" class="empty-state">All classes have completed attendance today!</td>
+                  <td [attr.colspan]="isMockDashboard ? 3 : 4" class="empty-state">All classes have completed attendance today!</td>
                 </tr>
               }
             </tbody>
