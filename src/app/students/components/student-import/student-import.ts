@@ -11,7 +11,7 @@ import { downloadCsv, parseCsv, toCsv } from '../../../shared/utils/csv.util';
 import { todayIso } from '../../../shared/utils/date.util';
 
 export const IMPORT_COLUMNS = [
-  'Name', 'RollNo', 'SatsNo', 'Gender', 'FatherName', 'MotherName', 'DOB', 'AadharNo', 'Address',
+  'Name', 'RollNo', 'SatsNo', 'Gender', 'FatherName', 'FatherOccupation', 'MotherName', 'DOB', 'AadharNo', 'Address',
   'MobileNo', 'DateOfAdmission', 'BloodGroup', 'EmergencyContactName', 'EmergencyContactNo', 'Class', 'Division',
 ] as const;
 
@@ -114,7 +114,7 @@ export class StudentImport implements OnInit {
   downloadTemplate(): void {
     const first = this.sections()[0];
     const sample = [
-      'Asha Verma', '12', 'SATS12345', 'Female', 'Ramesh Verma', 'Sunita Verma', '2015-04-21', '123412341234',
+      'Asha Verma', '12', 'SATS12345', 'Female', 'Ramesh Verma', 'Farmer', 'Sunita Verma', '2015-04-21', '123412341234',
       '12 MG Road, Bengaluru', '9876543210', '2024-06-03', 'B+', 'Ramesh Verma', '9876543211',
       first?.levelName ?? '5', first?.division ?? 'A',
     ];
@@ -230,6 +230,7 @@ export class StudentImport implements OnInit {
         satsNo: blankToNull(raw.SatsNo),
         gender,
         fatherName: blankToNull(raw.FatherName),
+        fatherOccupation: blankToNull(raw.FatherOccupation),
         motherName: blankToNull(raw.MotherName),
         dob,
         aadharNo: blankToNull(raw.AadharNo),

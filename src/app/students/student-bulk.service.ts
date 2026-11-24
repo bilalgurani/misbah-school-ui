@@ -10,6 +10,7 @@ export interface BulkStudentRow {
   satsNo: string | null;
   gender: string | null;
   fatherName: string | null;
+  fatherOccupation: string | null;
   motherName: string | null;
   dob: string | null;
   aadharNo: string | null;

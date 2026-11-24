@@ -149,6 +149,7 @@ export class AddStudent {
       satsNo: [''],
       gender: ['', Validators.required],
       fatherName: ['', Validators.required],
+      fatherOccupation: ['', Validators.maxLength(100)],
       motherName: ['', Validators.required],
       dob: ['', Validators.required],
       aadharNo: ['', Validators.pattern('^[0-9]{12}$')], // Updated to 12 digits for Aadhaar
@@ -225,6 +226,8 @@ export class AddStudent {
         }
       }
     });
+
+    if (!rawValue['fatherOccupation']) rawValue['fatherOccupation'] = null;
 
     return rawValue;
   }
