@@ -1,0 +1,135 @@
+<div class="page-container">
+  <div class="page-header">
+    <h2>Cover for Absent Teachers</h2>
+    <div class="header-actions">
+      <a routerLink="/timetable" class="btn-secondary">View timetable</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body date-row">
+      <div class="form-group">
+        <label for="sub-date">Date</label>
+        <input id="sub-date" type="date" class="form-input" [ngModel]="date()" (ngModelChange)="onDate($event)">
+      </div>
+      @if (data(); as d) {
+        <p class="day-label">{{ dayLong(d.dayOfWeek) }}</p>
+      }
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 class="card-title">Lessons that need cover</h3>
+    <div class="card-body">
+      <p class="hint">Teachers on approved leave or marked absent for this date appear here. Cover applies to this date only; the weekly timetable does not change.</p>
+      @if (loading()) {
+        <app-loader message="Loading..."></app-loader>
+      } @else if (data(); as d) {
+        @if (!d.workingDay) {
+          <p class="empty">The school is closed on this date.</p>
+        } @else if (d.items.length === 0) {
+          <p class="empty">No lessons need cover on this date.</p>
+        } @else {
+          <ul class="lessons">
+            @for (l of d.items; track l.entryId) {
+              <li [class.covered]="l.substitutionId">
+                <div class="info">
+                  <span class="time">{{ timeRange(l.startTime, l.endTime) }} &middot; {{ l.periodName }}</span>
+                  <strong>{{ l.className }} &mdash; {{ l.subjectName }}</strong>
+                  <span class="who">{{ l.teacherName }}@if (reasonText(l)) { <em> ({{ reasonText(l) }})</em> }</span>
+                  @if (l.substituteTeacherName) {
+                    <span class="cover">Covered by {{ l.substituteTeacherName }}@if (l.reason) { <em> ({{ l.reason }})</em> }</span>
+                  } @else {
+                    <span class="need">Needs cover</span>
+                  }
+                </div>
+                <div class="actions">
+                  <button type="button" class="btn-primary btn-sm" (click)="assign(l)">{{ l.substitutionId ? 'Change' : 'Assign cover' }}</button>
+                  @if (l.substitutionId) {
+                    <button type="button" class="btn-secondary btn-sm" (click)="remove(l)">Remove</button>
+                  }
+                </div>
+              </li>
+            }
+          </ul>
+        }
+      }
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 class="card-title">Cover a teacher who is not marked absent</h3>
+    <div class="card-body">
+      <p class="hint">For example someone who is late or unwell. Choose the teacher to see their lessons on this date.</p>
+      <div class="form-group narrow">
+        <label for="other-teacher">Teacher</label>
+        <select id="other-teacher" class="form-input" [ngModel]="otherTeacherId()" (ngModelChange)="onOtherTeacher($event)">
+          <option [ngValue]="null">Select a teacher</option>
+          @for (t of teachers(); track t.id) {
+            <option [ngValue]="t.id">{{ t.name }}</option>
+          }
+        </select>
+      </div>
+      @if (otherTeacherId() && otherLessons().length === 0) {
+        <p class="empty">No lessons for this teacher on this date.</p>
+      }
+      <ul class="lessons">
+        @for (l of otherLessons(); track l.entryId) {
+          <li [class.covered]="l.substitutionId">
+            <div class="info">
+              <span class="time">{{ timeRange(l.startTime, l.endTime) }} &middot; {{ l.periodName }}</span>
+              <strong>{{ l.className }} &mdash; {{ l.subjectName }}</strong>
+              @if (l.substituteTeacherName) {
+                <span class="cover">Covered by {{ l.substituteTeacherName }}</span>
+              }
+            </div>
+            <div class="actions">
+              <button type="button" class="btn-primary btn-sm" (click)="assign(l)">{{ l.substitutionId ? 'Change' : 'Assign cover' }}</button>
+              @if (l.substitutionId) {
+                <button type="button" class="btn-secondary btn-sm" (click)="remove(l)">Remove</button>
+              }
+            </div>
+          </li>
+        }
+      </ul>
+    </div>
+  </div>
+</div>
+
+@if (target(); as t) {
+  <div class="modal-backdrop" (click)="close()">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="cover-title" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 id="cover-title">Assign cover</h3>
+        <button type="button" class="close-btn" (click)="close()" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p><strong>{{ t.className }} &mdash; {{ t.subjectName }}</strong><br>
+          {{ timeRange(t.startTime, t.endTime) }} &middot; normally {{ t.teacherName }}</p>
+        @if (freeLoading()) {
+          <app-loader message="Finding free teachers..."></app-loader>
+        } @else if (free().length === 0) {
+          <p class="empty">No teacher is free at this time.</p>
+        } @else {
+          <div class="form-group">
+            <label for="cover-teacher">Free teachers (fewest lessons first)</label>
+            <select id="cover-teacher" class="form-input" [ngModel]="chosenId()" (ngModelChange)="chosenId.set($event)">
+              <option [ngValue]="null">Choose</option>
+              @for (f of free(); track f.teacherId) {
+                <option [ngValue]="f.teacherId">{{ f.teacherName }} ({{ f.periodsThatDay }} lessons that day)</option>
+              }
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="cover-reason">Reason (optional)</label>
+            <input id="cover-reason" class="form-input" maxlength="200" [ngModel]="reason()" (ngModelChange)="reason.set($event)">
+          </div>
+        }
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" (click)="close()" [disabled]="isSaving()">Cancel</button>
+        <button type="button" class="btn-primary" (click)="save()" [disabled]="isSaving() || freeLoading() || !chosenId()">{{ isSaving() ? 'Saving...' : 'Save cover' }}</button>
+      </div>
+    </div>
+  </div>
+}

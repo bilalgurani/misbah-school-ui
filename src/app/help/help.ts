@@ -54,6 +54,32 @@ export class Help {
       ],
     },
     {
+      title: 'View the timetable',
+      steps: [
+        'Open Timetable. Choose a class to see its week, or the Teacher tab to see one teacher\'s week.',
+        'The "A day" tab shows a teacher\'s lessons for one date, including any cover they have to take.',
+        'Use Print for a paper copy.',
+      ],
+    },
+    {
+      title: 'Build the timetable',
+      adminOnly: true,
+      steps: [
+        'Open Timetable Setup. Add a daily schedule with its periods, breaks and lunch times (or use the standard day and edit the times).',
+        'Say which schedule each class uses, then choose which teacher takes each subject in each class.',
+        'Open Timetable, choose a class and tap a period to pick the subject. Teachers who are already teaching another class at that time are greyed out.',
+        'Use "Copy a day" to repeat one day on other days.',
+      ],
+    },
+    {
+      title: 'Arrange cover for an absent teacher',
+      adminOnly: true,
+      steps: [
+        'Open Cover for Absent Teachers and choose the date. Teachers on approved leave or marked absent are listed with their lessons.',
+        'Press Assign cover and choose one of the free teachers. The weekly timetable stays unchanged.',
+      ],
+    },
+    {
       title: 'Apply for leave',
       steps: [
         'Open Leave > My Leave and check your balances.',

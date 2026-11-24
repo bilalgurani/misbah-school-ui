@@ -1,0 +1,277 @@
+<div class="page-container">
+  <div class="page-header">
+    <h2>Timetable Setup</h2>
+    <div class="header-actions">
+      <a routerLink="/timetable" class="btn-secondary">View timetable</a>
+    </div>
+  </div>
+
+  <p class="intro">Set this up once: (1) the school day, (2) which day shape each class uses, (3) who teaches which subject in each class.
+    Then fill each class timetable from the <a routerLink="/timetable">Timetable</a> page; the app stops any teacher being booked in two places at once.</p>
+
+  <!-- 1. Schedules -->
+  <div class="card">
+    <div class="card-head">
+      <h3 class="card-title">1. Daily schedules (bell times)</h3>
+      <button type="button" class="btn-primary btn-sm" (click)="newSchedule()">+ New schedule</button>
+    </div>
+    <div class="card-body">
+      <p class="hint">A schedule is the shape of a school day: periods, breaks and lunch with start and end times. Use more than one if some classes
+        have different timings (for example Nursery, or a shorter Saturday).</p>
+
+      @if (schedulesLoading()) {
+        <app-loader message="Loading schedules..."></app-loader>
+      } @else {
+        @for (s of schedules(); track s.id) {
+          <section class="schedule">
+            <header>
+              <div>
+                <strong>{{ s.name }}</strong>
+                @if (s.isDefault) { <span class="badge">Default</span> }
+                <small>{{ s.days.map(dayShort).join(', ') }}</small>
+              </div>
+              <div class="row-actions">
+                <button type="button" class="btn-secondary btn-sm" (click)="editSchedule(s)">Edit</button>
+                <button type="button" class="btn-danger btn-sm" (click)="askDeleteSchedule(s)">Delete</button>
+              </div>
+            </header>
+
+            @if (s.periods.length === 0) {
+              <p class="empty">No periods yet.</p>
+              <button type="button" class="btn-secondary btn-sm" [disabled]="isSaving()" (click)="quickStart(s)">Add a standard day to start with</button>
+            } @else {
+              <div class="table-scroll">
+                <table class="slots">
+                  <thead><tr><th>Name</th><th>Type</th><th>Time</th><th>Days</th><th></th></tr></thead>
+                  <tbody>
+                    @for (p of s.periods; track p.id) {
+                      <tr [class.not-teaching]="p.kind !== 'PERIOD'">
+                        <td>{{ p.name }}</td>
+                        <td>{{ kindLabel(p.kind) }}</td>
+                        <td>{{ timeRange(p.startTime, p.endTime) }}</td>
+                        <td>{{ daysText(p.days, s.days) }}</td>
+                        <td class="row-actions">
+                          <button type="button" class="btn-secondary btn-sm" (click)="editPeriod(p)">Edit</button>
+                          <button type="button" class="btn-danger btn-sm" (click)="askDeletePeriod(p)">Delete</button>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+            <button type="button" class="btn-secondary btn-sm add-slot" (click)="newPeriod(s)">+ Add period / break / lunch</button>
+          </section>
+        } @empty {
+          <p class="empty">No schedules yet. Create one to begin.</p>
+        }
+      }
+    </div>
+  </div>
+
+  <!-- 2. Class -> schedule -->
+  <div class="card">
+    <h3 class="card-title">2. Which schedule each class uses</h3>
+    <div class="card-body">
+      <p class="hint">Classes without their own choice use the default schedule. A class that already has lessons must be cleared before its schedule can change.</p>
+      <div class="table-scroll">
+        <table class="slots">
+          <thead><tr><th>Class</th><th>Schedule</th></tr></thead>
+          <tbody>
+            @for (row of sectionSchedules(); track row.classSectionId) {
+              <tr>
+                <td>{{ row.displayName }}</td>
+                <td>
+                  <select class="form-input" [ngModel]="row.explicit ? row.scheduleId : null"
+                    (ngModelChange)="setSectionSchedule(row, $event)" [attr.aria-label]="'Schedule for ' + row.displayName">
+                    <option [ngValue]="null">Default schedule</option>
+                    @for (s of schedules(); track s.id) {
+                      <option [ngValue]="s.id">{{ s.name }}</option>
+                    }
+                  </select>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Subject -> teacher -->
+  <div class="card">
+    <h3 class="card-title">3. Subjects and teachers for each class</h3>
+    <div class="card-body">
+      <p class="hint">Pick a class, then say which teacher takes each subject. The timetable uses this, so choosing a subject also chooses its teacher.
+        Subjects come from <a routerLink="/exams/setup">Exams &amp; Subjects</a>.</p>
+      <div class="form-group narrow">
+        <label for="map-class">Class</label>
+        <select id="map-class" class="form-input" [ngModel]="mappingSectionId()" (ngModelChange)="onMappingSection($event)">
+          <option [ngValue]="null">Select a class</option>
+          @for (s of sections(); track s.id) {
+            <option [ngValue]="s.id">{{ s.displayName }}</option>
+          }
+        </select>
+      </div>
+
+      @if (mappingSectionId()) {
+        @if (mappingsLoading()) {
+          <app-loader message="Loading..."></app-loader>
+        } @else {
+          <div class="table-scroll">
+            <table class="slots">
+              <thead><tr><th>Subject</th><th>Teacher</th><th>Periods / week</th><th>In timetable</th><th></th></tr></thead>
+              <tbody>
+                @for (m of mappings(); track m.id) {
+                  <tr>
+                    <td>{{ m.subjectName }}</td>
+                    <td>
+                      <select class="form-input" [ngModel]="m.teacherId" (ngModelChange)="changeTeacher(m, $event)"
+                        [attr.aria-label]="'Teacher for ' + m.subjectName">
+                        @for (t of teachers(); track t.id) {
+                          <option [ngValue]="t.id">{{ t.name }}</option>
+                        }
+                      </select>
+                    </td>
+                    <td>
+                      <input type="number" min="1" max="60" class="form-input num" [ngModel]="m.periodsPerWeek"
+                        (change)="changePeriods(m, $any($event.target).value)" placeholder="Optional"
+                        [attr.aria-label]="'Periods per week for ' + m.subjectName">
+                    </td>
+                    <td>
+                      <span [class.short]="m.periodsPerWeek && m.placed < m.periodsPerWeek">
+                        {{ m.placed }}{{ m.periodsPerWeek ? ' of ' + m.periodsPerWeek : '' }}
+                      </span>
+                    </td>
+                    <td class="row-actions"><button type="button" class="btn-danger btn-sm" (click)="askDeleteMapping(m)">Remove</button></td>
+                  </tr>
+                } @empty {
+                  <tr><td colspan="5" class="empty">No subjects added for this class yet.</td></tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <div class="add-row">
+            <div class="form-group">
+              <label for="new-subject">Subject</label>
+              <select id="new-subject" class="form-input" [ngModel]="newSubjectId()" (ngModelChange)="newSubjectId.set($event)">
+                <option [ngValue]="null">Choose</option>
+                @for (s of unmappedSubjects(); track s.id) {
+                  <option [ngValue]="s.id">{{ s.name }}</option>
+                }
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="new-teacher">Teacher</label>
+              <select id="new-teacher" class="form-input" [ngModel]="newTeacherId()" (ngModelChange)="newTeacherId.set($event)">
+                <option [ngValue]="null">Choose</option>
+                @for (t of teachers(); track t.id) {
+                  <option [ngValue]="t.id">{{ t.name }}</option>
+                }
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="new-ppw">Periods / week</label>
+              <input id="new-ppw" type="number" min="1" max="60" class="form-input" [ngModel]="newPeriods()"
+                (ngModelChange)="newPeriods.set($event || null)" placeholder="Optional">
+            </div>
+            <button type="button" class="btn-primary" (click)="addMapping()">Add</button>
+          </div>
+          @if (unmappedSubjects().length === 0 && subjects().length === 0) {
+            <p class="hint">No subjects exist yet. Add them in <a routerLink="/exams/setup">Exams &amp; Subjects</a>.</p>
+          }
+        }
+      }
+    </div>
+  </div>
+</div>
+
+@if (scheduleDraft(); as d) {
+  <div class="modal-backdrop" (click)="scheduleDraft.set(null)">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="sched-title" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 id="sched-title">{{ d.id ? 'Edit schedule' : 'New schedule' }}</h3>
+        <button type="button" class="close-btn" (click)="scheduleDraft.set(null)" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="sched-name">Name</label>
+          <input id="sched-name" class="form-input" maxlength="60" [ngModel]="d.name" (ngModelChange)="scheduleDraft.set({ ...d, name: $event })"
+            placeholder="e.g. Primary, High school, Saturday">
+        </div>
+        <span class="field-label">Working days</span>
+        <div class="day-picks">
+          @for (day of allDays; track day) {
+            <label class="check-row"><input type="checkbox" [checked]="d.days.includes(day)" (change)="toggleDraftDay(day)"> {{ dayShort(day) }}</label>
+          }
+        </div>
+        <label class="check-row">
+          <input type="checkbox" [checked]="d.isDefault" (change)="scheduleDraft.set({ ...d, isDefault: !d.isDefault })">
+          Default for classes without their own schedule
+        </label>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" (click)="scheduleDraft.set(null)" [disabled]="isSaving()">Cancel</button>
+        <button type="button" class="btn-primary" (click)="saveSchedule()" [disabled]="isSaving()">{{ isSaving() ? 'Saving...' : 'Save' }}</button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (periodDraft(); as d) {
+  <div class="modal-backdrop" (click)="periodDraft.set(null)">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="period-title" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 id="period-title">{{ d.id ? 'Edit' : 'Add' }} period, break or lunch</h3>
+        <button type="button" class="close-btn" (click)="periodDraft.set(null)" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="p-name">Name</label>
+          <input id="p-name" class="form-input" maxlength="60" [ngModel]="d.name" (ngModelChange)="periodDraft.set({ ...d, name: $event })"
+            placeholder="e.g. Period 1, Short break, Lunch">
+        </div>
+        <div class="form-group">
+          <label for="p-kind">Type</label>
+          <select id="p-kind" class="form-input" [ngModel]="d.kind" (ngModelChange)="periodDraft.set({ ...d, kind: $event })">
+            @for (k of kinds; track k.value) {
+              <option [value]="k.value">{{ k.label }}</option>
+            }
+          </select>
+          <small class="hint">Only a Period can hold a subject. Break, Lunch and Other are shown as bands.</small>
+        </div>
+        <div class="time-row">
+          <div class="form-group">
+            <label for="p-start">Starts</label>
+            <input id="p-start" type="time" class="form-input" [ngModel]="d.startTime" (ngModelChange)="periodDraft.set({ ...d, startTime: $event })">
+          </div>
+          <div class="form-group">
+            <label for="p-end">Ends</label>
+            <input id="p-end" type="time" class="form-input" [ngModel]="d.endTime" (ngModelChange)="periodDraft.set({ ...d, endTime: $event })">
+          </div>
+        </div>
+        <label class="check-row">
+          <input type="checkbox" [checked]="d.limitDays" (change)="periodDraft.set({ ...d, limitDays: !d.limitDays })">
+          Only on some days
+        </label>
+        @if (d.limitDays) {
+          <div class="day-picks">
+            @for (day of allDays; track day) {
+              <label class="check-row"><input type="checkbox" [checked]="d.days.includes(day)" (change)="toggleDraftPeriodDay(day)"> {{ dayShort(day) }}</label>
+            }
+          </div>
+        }
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" (click)="periodDraft.set(null)" [disabled]="isSaving()">Cancel</button>
+        <button type="button" class="btn-primary" (click)="savePeriod()" [disabled]="isSaving()">{{ isSaving() ? 'Saving...' : 'Save' }}</button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (confirm(); as c) {
+  <app-confirm-dialog title="Please confirm" [message]="c.message" confirmLabel="Yes, continue"
+    (confirmed)="runConfirm()" (cancelled)="confirm.set(null)"></app-confirm-dialog>
+}

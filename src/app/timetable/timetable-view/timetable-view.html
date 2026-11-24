@@ -1,0 +1,294 @@
+<div class="page-container">
+  <div class="page-header no-print">
+    <h2>Timetable</h2>
+    <div class="header-actions">
+      @if (auth.isAdmin()) {
+        <a routerLink="/timetable/substitutions" class="btn-secondary">Cover for absent teachers</a>
+        <a routerLink="/timetable/setup" class="btn-secondary">Timetable setup</a>
+      }
+    </div>
+  </div>
+
+  <div class="tabs no-print" role="tablist">
+    <button type="button" role="tab" [class.active]="tab() === 'class'" [attr.aria-selected]="tab() === 'class'" (click)="setTab('class')">Class</button>
+    <button type="button" role="tab" [class.active]="tab() === 'teacher'" [attr.aria-selected]="tab() === 'teacher'" (click)="setTab('teacher')">Teacher</button>
+    <button type="button" role="tab" [class.active]="tab() === 'day'" [attr.aria-selected]="tab() === 'day'" (click)="setTab('day')">A day</button>
+  </div>
+
+  @if (tab() === 'class') {
+    <div class="card">
+      <div class="card-body toolbar-row no-print">
+        <div class="form-group">
+          <label for="tt-class">Class</label>
+          <select id="tt-class" class="form-input" [ngModel]="sectionId()" (ngModelChange)="onSection($event)">
+            <option [ngValue]="null">Select a class</option>
+            @for (s of sections(); track s.id) {
+              <option [ngValue]="s.id">{{ s.displayName }}</option>
+            }
+          </select>
+        </div>
+        @if (classData()?.schedule) {
+          <div class="actions">
+            @if (auth.isAdmin()) {
+              <button type="button" class="btn-secondary" (click)="openCopy()">Copy a day</button>
+            }
+            <button type="button" class="btn-secondary" (click)="print()">Print</button>
+          </div>
+        }
+      </div>
+
+      @if (classLoading()) {
+        <div class="loader-container"><app-loader message="Loading timetable..."></app-loader></div>
+      } @else if (classData(); as data) {
+        <h3 class="print-title">{{ data.className }} timetable</h3>
+        @if (!data.schedule) {
+          <p class="empty-block">This class has no daily schedule yet.
+            @if (auth.isAdmin()) { <a routerLink="/timetable/setup">Set one up</a>. }
+          </p>
+        } @else {
+          @if (auth.isAdmin()) {
+            <p class="hint no-print">Tap a period to choose its subject. Teachers who are busy at that time are greyed out.
+              If a subject is missing, add its teacher for this class in <a routerLink="/timetable/setup">Timetable setup</a>.</p>
+          }
+          <div class="grid-wrap">
+            <table class="grid">
+              <thead>
+                <tr>
+                  <th class="corner">Period</th>
+                  @for (day of data.schedule.days; track day) {
+                    <th>{{ dayShort(day) }}</th>
+                  }
+                </tr>
+              </thead>
+              <tbody>
+                @for (p of data.schedule.periods; track p.id) {
+                  @if (p.kind === 'PERIOD') {
+                    <tr>
+                      <th class="period-head" scope="row">
+                        <strong>{{ p.name }}</strong>
+                        <small>{{ timeRange(p.startTime, p.endTime) }}</small>
+                      </th>
+                      @for (day of data.schedule.days; track day) {
+                        @if (runs(p, day)) {
+                          <td class="cell" [class.filled]="cell(day, p)">
+                            @if (auth.isAdmin()) {
+                              <button type="button" class="cell-btn" (click)="openCell(day, p)"
+                                [attr.aria-label]="'Edit ' + p.name + ' on ' + dayLong(day)">
+                                @if (cell(day, p); as e) {
+                                  <strong>{{ e.subjectName }}</strong>
+                                  <small>{{ e.teacherName }}</small>
+                                } @else {
+                                  <span class="add">+</span>
+                                }
+                              </button>
+                            } @else if (cell(day, p); as e) {
+                              <strong>{{ e.subjectName }}</strong>
+                              <small>{{ e.teacherName }}</small>
+                            }
+                          </td>
+                        } @else {
+                          <td class="cell off"></td>
+                        }
+                      }
+                    </tr>
+                  } @else {
+                    <tr class="band">
+                      <th class="period-head" scope="row">
+                        <strong>{{ p.name }}</strong>
+                        <small>{{ timeRange(p.startTime, p.endTime) }}</small>
+                      </th>
+                      <td [attr.colspan]="data.schedule.days.length">{{ p.name }}</td>
+                    </tr>
+                  }
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      } @else {
+        <p class="empty-block">Choose a class to see its timetable.</p>
+      }
+    </div>
+  }
+
+  @if (tab() === 'teacher') {
+    <div class="card">
+      <div class="card-body toolbar-row no-print">
+        <div class="form-group">
+          <label for="tt-teacher">Teacher</label>
+          <select id="tt-teacher" class="form-input" [ngModel]="teacherId()" (ngModelChange)="onTeacher($event)">
+            <option [ngValue]="null">Select a teacher</option>
+            @for (t of teachers(); track t.id) {
+              <option [ngValue]="t.id">{{ t.name }}</option>
+            }
+          </select>
+        </div>
+        @if (teacherData()) {
+          <div class="actions"><button type="button" class="btn-secondary" (click)="print()">Print</button></div>
+        }
+      </div>
+
+      @if (teacherLoading()) {
+        <div class="loader-container"><app-loader message="Loading timetable..."></app-loader></div>
+      } @else if (teacherData(); as t) {
+        <h3 class="print-title">{{ t.teacherName }}</h3>
+        <p class="summary">{{ t.teacherName }} teaches <strong>{{ t.periodsPerWeek }}</strong> period(s) a week.</p>
+        @if (t.entries.length === 0) {
+          <p class="empty-block">No lessons placed yet.</p>
+        } @else {
+          <div class="week">
+            @for (day of teacherDays(); track day) {
+              <section class="day-col">
+                <h4>{{ dayLong(day) }}</h4>
+                @for (e of entriesOn(day); track e.id) {
+                  <div class="lesson">
+                    <span class="time">{{ timeRange(e.startTime, e.endTime) }}</span>
+                    <strong>{{ e.className }}</strong>
+                    <span>{{ e.subjectName }}</span>
+                  </div>
+                } @empty {
+                  <p class="free">Free</p>
+                }
+              </section>
+            }
+          </div>
+        }
+      } @else {
+        <p class="empty-block">Choose a teacher to see their week.</p>
+      }
+    </div>
+
+    @if (auth.isAdmin() && loads().length > 0) {
+      <div class="card no-print">
+        <h3 class="card-title">Teaching load (periods per week)</h3>
+        <div class="card-body load-list">
+          @for (l of loads(); track l.teacherId) {
+            <button type="button" class="load-row" (click)="onTeacher(l.teacherId)">
+              <span>{{ l.teacherName }}</span>
+              <strong>{{ l.periodsPerWeek }}</strong>
+            </button>
+          }
+        </div>
+      </div>
+    }
+  }
+
+  @if (tab() === 'day') {
+    <div class="card">
+      <div class="card-body toolbar-row no-print">
+        <div class="form-group">
+          <label for="tt-day-teacher">Teacher</label>
+          <select id="tt-day-teacher" class="form-input" [ngModel]="teacherId()" (ngModelChange)="onTeacher($event)">
+            <option [ngValue]="null">Select a teacher</option>
+            @for (t of teachers(); track t.id) {
+              <option [ngValue]="t.id">{{ t.name }}</option>
+            }
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="tt-date">Date</label>
+          <input id="tt-date" type="date" class="form-input" [ngModel]="date()" (ngModelChange)="onDate($event)">
+        </div>
+      </div>
+
+      @if (dayLoading()) {
+        <div class="loader-container"><app-loader message="Loading the day..."></app-loader></div>
+      } @else if (dayData(); as d) {
+        <p class="summary">{{ dayLong(d.dayOfWeek) }}, {{ d.date }}</p>
+        @if (!d.workingDay) {
+          <p class="empty-block">The school is closed on this day.</p>
+        } @else if (d.lessons.length === 0) {
+          <p class="empty-block">No lessons this day.</p>
+        } @else {
+          <div class="day-list">
+            @for (l of d.lessons; track l.entryId + l.status) {
+              <div class="lesson wide" [class.covered]="l.status === 'COVERED_BY_OTHER'" [class.covering]="l.status === 'COVERING'">
+                <span class="time">{{ timeRange(l.startTime, l.endTime) }}</span>
+                <strong>{{ l.className }}</strong>
+                <span>{{ l.subjectName }}</span>
+                @if (l.status === 'COVERED_BY_OTHER') {
+                  <span class="tag">Covered by {{ l.otherTeacherName }}</span>
+                } @else if (l.status === 'COVERING') {
+                  <span class="tag cover">Cover for {{ l.otherTeacherName }}</span>
+                }
+              </div>
+            }
+          </div>
+        }
+        @if (auth.isAdmin()) {
+          <p class="hint">To arrange cover for an absent teacher, use <a routerLink="/timetable/substitutions">Cover for absent teachers</a>.</p>
+        }
+      } @else {
+        <p class="empty-block">Choose a teacher and a date.</p>
+      }
+    </div>
+  }
+</div>
+
+@if (editing(); as target) {
+  <div class="modal-backdrop" (click)="closeEdit()">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="edit-title" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 id="edit-title">{{ dayLong(target.day) }}, {{ target.period.name }}</h3>
+        <button type="button" class="close-btn" (click)="closeEdit()" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="hint">{{ timeRange(target.period.startTime, target.period.endTime) }}. Choose the subject for {{ classData()?.className }}.</p>
+        @if (optionsLoading()) {
+          <app-loader message="Checking teachers..."></app-loader>
+        } @else if (options().length === 0) {
+          <p class="empty-block">No subjects have a teacher for this class yet. Add them in <a routerLink="/timetable/setup">Timetable setup</a>.</p>
+        } @else {
+          <ul class="option-list">
+            @for (o of options(); track o.subjectId) {
+              <li>
+                <button type="button" class="option" [disabled]="o.busy || isSaving()" (click)="choose(o)"
+                  [class.current]="target.entry?.subjectId === o.subjectId">
+                  <span><strong>{{ o.subjectName }}</strong> <small>{{ o.teacherName }}</small></span>
+                  @if (o.busy) { <small class="busy">{{ o.busyReason }}</small> }
+                </button>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" (click)="closeEdit()" [disabled]="isSaving()">Close</button>
+        @if (target.entry) {
+          <button type="button" class="btn-danger" (click)="clearCell()" [disabled]="isSaving()">Clear this period</button>
+        }
+      </div>
+    </div>
+  </div>
+}
+
+@if (copyOpen()) {
+  <div class="modal-backdrop" (click)="copyOpen.set(false)">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="copy-title" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 id="copy-title">Copy a day</h3>
+        <button type="button" class="close-btn" (click)="copyOpen.set(false)" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="copy-from">Copy lessons from</label>
+          <select id="copy-from" class="form-input" [ngModel]="copyFrom()" (ngModelChange)="copyFrom.set($event)">
+            @for (d of classData()?.schedule?.days ?? []; track d) {
+              <option [ngValue]="d">{{ dayLong(d) }}</option>
+            }
+          </select>
+        </div>
+        <p class="hint">To these days (their current lessons are replaced):</p>
+        @for (d of copyTargets(); track d) {
+          <label class="check-row">
+            <input type="checkbox" [checked]="copyTo().has(d)" (change)="toggleCopyTo(d)"> {{ dayLong(d) }}
+          </label>
+        }
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" (click)="copyOpen.set(false)" [disabled]="isSaving()">Cancel</button>
+        <button type="button" class="btn-primary" (click)="doCopy()" [disabled]="isSaving()">{{ isSaving() ? 'Copying...' : 'Copy' }}</button>
+      </div>
+    </div>
+  </div>
+}

@@ -86,6 +86,10 @@ export const routes: Routes = [
       { path: 'leave/requests', loadComponent: () => import('./leave/leave-approvals/leave-approvals').then(m => m.LeaveApprovals), canActivate: [AuthGuards.roleGuard('ADMIN')] },
       { path: 'leave/settings', loadComponent: () => import('./leave/leave-settings/leave-settings').then(m => m.LeaveSettings), canActivate: [AuthGuards.roleGuard('ADMIN')] },
 
+      { path: 'timetable', loadComponent: () => import('./timetable/timetable-view/timetable-view').then(m => m.TimetableView) },
+      { path: 'timetable/setup', loadComponent: () => import('./timetable/timetable-setup/timetable-setup').then(m => m.TimetableSetup), canActivate: [AuthGuards.roleGuard('ADMIN')] },
+      { path: 'timetable/substitutions', loadComponent: () => import('./timetable/substitutions/substitutions').then(m => m.Substitutions), canActivate: [AuthGuards.roleGuard('ADMIN')] },
+
       { path: 'exams/setup', loadComponent: () => import('./exams/exam-setup/exam-setup').then(m => m.ExamSetup), canActivate: [AuthGuards.roleGuard('ADMIN')] },
       { path: 'exams/marks', loadComponent: () => import('./exams/marks-entry/marks-entry').then(m => m.MarksEntry) },
       { path: 'exams/results', loadComponent: () => import('./exams/exam-results/exam-results').then(m => m.ExamResults) },

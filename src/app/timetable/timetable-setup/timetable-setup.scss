@@ -1,0 +1,156 @@
+@use '../../shared/styles/parts' as p;
+
+@include p.layout;
+@include p.buttons;
+@include p.form;
+@include p.modal;
+
+.intro,
+.hint {
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.intro {
+  margin: 0 0 1.25rem;
+}
+
+.card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 1rem 1rem 0;
+
+  .card-title {
+    padding: 0;
+  }
+}
+
+.schedule {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.75rem;
+  margin-bottom: 0.75rem;
+
+  header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+
+    small {
+      display: block;
+      color: var(--muted-foreground);
+    }
+  }
+}
+
+.badge {
+  margin-left: 0.5rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: var(--radius);
+  background: color-mix(in oklch, var(--primary) 30%, transparent);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.add-slot {
+  margin-top: 0.5rem;
+}
+
+.empty {
+  color: var(--muted-foreground);
+  text-align: center;
+  padding: 0.75rem;
+  margin: 0;
+}
+
+.table-scroll {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.slots {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+
+  th,
+  td {
+    padding: 0.5rem 0.6rem;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  th {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+  }
+
+  tr.not-teaching td {
+    background: var(--muted);
+    color: var(--muted-foreground);
+  }
+
+  .form-input {
+    min-width: 11rem;
+
+    &.num {
+      min-width: 6rem;
+      width: 6rem;
+    }
+  }
+
+  .short {
+    color: var(--destructive);
+    font-weight: 600;
+  }
+}
+
+.narrow {
+  max-width: 320px;
+  margin-bottom: 0.75rem;
+}
+
+.add-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+  margin-top: 1rem;
+
+  .form-group {
+    flex: 1 1 180px;
+  }
+}
+
+.field-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--muted-foreground);
+  text-transform: uppercase;
+}
+
+.day-picks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+}
+
+.time-row {
+  display: flex;
+  gap: 0.75rem;
+}

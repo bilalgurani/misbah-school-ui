@@ -61,6 +61,16 @@ export const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
+    id: 'timetable',
+    label: 'Timetable',
+    icon: ICON.calendar,
+    items: [
+      { label: 'Timetable', path: '/timetable' },
+      { label: 'Cover for Absent Teachers', path: '/timetable/substitutions', role: 'ADMIN' },
+      { label: 'Timetable Setup', path: '/timetable/setup', role: 'ADMIN' },
+    ],
+  },
+  {
     id: 'students',
     label: 'Students',
     icon: ICON.students,
