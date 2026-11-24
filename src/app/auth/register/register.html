@@ -61,8 +61,12 @@
             placeholder="••••••••"
             autocomplete="new-password"
           />
-          @if (f['password'].touched && f['password'].errors) {
-            <span class="error">Password must be at least 10 characters.</span>
+          @if (f['password'].touched && f['password'].errors?.['server']) {
+            <span class="error">{{ f['password'].errors?.['server'] }}</span>
+          } @else if (f['password'].touched && f['password'].errors) {
+            <span class="error">Temporary password must be at least 4 characters.</span>
+          } @else {
+            <span class="hint">Temporary password. The user must choose a new one at first login.</span>
           }
         </div>
 

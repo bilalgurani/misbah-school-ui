@@ -466,7 +466,7 @@ $danger-bg: color-mix(in oklch, var(--absent) 15%, transparent);
             /* Exception: Solid green toggle button for active present state */
             &.btn-present.active { 
               background-color: $success-color; 
-              color: #ffffff; 
+              color: var(--success-foreground); 
               box-shadow: 0 2px 4px color-mix(in oklch, $success-color 25%, transparent);
             }
 

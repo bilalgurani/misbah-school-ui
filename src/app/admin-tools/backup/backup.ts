@@ -2,6 +2,7 @@ import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { ToastService } from '../../shared/services/toast.service';
+import { PasswordToggleDirective } from '../../shared/directives/password-toggle.directive';
 import { BackupService } from './backup.service';
 
 const STORAGE_KEY = 'lastBackupAt';
@@ -36,7 +37,7 @@ function readLastBackup(): string | null {
 }
 
 @Component({
-  imports: [DatePipe],
+  imports: [DatePipe, PasswordToggleDirective],
   selector: 'app-database-backup',
   styleUrl: './backup.scss',
   templateUrl: './backup.html',

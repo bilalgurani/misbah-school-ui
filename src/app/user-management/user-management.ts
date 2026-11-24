@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { environment } from '../../environments/environment';
 import { AuthService } from '../auth/auth.service';
 import { ToastService } from '../shared/services/toast.service';
+import { PasswordToggleDirective } from '../shared/directives/password-toggle.directive';
 import { LoaderComponent } from '../shared/component/loader.component';
 
 export interface ManagedUser {
@@ -17,7 +18,7 @@ export interface ManagedUser {
 }
 
 @Component({
-  imports: [ReactiveFormsModule, LoaderComponent],
+  imports: [ReactiveFormsModule, LoaderComponent, PasswordToggleDirective],
   selector: 'app-user-management',
   styleUrl: './user-management.scss',
   templateUrl: './user-management.html',
@@ -36,7 +37,7 @@ export class UserManagement implements OnInit {
   isSaving = signal(false);
 
   resetForm: FormGroup = this.fb.group({
-    newPassword: ['', [Validators.required, Validators.minLength(10)]]
+    newPassword: ['', [Validators.required, Validators.minLength(4)]]
   });
 
   ngOnInit(): void {

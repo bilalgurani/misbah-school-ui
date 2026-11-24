@@ -513,7 +513,7 @@ $danger-bg: color-mix(in oklch, var(--absent) 15%, transparent);
 
             &.btn-present.active {
               background-color: $success-color;
-              color: var(--primary-foreground);
+              color: var(--success-foreground);
             }
 
             &.btn-absent.active {

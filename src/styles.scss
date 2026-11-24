@@ -108,11 +108,11 @@ body {
 }
 .btn-success {
   background: var(--success);
-  color: var(--background);
+  color: var(--success-foreground);
 }
 .btn-danger {
   background: var(--destructive);
-  color: var(--background);
+  color: var(--destructive-foreground);
 }
 .btn-outline {
   background: transparent;

@@ -71,9 +71,9 @@
             <label for="temp-password">Temporary Password <span class="required">*</span></label>
             <input id="temp-password" type="password" formControlName="newPassword" class="form-input" autocomplete="new-password" />
             @if (resetForm.get('newPassword')?.touched && resetForm.get('newPassword')?.invalid) {
-              <span class="error">Minimum 10 characters</span>
+              <span class="error">Minimum 4 characters</span>
             } @else {
-              <span class="hint">Minimum 10 characters, not a common password. The user must change it at next login.</span>
+              <span class="hint">Any temporary password (minimum 4 characters). The user must choose a new one at next login.</span>
             }
           </div>
         </div>

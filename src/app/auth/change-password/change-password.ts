@@ -3,10 +3,11 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { environment } from '../../../environments/environment';
 import { ToastService } from '../../shared/services/toast.service';
+import { PasswordToggleDirective } from '../../shared/directives/password-toggle.directive';
 import { AuthService } from '../auth.service';
 
 @Component({
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, PasswordToggleDirective],
   selector: 'app-change-password',
   styleUrl: './change-password.scss',
   templateUrl: './change-password.html',
@@ -18,6 +19,8 @@ export class ChangePassword {
   private authService = inject(AuthService);
   mustChange = this.authService.mustChangePassword;
   isLoading = signal(false);
+  // The server's reason (for example "must not contain your username"), kept on screen next to the form.
+  serverError = signal('');
 
   passForm: FormGroup = this.fb.group({
     currentPassword: ['', Validators.required],
@@ -27,6 +30,7 @@ export class ChangePassword {
   updatePassword() {
     if (this.passForm.invalid) return;
     this.isLoading.set(true);
+    this.serverError.set('');
 
     this.http.post(`${environment.apiUrl}/auth/change-password`, this.passForm.value, { responseType: 'text' }).subscribe({
       next: () => {
@@ -37,6 +41,8 @@ export class ChangePassword {
       },
       error: (err) => {
         this.isLoading.set(false);
+        const body = err?.error;
+        this.serverError.set(typeof body === 'string' ? body : body?.message ?? '');
         this.toast.showError(err, 'Failed to update password.');
       }
     });

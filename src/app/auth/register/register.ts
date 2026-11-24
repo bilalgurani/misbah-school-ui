@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../auth.service';
 import { ToastService } from '../../shared/services/toast.service';
 import { environment } from '../../../environments/environment';
+import { PasswordToggleDirective } from '../../shared/directives/password-toggle.directive';
 
 export interface UnlinkedTeacher {
   id: number;
@@ -14,7 +15,7 @@ export interface UnlinkedTeacher {
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, PasswordToggleDirective],
   styleUrl: './register.scss',
   templateUrl: './register.html',
 })
@@ -33,7 +34,7 @@ export class Register implements OnInit {
     {
       username: ['', [Validators.required, Validators.minLength(3)]],
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(10)]],
+      password: ['', [Validators.required, Validators.minLength(4)]],
       confirmPassword: ['', [Validators.required]],
       role: ['TEACHER', [Validators.required]],
       teacherId: [null]
@@ -134,6 +135,11 @@ export class Register implements OnInit {
           this.toast.show(message, 'error');
         } else {
           const errorMsg = err?.error?.message || 'Registration failed. Please try again.';
+          // Shown next to the field as well as in the toast, so the reason is still visible after the toast fades.
+          const field = err?.error?.field;
+          if (field && this.registerForm.get(field)) {
+            this.registerForm.get(field)?.setErrors({ server: errorMsg });
+          }
           this.toast.show(errorMsg, 'error');
         }
       }
