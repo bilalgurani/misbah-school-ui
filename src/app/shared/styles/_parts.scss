@@ -482,7 +482,7 @@ $danger: var(--destructive);
 // The dashboard's headline card. Each page keeps its own .kpi-grid, which decides how many cards sit in a row.
 @mixin kpi {
   .kpi-card {
-    padding: 1.25rem;
+    padding: 0.875rem 1rem;
     border-radius: var(--radius);
     background: var(--card);
     box-shadow: var(--shadow-card);
@@ -502,7 +502,7 @@ $danger: var(--destructive);
   }
 
   .kpi-title {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 700;
     color: $text-light;
     text-transform: uppercase;
@@ -510,15 +510,15 @@ $danger: var(--destructive);
   }
 
   .kpi-value {
-    font-size: clamp(1.85rem, 3vw, 2.25rem);
+    font-size: clamp(1.5rem, 2.2vw, 1.9rem);
     font-weight: 800;
     color: var(--foreground);
-    margin: 0.35rem 0;
+    margin: 0.25rem 0 0.15rem;
     line-height: 1;
   }
 
   .kpi-subtext {
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     color: $text-light;
   }
 }

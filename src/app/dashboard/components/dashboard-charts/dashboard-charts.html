@@ -1,5 +1,5 @@
 <div class="charts-grid">
-  <section class="chart-card wide">
+  <section class="chart-card">
     <h3>Monthly attendance trend</h3>
     <p class="subtitle">Student and teacher presence over the last 6 months</p>
     @if (trendLoading()) {
@@ -7,12 +7,12 @@
     } @else if (!hasTrendData()) {
       <p class="empty-note">No attendance has been marked in the last 6 months.</p>
     } @else {
-      <app-chart type="line" [data]="trendData()" [options]="trendOptions" [height]="280"
+      <app-chart type="line" [data]="trendData()" [options]="trendOptions" [height]="240"
         label="Line chart of monthly student and teacher attendance percentage"></app-chart>
     }
   </section>
 
-  <section class="chart-card wide">
+  <section class="chart-card">
     <h3>Today's attendance by class</h3>
     @if (todayLoading()) {
       <app-loader message="Loading classes..."></app-loader>
@@ -41,13 +41,13 @@
 
   <section class="chart-card">
     <h3>Students by gender</h3>
-    <app-chart type="doughnut" [data]="genderData()" [options]="doughnutOptions" [height]="220"
+    <app-chart type="doughnut" [data]="genderData()" [options]="doughnutOptions" [height]="190"
       label="Doughnut chart of boys and girls"></app-chart>
   </section>
 
   <section class="chart-card">
     <h3>Students by level</h3>
-    <app-chart type="doughnut" [data]="levelData()" [options]="doughnutOptions" [height]="220"
+    <app-chart type="doughnut" [data]="levelData()" [options]="doughnutOptions" [height]="190"
       label="Doughnut chart of pre-primary and primary students"></app-chart>
   </section>
 </div>

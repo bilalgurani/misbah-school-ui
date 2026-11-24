@@ -62,7 +62,7 @@ export class DashboardCharts implements OnInit {
     plugins: { legend: { display: false } },
   };
 
-  classHeight = computed(() => Math.max(180, this.markedClasses().length * 28 + 40));
+  classHeight = computed(() => Math.max(180, this.markedClasses().length * 24 + 30));
 
   classData = computed<ChartConfiguration['data']>(() => ({
     labels: this.markedClasses().map(c => c.className),

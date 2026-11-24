@@ -8,10 +8,11 @@ import { SchoolConfigService } from '../school/school-config.service';
 import { ThemeService } from '../shared/services/theme.service';
 import { TermsDialog } from '../terms/terms-dialog';
 import { TermsService, TermsStatus } from '../terms/terms.service';
+import { HeaderSearch } from './header-search/header-search';
 import { BOTTOM_TABS, BottomTab, NAV_GROUPS, NAV_ICONS, NAV_TOP_LINKS, NavGroup, NavLinkItem, NavTopLink } from './shell-nav';
 
 @Component({
-  imports: [RouterOutlet, RouterLink, TermsDialog],
+  imports: [RouterOutlet, RouterLink, TermsDialog, HeaderSearch],
   selector: 'app-shell',
   styleUrl: './shell.scss',
   templateUrl: './shell.html',

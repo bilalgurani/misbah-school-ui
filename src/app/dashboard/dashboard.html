@@ -1,10 +1,10 @@
 <div class="dashboard-container">
   <header class="dashboard-header">
     <div class="header-text">
-      <p class="welcome">{{ greeting }}, {{ auth.currentUser() || 'there' }}</p>
       <h1 class="title">School Overview</h1>
       <p class="subtitle">
-        {{ isMockDashboard ? 'Demo data for ' : 'Real-time stats and metrics for ' }}{{ school.shortName() }}
+        <span class="welcome">{{ greeting }}, {{ displayName() }}</span>
+        &middot; {{ isMockDashboard ? 'Demo data for ' : 'Real-time stats and metrics for ' }}{{ school.shortName() }}
       </p>
     </div>
     <button class="btn btn-refresh" (click)="fetchDashboardStats()" [disabled]="isLoading()">
@@ -77,27 +77,27 @@
       </div>
 
       <div class="kpi-card blue">
-        <div class="kpi-title">Pre-Primary (Nursery - UKG)</div>
+        <div class="kpi-title">Pre-Primary</div>
         <div class="kpi-value">{{ s.prePrimaryStudents }}</div>
-        <div class="kpi-subtext">Active Enrollments</div>
+        <div class="kpi-subtext">Nursery &ndash; UKG</div>
       </div>
 
       <div class="kpi-card green">
-        <div class="kpi-title">Primary (Class 1+)</div>
+        <div class="kpi-title">Primary</div>
         <div class="kpi-value">{{ s.primaryStudents }}</div>
-        <div class="kpi-subtext">Active Enrollments</div>
+        <div class="kpi-subtext">Class 1 and above</div>
       </div>
 
       <div class="kpi-card purple">
-        <div class="kpi-title">Total Active Teachers</div>
+        <div class="kpi-title">Teachers</div>
         <div class="kpi-value">{{ s.totalTeachers }}</div>
-        <div class="kpi-subtext">Staff Count</div>
+        <div class="kpi-subtext">Active staff</div>
       </div>
 
       <div class="kpi-card emerald">
-        <div class="kpi-title">Today's Attendance Rate</div>
+        <div class="kpi-title">Today's Attendance</div>
         <div class="kpi-value">{{ s.studentAttendancePercentage | number:'1.0-1' }}%</div>
-        <div class="kpi-subtext">Present today (of marked)</div>
+        <div class="kpi-subtext">Present (of marked)</div>
       </div>
 
       <!-- Pending Attendance Clickable Card -->
@@ -106,7 +106,7 @@
         [class.clickable]="s.pendingClassAttendanceCount > 0"
         (click)="s.pendingClassAttendanceCount > 0 ? openPendingModal() : null"
       >
-        <div class="kpi-title">Pending Class Sections</div>
+        <div class="kpi-title">Pending Sections</div>
         <div class="kpi-value">{{ s.pendingClassAttendanceCount }}</div>
         <div class="kpi-subtext">
           @if (s.pendingClassAttendanceCount > 0) {

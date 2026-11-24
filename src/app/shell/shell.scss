@@ -321,7 +321,7 @@ $text-active: var(--foreground);
 }
 
 .top-header {
-  height: 60px;
+  height: 52px;
   padding: 0 1rem;
   display: flex;
   align-items: center;
@@ -370,9 +370,9 @@ $text-active: var(--foreground);
       justify-content: center;
       align-items: center;
 
-      // Stays inside the 60px phone header whatever shape the school's banner is.
+      // Stays inside the 52px phone header whatever shape the school's banner is.
       .header-banner-img {
-        max-height: 44px;
+        max-height: 36px;
         max-width: 100%;
         width: auto;
         height: auto;
@@ -391,6 +391,13 @@ $text-active: var(--foreground);
 }
 
 /* User Menu Dropdown Mobile Optimization */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
 .user-menu-container {
   position: relative;
   flex-shrink: 0;
@@ -403,8 +410,8 @@ $text-active: var(--foreground);
     border-radius: 50%;
 
     .avatar-img {
-      width: 36px;
-      height: 36px;
+      width: 34px;
+      height: 34px;
       border-radius: 50%;
       object-fit: cover;
       border: 2px solid var(--border);
@@ -548,8 +555,8 @@ $text-active: var(--foreground);
   }
 
   .top-header {
-    height: 84px;
-    padding: 0 32px;
+    height: 56px;
+    padding: 0 24px;
 
     .header-left {
       .hamburger-btn {
@@ -557,13 +564,13 @@ $text-active: var(--foreground);
       }
 
       .page-title .header-banner-img {
-        max-height: 62px;
+        max-height: 40px;
       }
     }
   }
 
   .page-body {
-    padding: 32px;
+    padding: 24px;
   }
 
   .bottom-nav {

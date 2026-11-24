@@ -52,7 +52,7 @@ describe('Dashboard', () => {
     const charts: DashboardCharts = harness.routeDebugElement!.query(By.directive(DashboardCharts)).componentInstance;
     const stats = charts.stats();
 
-    expect(page.querySelector('.welcome')?.textContent).toContain('test-admin');
+    expect(page.querySelector('.welcome')?.textContent).toContain('Test-admin');
     expect(page.querySelectorAll('.kpi-card')).toHaveLength(6);
     expect(page.querySelector('.year-strip')?.textContent).toContain('2026-27');
     expect(charts.trendData().labels).toHaveLength(6);

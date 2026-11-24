@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { LoaderComponent } from '../shared/component/loader.component';
@@ -40,6 +40,11 @@ export class Dashboard implements OnInit {
 
   protected readonly isMockDashboard = inject(ActivatedRoute).snapshot.data['mockDashboard'] === true;
   protected readonly greeting = greetingFor(new Date().getHours());
+  // "admin" is shown as "Admin" in the welcome line.
+  protected readonly displayName = computed(() => {
+    const name = this.auth.currentUser()?.trim();
+    return name ? name.charAt(0).toUpperCase() + name.slice(1) : 'there';
+  });
 
   ngOnInit(): void {
     this.fetchDashboardStats();

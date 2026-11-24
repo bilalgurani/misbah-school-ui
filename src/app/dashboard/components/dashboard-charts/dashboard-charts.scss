@@ -1,10 +1,11 @@
 .charts-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1.25rem;
-  margin-top: 2rem;
+  gap: 0.875rem;
+  margin-top: 0.875rem;
 
-  @media (max-width: 800px) {
+  /* One column when the space beside the sidebar is narrow. */
+  @container (max-width: 700px) {
     grid-template-columns: minmax(0, 1fr);
   }
 }
@@ -13,7 +14,7 @@
   background: var(--card);
   color: var(--card-foreground);
   border-radius: var(--radius);
-  padding: 1.25rem;
+  padding: 1rem 1.25rem;
   min-width: 0;
   box-shadow: var(--shadow-card);
 
@@ -22,15 +23,15 @@
   }
 
   h3 {
-    margin: 0 0 0.25rem;
-    font-size: 1.05rem;
+    margin: 0 0 0.15rem;
+    font-size: 1rem;
   }
 }
 
 .subtitle {
   color: var(--muted-foreground);
-  font-size: 0.875rem;
-  margin: 0 0 1rem;
+  font-size: 0.8rem;
+  margin: 0 0 0.5rem;
 }
 
 .empty-note {
