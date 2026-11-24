@@ -318,6 +318,8 @@ $text-active: var(--foreground);
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  // Lets a wide table scroll inside its own box instead of stretching the whole page.
+  min-width: 0;
 }
 
 .top-header {
@@ -388,6 +390,7 @@ $text-active: var(--foreground);
   // Room for the phone tab bar so it never covers the last rows or the Save buttons.
   padding-bottom: calc(5rem + env(safe-area-inset-bottom));
   flex: 1;
+  min-width: 0;
 }
 
 /* User Menu Dropdown Mobile Optimization */
@@ -535,7 +538,7 @@ $text-active: var(--foreground);
 @media (min-width: 768px) {
   .shell {
     display: grid;
-    grid-template-columns: $sidebar-width 1fr;
+    grid-template-columns: $sidebar-width minmax(0, 1fr);
   }
 
   .sidebar-backdrop {
